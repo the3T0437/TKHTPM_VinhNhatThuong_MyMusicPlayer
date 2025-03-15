@@ -29,12 +29,14 @@ class MainActivity : AppCompatActivity() {
         }
 
         songs = arrayListOf()
-        songGetter.getAllSongs(this, songs)
-        for (i in 0..10){
-            Log.d("myDebug", songs[i].title)
-        }
         setSupportActionBar(binding.toolbar)
         setup()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        songGetter.getAllSongs(this, songs)
+        adapter.notifyDataSetChanged()
     }
 
     fun setup(){
