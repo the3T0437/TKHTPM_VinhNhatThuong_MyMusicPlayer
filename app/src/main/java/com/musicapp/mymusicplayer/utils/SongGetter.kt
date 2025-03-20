@@ -1,11 +1,10 @@
-package com.example.mymusicplayer.utils
+package com.musicapp.mymusicplayer.utils
 
-import android.content.ContentUris
 import android.content.Context
 import android.database.Cursor
 import android.provider.MediaStore
 import androidx.core.database.getStringOrNull
-import com.example.mymusicplayer.model.Song
+import com.musicapp.mymusicplayer.model.Song
 
 object songGetter {
     private const val ID = MediaStore.Audio.Media._ID
@@ -24,7 +23,7 @@ object songGetter {
             ALBUM
         )
 
-        val sort = "${TITLE} ASC"
+        val sort = "$TITLE ASC"
         val cursor: Cursor? = context.contentResolver.query(uri, project, null, null, sort)
         if (cursor == null){
             return
