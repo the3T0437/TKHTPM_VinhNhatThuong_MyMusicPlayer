@@ -1,8 +1,7 @@
-package com.example.mymusicplayer
+package com.musicapp.mymusicplayer
 
 import android.os.Bundle
-import android.provider.MediaStore
-import android.util.Log
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -10,11 +9,11 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.media3.common.MediaItem
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.mymusicplayer.adapters.SongAdapter
-import com.example.mymusicplayer.adapters.SongClickListener
-import com.example.mymusicplayer.databinding.MainLayoutBinding
-import com.example.mymusicplayer.model.Song
-import com.example.mymusicplayer.utils.songGetter
+import com.musicapp.mymusicplayer.adapters.SongAdapter
+import com.musicapp.mymusicplayer.adapters.SongClickListener
+import com.musicapp.mymusicplayer.databinding.MainLayoutBinding
+import com.musicapp.mymusicplayer.model.Song
+import com.musicapp.mymusicplayer.utils.songGetter
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: MainLayoutBinding
@@ -34,6 +33,7 @@ class MainActivity : AppCompatActivity() {
 
         songs = arrayListOf()
         setSupportActionBar(binding.toolbar)
+        Toast.makeText(this, "open app", Toast.LENGTH_SHORT).show()
         setup()
     }
 
@@ -57,7 +57,7 @@ class MainActivity : AppCompatActivity() {
     fun setupPlayMusic(){
         player = ExoPlayer.Builder(this).build()
 
-        adapter.setSongClickListener(object: SongClickListener{
+        adapter.setSongClickListener(object: SongClickListener {
             override fun onArtistClick(artist: String) {
             }
 

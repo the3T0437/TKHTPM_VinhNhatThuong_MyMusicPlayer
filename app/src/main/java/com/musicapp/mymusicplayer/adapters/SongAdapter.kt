@@ -1,4 +1,4 @@
-package com.example.mymusicplayer.adapters
+package com.musicapp.mymusicplayer.adapters
 
 import android.content.Context
 import android.util.Size
@@ -7,8 +7,8 @@ import android.view.View
 import android.view.View.OnClickListener
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.example.mymusicplayer.databinding.SongLayoutBinding
-import com.example.mymusicplayer.model.Song
+import com.musicapp.mymusicplayer.databinding.SongLayoutBinding
+import com.musicapp.mymusicplayer.model.Song
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job

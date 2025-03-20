@@ -1,4 +1,4 @@
-package com.example.mymusicplayer.model
+package com.musicapp.mymusicplayer.model
 
 import android.content.ContentUris
 import android.net.Uri
