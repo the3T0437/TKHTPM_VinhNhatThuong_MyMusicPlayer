@@ -3,4 +3,7 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="transparent">#00000000</color>
+    <color name="progressBarUnloaded">#4e4e4e</color>
+    <color name="progressBarLoaded">#363636</color>
+
 </resources>
