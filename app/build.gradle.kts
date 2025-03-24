@@ -4,15 +4,15 @@ plugins {
 }
 
 android {
-    namespace = "com.example.mymusicplayer"
+    namespace = "com.musicapp.mymusicplayer"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.mymusicplayer"
+        applicationId = "com.musicapp.mymusicplayer"
         minSdk = 29
         targetSdk = 35
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 2
+        versionName = "1.0.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -45,6 +45,10 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
+    implementation(libs.media3.exoplayer)
+    implementation(libs.media3.exoplayer.dash)
+    implementation(libs.media3.ui)
+    implementation(libs.androidx.media3.session)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
