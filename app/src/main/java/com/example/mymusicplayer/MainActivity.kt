@@ -47,4 +47,6 @@ class MainActivity : AppCompatActivity() {
         binding.recyclerView.layoutManager = layoutManager
         adapter.notifyDataSetChanged()
     }
+
+
 }
