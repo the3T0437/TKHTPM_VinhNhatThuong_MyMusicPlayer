@@ -2,10 +2,16 @@ package com.musicapp.mymusicplayer.widget
 
 import android.content.Context
 import android.util.AttributeSet
+import android.util.Size
 import android.view.LayoutInflater
 import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.media3.common.MediaItem
+import androidx.media3.common.Player
+import androidx.media3.session.MediaController
+import com.musicapp.mymusicplayer.R
 import com.musicapp.mymusicplayer.databinding.MusicPlayerSmallLayoutBinding
+import com.musicapp.mymusicplayer.utils.songGetter
 
 interface MusicPlayerSmallClickListener{
     fun onPauseClick()
@@ -19,7 +25,56 @@ class MusicPlaySmall : ConstraintLayout{
     private val context: Context;
     private lateinit var binding: MusicPlayerSmallLayoutBinding
     private var musicPlayerClickListener: MusicPlayerSmallClickListener? = null
+    var mediaController: MediaController? = null
+        set (value) {
+            if (value == null) {
+                field = null
+                return
+            }
+
+            value.addListener(listener)
+            field = value;
+        }
     var isDisablePauseStartBtn : Boolean = false
+
+    private val listener: Player.Listener = object : Player.Listener{
+        override fun onIsPlayingChanged(isPlaying: Boolean) {
+            super.onIsPlayingChanged(isPlaying)
+            this@MusicPlaySmall.updateState()
+        }
+
+        override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
+            super.onMediaItemTransition(mediaItem, reason)
+            this@MusicPlaySmall.updateState()
+        }
+    }
+
+    private fun updateState(){
+        if (mediaController == null){
+            binding.img.setImageResource(R.drawable.thumbnail)
+            binding.tvTitle.setText("title")
+            binding.tvArtist.setText("artist")
+            binding.btnPauseStart.isSelected = false
+            return
+        }
+
+        val uri = mediaController!!.currentMediaItem?.localConfiguration?.uri
+        if (uri == null)
+            return;
+        try{
+            val bitmap = context.contentResolver.loadThumbnail(uri!!, Size(640, 480), null)
+            binding.img.setImageBitmap(bitmap)
+        }catch (e: Exception){
+            binding.img.setImageResource(R.drawable.thumbnail)
+        }
+
+        val song = songGetter.getSong(context, uri)
+        binding.tvTitle.setText(song!!.title)
+        binding.tvArtist.setText(song!!.artist)
+
+        binding.btnPauseStart.isSelected = mediaController!!.isPlaying
+    }
+
 
     private val callback: OnClickListener = object :OnClickListener{
         override fun onClick(v: View?) {

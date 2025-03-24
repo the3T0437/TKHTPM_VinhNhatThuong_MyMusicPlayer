@@ -2,14 +2,14 @@
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:state_selected="true"
-        android:drawable="@drawable/pause"/>
+        android:drawable="@drawable/play_with_circle_around"/>
     <item
         android:state_pressed="true"
-        android:drawable="@drawable/pause"/>
+        android:drawable="@drawable/play_with_circle_around"/>
     <item
         android:state_selected="false"
         android:state_pressed="false"
-        android:drawable="@drawable/play_with_circle_around"/>
+        android:drawable="@drawable/pause"/>
 
 
 </selector>
