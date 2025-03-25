@@ -83,9 +83,13 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun onStartClick() {
+                if (mediaController!= null && mediaController?.currentMediaItem != null)
+                    mediaController?.play()
             }
 
             override fun onNextClick() {
+                if (mediaController != null && mediaController!!.hasNextMediaItem())
+                    mediaController?.seekToNextMediaItem()
             }
 
             override fun onMenuClick() {

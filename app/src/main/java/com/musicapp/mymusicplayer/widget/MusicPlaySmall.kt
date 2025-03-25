@@ -13,7 +13,7 @@ import com.musicapp.mymusicplayer.R
 import com.musicapp.mymusicplayer.databinding.MusicPlayerSmallLayoutBinding
 import com.musicapp.mymusicplayer.utils.songGetter
 
-interface MusicPlayerSmallClickListener{
+interface MusicPlayerSmallClickListener {
     fun onPauseClick()
     fun onStartClick()
     fun onNextClick()
@@ -21,12 +21,12 @@ interface MusicPlayerSmallClickListener{
     fun onMusicPlayerClick()
 }
 
-class MusicPlaySmall : ConstraintLayout{
+class MusicPlaySmall : ConstraintLayout {
     private val context: Context;
     private lateinit var binding: MusicPlayerSmallLayoutBinding
     private var musicPlayerClickListener: MusicPlayerSmallClickListener? = null
     var mediaController: MediaController? = null
-        set (value) {
+        set(value) {
             if (value == null) {
                 field = null
                 return
@@ -35,9 +35,8 @@ class MusicPlaySmall : ConstraintLayout{
             value.addListener(listener)
             field = value;
         }
-    var isDisablePauseStartBtn : Boolean = false
 
-    private val listener: Player.Listener = object : Player.Listener{
+    private val listener: Player.Listener = object : Player.Listener {
         override fun onIsPlayingChanged(isPlaying: Boolean) {
             super.onIsPlayingChanged(isPlaying)
             this@MusicPlaySmall.updateState()
@@ -49,22 +48,22 @@ class MusicPlaySmall : ConstraintLayout{
         }
     }
 
-    private fun updateState(){
-        if (mediaController == null){
+    private fun updateState() {
+        if (mediaController == null) {
             binding.img.setImageResource(R.drawable.thumbnail)
             binding.tvTitle.setText("title")
             binding.tvArtist.setText("artist")
-            binding.btnPauseStart.isSelected = false
+            updateStateOfStartPauseButton()
             return
         }
 
         val uri = mediaController!!.currentMediaItem?.localConfiguration?.uri
         if (uri == null)
             return;
-        try{
+        try {
             val bitmap = context.contentResolver.loadThumbnail(uri!!, Size(640, 480), null)
             binding.img.setImageBitmap(bitmap)
-        }catch (e: Exception){
+        } catch (e: Exception) {
             binding.img.setImageResource(R.drawable.thumbnail)
         }
 
@@ -72,33 +71,42 @@ class MusicPlaySmall : ConstraintLayout{
         binding.tvTitle.setText(song!!.title)
         binding.tvArtist.setText(song!!.artist)
 
+        updateStateOfStartPauseButton()
+    }
+
+    private fun updateStateOfStartPauseButton() {
+        if (mediaController == null) {
+            binding.btnPauseStart.isSelected = false
+            return
+        }
         binding.btnPauseStart.isSelected = mediaController!!.isPlaying
     }
 
-
-    private val callback: OnClickListener = object :OnClickListener{
+    private val callback: OnClickListener = object : OnClickListener {
         override fun onClick(v: View?) {
             if (v == null)
                 return
 
-            when(v.id){
-                binding.btnPauseStart.id ->{
-                    if (isDisablePauseStartBtn != false){
+            when (v.id) {
+                binding.btnPauseStart.id -> {
+                    if (mediaController?.currentMediaItem != null) {
                         if (binding.btnPauseStart.isSelected)
-                            musicPlayerClickListener?.onStartClick()
-                        else
                             musicPlayerClickListener?.onPauseClick()
+                        else
+                            musicPlayerClickListener?.onStartClick()
 
-                        val nextState = !binding.btnPauseStart.isSelected
-                        binding.btnPauseStart.isSelected = nextState
+                        updateStateOfStartPauseButton()
                     }
                 }
-                binding.btnNext.id ->{
+
+                binding.btnNext.id -> {
                     musicPlayerClickListener?.onNextClick()
                 }
-                binding.btnMenu.id ->{
+
+                binding.btnMenu.id -> {
                     musicPlayerClickListener?.onMenuClick()
                 }
+
                 else -> {
                     musicPlayerClickListener?.onMusicPlayerClick()
                 }
@@ -106,19 +114,21 @@ class MusicPlaySmall : ConstraintLayout{
         }
     }
 
-    constructor(context: Context) : super(context){
+    constructor(context: Context) : super(context) {
         this.context = context
         setUp(context)
     }
-    constructor(context: Context, attrs: AttributeSet?) : super(context, attrs){
+
+    constructor(context: Context, attrs: AttributeSet?) : super(context, attrs) {
         this.context = context;
         setUp(context)
     }
+
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(
         context,
         attrs,
         defStyleAttr
-    ){
+    ) {
         this.context = context
         setUp(context)
     }
@@ -128,12 +138,12 @@ class MusicPlaySmall : ConstraintLayout{
         attrs: AttributeSet?,
         defStyleAttr: Int,
         defStyleRes: Int
-    ) : super(context, attrs, defStyleAttr, defStyleRes){
+    ) : super(context, attrs, defStyleAttr, defStyleRes) {
         this.context = context
         setUp(context)
     }
 
-    private fun setUp(context: Context){
+    private fun setUp(context: Context) {
         binding = MusicPlayerSmallLayoutBinding.inflate(LayoutInflater.from(context), this, true)
 
         binding.btnMenu.setOnClickListener(callback)
@@ -142,7 +152,7 @@ class MusicPlaySmall : ConstraintLayout{
         binding.root.setOnClickListener(callback)
     }
 
-    fun setOnMusicPlayerClickListener(musicPlayerSmallClickListener: MusicPlayerSmallClickListener){
+    fun setOnMusicPlayerClickListener(musicPlayerSmallClickListener: MusicPlayerSmallClickListener) {
         musicPlayerClickListener = musicPlayerSmallClickListener
     }
 }
