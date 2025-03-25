@@ -5,6 +5,8 @@ import android.media.browse.MediaBrowser.MediaItem
 import android.os.Bundle
 import android.util.Log
 import android.util.Size
+import android.widget.SeekBar
+import android.widget.SeekBar.OnSeekBarChangeListener
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.OptIn
 import androidx.appcompat.app.AppCompatActivity
@@ -55,6 +57,8 @@ class MusicDetailActivity : AppCompatActivity() {
     private var mode: MusicPlayerMode = MusicPlayerMode.Line
     private var mediaController: MediaController? = null
     private lateinit var coroutineScope: CoroutineScope
+    //if true, will update seekbar every second
+    private var isUpdateSeekbar: Boolean = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -91,12 +95,12 @@ class MusicDetailActivity : AppCompatActivity() {
                 mediaController?.seekToPreviousMediaItem()
         }
         binding.btnContinue.setOnClickListener{
-            if (binding.btnContinue.isSelected == false && mediaController != null && mediaController!!.isPlaying)
-                mediaController?.pause()
-            else if (binding.btnContinue.isSelected == true && mediaController != null && mediaController!!.isPlaying == false)
+            if (binding.btnContinue.isSelected == false && mediaController != null)
                 mediaController?.play()
+            else if (binding.btnContinue.isSelected == true && mediaController != null)
+                mediaController?.pause()
 
-            binding.btnContinue.isSelected = !binding.btnContinue.isSelected
+            updateStateStartPauseButton()
         }
 
         binding.btnMode.setOnClickListener{
@@ -124,6 +128,22 @@ class MusicDetailActivity : AppCompatActivity() {
         binding.btnDown.setOnClickListener{
             this@MusicDetailActivity.finish()
         }
+
+        binding.seekbar.setOnSeekBarChangeListener(object: OnSeekBarChangeListener{
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+            }
+
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {
+                isUpdateSeekbar = false
+            }
+
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {
+                Log.d("myLog", "process bar ${seekBar?.progress}")
+                mediaController?.seekTo((seekBar?.progress ?: 0).toLong() * 1000)
+                isUpdateSeekbar = true
+                this@MusicDetailActivity.onResume()
+            }
+        })
     }
 
     fun createMediaController(){
@@ -151,7 +171,7 @@ class MusicDetailActivity : AppCompatActivity() {
 
     fun setupUpdateSeekbar(){
         coroutineScope.launch {
-            while(true){
+            while(this@MusicDetailActivity.isUpdateSeekbar){
                 delay(1000)
                 var isFineMediaControl = false;
                 var process: Int = 0 ;
@@ -183,8 +203,6 @@ class MusicDetailActivity : AppCompatActivity() {
         Log.d("myLog", "start resume")
         val mediaItem = mediaController?.currentMediaItem
 
-        if (mediaController != null)
-            binding.btnContinue.isSelected = mediaController!!.isPlaying
         if (mediaItem == null){
             binding.tvTitle.setText("Not playing music")
             binding.tvArtist.setText("Unknown")
@@ -204,6 +222,16 @@ class MusicDetailActivity : AppCompatActivity() {
         binding.tvTitle.setText(song?.title ?: "unknown")
         binding.tvArtist.setText(song?.artist ?: "unknown")
         updateModePlayer()
+        updateStateStartPauseButton()
+    }
+
+    private fun updateStateStartPauseButton(){
+        if (mediaController == null){
+            binding.btnContinue.isSelected = false
+            return
+        }
+
+        binding.btnContinue.isSelected = mediaController!!.isPlaying
     }
 
     fun updateModePlayer(){
@@ -221,7 +249,7 @@ class MusicDetailActivity : AppCompatActivity() {
         }
         else if (mode == MusicPlayerMode.Shuffle){
             mediaController?.repeatMode = Player.REPEAT_MODE_OFF
-            mediaController?.shuffleModeEnabled = false
+            mediaController?.shuffleModeEnabled = true
         }
     }
 }
