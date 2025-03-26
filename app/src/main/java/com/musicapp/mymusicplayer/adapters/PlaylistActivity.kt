@@ -1,8 +1,7 @@
 package com.example.mymusicplayer.adapters
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import com.example.mymusicplayer.databinding.MusicPlayerSmallLayoutBinding
-import com.example.mymusicplayer.databinding.PlaylistLayoutBinding
+import com.musicapp.mymusicplayer.databinding.PlaylistLayoutBinding
 
 class PlaylistActivity : AppCompatActivity() {
     private lateinit var binding: PlaylistLayoutBinding
