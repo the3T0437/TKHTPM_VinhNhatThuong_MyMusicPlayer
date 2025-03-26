@@ -1,24 +1,14 @@
 package com.musicapp.mymusicplayer.service
 
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.annotation.OptIn
-import androidx.core.app.NotificationCompat
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.session.CommandButton
-import androidx.media3.session.MediaLibraryService
-import androidx.media3.session.MediaNotification
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
-import androidx.media3.session.MediaStyleNotificationHelper
-import androidx.media3.session.MediaStyleNotificationHelper.MediaStyle
 import androidx.media3.session.SessionCommand
-import com.google.common.collect.ImmutableList
 import com.musicapp.mymusicplayer.R
 
 class PlayBackService: MediaSessionService() {
@@ -39,13 +29,13 @@ class PlayBackService: MediaSessionService() {
 
         val likeButton = CommandButton.Builder()
             .setDisplayName("Like")
-            .setIconResId(R.drawable.baseline_favorite_24)
+            .setIconResId(R.drawable.favorite)
             .setSessionCommand(SessionCommand("like", Bundle()))
             .setEnabled(true)
             .build()
         val favoriteButton = CommandButton.Builder()
             .setDisplayName("Save to favorites")
-            .setIconResId(R.drawable.baseline_favorite_24)
+            .setIconResId(R.drawable.favorite)
             .setSessionCommand(SessionCommand(SAVE_TO_FAVORITES, Bundle()))
             .build()
 
