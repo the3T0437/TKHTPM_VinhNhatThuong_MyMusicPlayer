@@ -17,26 +17,29 @@ import androidx.media3.session.SessionToken
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.MoreExecutors
-/*import com.musicapp.mymusicplayer.activities.MusicDetailActivity
+import com.musicapp.mymusicplayer.activities.MusicDetailActivity
 import com.musicapp.mymusicplayer.adapters.SongAdapter
 import com.musicapp.mymusicplayer.adapters.SongClickListener
+import com.musicapp.mymusicplayer.database.DatabaseAPI
+import com.musicapp.mymusicplayer.database.OnDatabaseCallBack
 import com.musicapp.mymusicplayer.databinding.MainLayoutBinding
 import com.musicapp.mymusicplayer.model.Song
 import com.musicapp.mymusicplayer.service.PlayBackService
 import com.musicapp.mymusicplayer.utils.songGetter
-import com.musicapp.mymusicplayer.widget.MusicPlayerSmallClickListener*/
+import com.musicapp.mymusicplayer.widget.MusicPlayerSmallClickListener
 import com.musicapp.mymusicplayer.widget.test
+import kotlinx.coroutines.Dispatchers
 
 class MainActivity : AppCompatActivity() {
-    /*private lateinit var binding: MainLayoutBinding
+    private lateinit var binding: MainLayoutBinding
     private lateinit var adapter: SongAdapter
     private lateinit var songs: ArrayList<Song>
     private var factory: ListenableFuture<MediaController>? = null
-    private var mediaController: MediaController? = null*/
+    private var mediaController: MediaController? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-       /* binding = MainLayoutBinding.inflate(layoutInflater)
+        binding = MainLayoutBinding.inflate(layoutInflater)
         setContentView(binding.root)
         ViewCompat.setOnApplyWindowInsetsListener(binding.main) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -47,20 +50,34 @@ class MainActivity : AppCompatActivity() {
         songs = arrayListOf()
         setSupportActionBar(binding.toolbar)
         Toast.makeText(this, "open app", Toast.LENGTH_SHORT).show()
-        setup()*/
-        val testRunner = test(this)
-        testRunner.runTests()
+        setup()
+        //val testRunner = test(this)
+        //testRunner.runTests()
     }
 
     override fun onStart() {
         super.onStart()
     }
 
-    /*override fun onResume() {
+    override fun onResume() {
         super.onResume()
         songGetter.getAllSongs(this, songs)
         adapter.notifyDataSetChanged()
         createMediaController()
+        addToDatabase()
+    }
+
+    private fun addToDatabase(){
+        val dataBaseSongAPI = DatabaseAPI(this)
+        for(song in songs){
+            dataBaseSongAPI.themSong(song, object: OnDatabaseCallBack{
+                override fun onSuccess(id: Long) {
+                }
+
+                override fun onFailure(e: Exception) {
+                }
+            })
+        }
     }
 
     override fun onStop() {
@@ -140,5 +157,5 @@ class MainActivity : AppCompatActivity() {
             MoreExecutors.directExecutor()
         )
 
-    }*/
+    }
 }
