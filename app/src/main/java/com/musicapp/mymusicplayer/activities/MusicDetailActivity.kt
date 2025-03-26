@@ -35,6 +35,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
@@ -167,19 +168,10 @@ class MusicDetailActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            databaseApi?.getFavorite(songId, object: OnGetItemCallback{
-                override fun onSuccess(value: Any) {
-                    favoriteId = (value as FavoriteSong).id
-                }
-
-                override fun onFailure(e: Exception) {
-                    favoriteId = -1
-                }
-            })
-
-            /*
             runBlocking {
-                databaseApi?.join()
+
+                favoriteId = databaseApi?.getFavorite(songId)?.id ?: -1
+
                 if (favoriteId == -1){
                     databaseApi?.insertFavoriteSong(FavoriteSong(songId), object: OnDatabaseCallBack{
                         override fun onSuccess(id: Long) {
@@ -190,21 +182,19 @@ class MusicDetailActivity : AppCompatActivity() {
                     })
 
                     binding.btnFavorite.isSelected = true
-                    return@runBlocking
                 }
+                else{
+                    databaseApi?.deleteFavroiteSong(favoriteId, object: OnDatabaseCallBack{
+                        override fun onSuccess(id: Long) {
+                        }
 
-                databaseApi?.deleteFavroiteSong(favoriteId, object: OnDatabaseCallBack{
-                    override fun onSuccess(id: Long) {
-                    }
+                        override fun onFailure(e: Exception) {
+                        }
+                    })
 
-                    override fun onFailure(e: Exception) {
-                    }
-                })
-
-                binding.btnFavorite.isSelected = false
-                return@runBlocking
+                    binding.btnFavorite.isSelected = false
+                }
             }
-             */
         }
     }
 

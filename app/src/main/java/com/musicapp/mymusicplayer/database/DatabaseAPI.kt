@@ -6,10 +6,13 @@ import com.musicapp.mymusicplayer.model.PlayList
 import com.musicapp.mymusicplayer.model.Song
 import com.musicapp.mymusicplayer.model.SongPlayList
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 
 interface OnDatabaseCallBack {
@@ -28,7 +31,7 @@ class DatabaseAPI(context: Context) {
     private var playListDAO: PlayListDAO
     private var favoriteSongDAO: FavoriteSongDAO
     private val job = Job()
-    private val coroutineScope = CoroutineScope(Dispatchers.IO + job)
+    val coroutineScope = CoroutineScope(Dispatchers.IO + job)
 
     init {
         val myRoomDatabase = MyRoomDatabase.getDatabase(context)
@@ -258,8 +261,8 @@ class DatabaseAPI(context: Context) {
         }
     }
 
-    fun getFavorite(songId: Long, callback: OnGetItemCallback){
-        coroutineScope.launch {
+    fun getFavorite(songId: Long, callback: OnGetItemCallback): Job{
+        return coroutineScope.launch {
             try{
                 val favoriteSong = favoriteSongDAO.readFavoriteSongFromId(songId)
 
@@ -273,6 +276,12 @@ class DatabaseAPI(context: Context) {
                 }
             }
         }
+    }
+
+    suspend fun getFavorite(songId: Long): FavoriteSong? = runBlocking(coroutineScope.coroutineContext){
+        var favoriteSong : FavoriteSong? = null
+        favoriteSong = favoriteSongDAO.readFavoriteSongFromId(songId)
+        favoriteSong
     }
 
     suspend fun join(){
