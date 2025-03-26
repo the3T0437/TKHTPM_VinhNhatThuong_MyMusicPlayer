@@ -1,5 +1,8 @@
 package com.musicapp.mymusicplayer.model
 
+import android.content.ContentUris
+import android.net.Uri
+import android.provider.MediaStore
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
@@ -22,40 +25,35 @@ class Song {
         const val FAVORITE = "favorite"
     }
 
-
-    @PrimaryKey(autoGenerate = true)
+    @PrimaryKey
     @ColumnInfo(name = ID)
-    var id:Int = 0
-    @ColumnInfo(name = URL)
-    var url:String =""
+    var id:Long = 0
     @ColumnInfo(name = TITLE)
     var title: String = ""
     @ColumnInfo(name = ARTIST)
-    var artist: Int = 0
+    var artist: String? = null
     @ColumnInfo(name = ALBUM)
-    var album: Int = 0
+    var album: String? = null
     @ColumnInfo(name = LYRICS)
     var lyrics: String = ""
     @ColumnInfo(name = RELEASE_DATE)
-    var release_date: String= ""
+    var release_year : Int? = null
     @ColumnInfo(name = PLAYED_TIME)
     var played_time: Int = 0
-    @ColumnInfo(name = FAVORITE)
-    var favorite: Int = 0
 
-
+    fun getUri(): Uri {
+        return ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, this.id)
+    }
 
     // Constructor
-    constructor(id:Int, url:String, title: String, artist:Int, album :Int, lyrics: String, release_date:String, played_time:Int, favorite:Int) {
+    constructor(id:Long, title: String, artist:String?, album: String?, lyrics: String, release_year :Int?, played_time:Int) {
         this.id = id
-        this.url = url
         this.title = title
         this.artist = artist
         this.album = album
         this.lyrics = lyrics
-        this.release_date = release_date
+        this.release_year = release_year
         this.played_time = played_time
-        this.favorite = favorite
     }
     constructor()
 }

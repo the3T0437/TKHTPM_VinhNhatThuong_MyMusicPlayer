@@ -23,10 +23,10 @@ class SongPlayList {
     var playListId: Int = 0
 
     @ColumnInfo(name = SONG_ID)
-    var songId: Int = 0
+    var songId: Long = 0
 
     // Constructor
-    constructor(playListId: Int, songId: Int) {
+    constructor(playListId: Int, songId: Long) {
         this.playListId = playListId
         this.songId = songId
     }

@@ -1,18 +1,15 @@
 package com.musicapp.mymusicplayer.test
 
 import android.content.Context
-import com.musicapp.mymusicplayer.database.DatabasePlayListAPI
-import com.musicapp.mymusicplayer.database.DataBaseSongAPI
-import com.musicapp.mymusicplayer.database.OnDatabasePlayListAPICallback
-import com.musicapp.mymusicplayer.database.OnDatabaseSongCallback
+import com.musicapp.mymusicplayer.database.DatabaseAPI
+import com.musicapp.mymusicplayer.database.OnDatabaseCallBack
 import com.musicapp.mymusicplayer.model.PlayList
 import com.musicapp.mymusicplayer.model.Song
 import kotlinx.coroutines.runBlocking
 import java.util.Date
 
 class TestPlayListAndSong(context: Context) {
-    private val databasePlayListAPI = DatabasePlayListAPI(context)
-    private val databaseSongAPI = DataBaseSongAPI(context)
+    val databaseAPI = DatabaseAPI(context)
 
     // Dữ liệu giả cho PlayList
     private val playLists = listOf(
@@ -24,37 +21,31 @@ class TestPlayListAndSong(context: Context) {
     // Dữ liệu giả cho Song
     private val songs = listOf(
         Song(
-            id = 101,
-            url = "https://example.com/song1.mp3",
-            title = "Shape of You",
-            artist = 1,
-            album = 1,
-            lyrics = "Lyrics 1",
-            release_date = "123",
-            played_time = 150,
-            favorite = 1
+            101,
+            "Shape of You",
+            "",
+            "",
+            "Lyrics 1",
+            123,
+            150
         ),
         Song(
-            id = 102,
-            url = "https://example.com/song2.mp3",
-            title = "Blinding Lights",
-            artist = 2,
-            album = 2,
-            lyrics = "Lyrics 2",
-            release_date = "123",
-            played_time = 200,
-            favorite = 1
+            102,
+            "Blinding Lights",
+            "2",
+            "2",
+            "Lyrics 2",
+            123,
+            200,
         ),
         Song(
-            id = 103,
-            url = "https://example.com/song3.mp3",
-            title = "Levitating",
-            artist = 3,
-            album = 3,
-            lyrics = "Lyrics 3",
-            release_date = "123",
-            played_time = 100,
-            favorite = 0
+            103,
+            "title 3",
+            "3",
+            "3",
+            "Lyrics 3",
+            123,
+            200,
         )
     )
 
@@ -63,7 +54,7 @@ class TestPlayListAndSong(context: Context) {
     fun testThemPlayList() {
         playLists.forEach { playList ->
             runBlocking {
-                databasePlayListAPI.themPlayList(playList, object : OnDatabasePlayListAPICallback {
+                databaseAPI.themPlayList(playList, object : OnDatabaseCallBack {
                     override fun onSuccess(id: Long) {
                         println("Thêm PlayList thành công: $playList với ID = $id")
                     }
@@ -80,7 +71,7 @@ class TestPlayListAndSong(context: Context) {
     fun testThemSong() {
         songs.forEach { song ->
             runBlocking {
-                databaseSongAPI.themSong(song, object : OnDatabaseSongCallback {
+                databaseAPI.themSong(song, object : OnDatabaseCallBack{
                     override fun onSuccess(id: Long) {
                         println("Thêm Song thành công: $song với ID = $id")
                     }
@@ -97,7 +88,7 @@ class TestPlayListAndSong(context: Context) {
     fun testDocPlayList() {
         val danhSachPlayList = ArrayList<PlayList>()
         runBlocking {
-            databasePlayListAPI.docPlayList(danhSachPlayList, object : OnDatabasePlayListAPICallback {
+            databaseAPI.docPlayList(danhSachPlayList, object : OnDatabaseCallBack {
                 override fun onSuccess(size: Long) {
                     println("Đọc PlayList thành công, tổng số: $size")
                     danhSachPlayList.forEach {
@@ -116,7 +107,7 @@ class TestPlayListAndSong(context: Context) {
     fun testDocSong() {
         val danhSachSong = ArrayList<Song>()
         runBlocking {
-            databaseSongAPI.docSong(danhSachSong, object : OnDatabaseSongCallback {
+            databaseAPI.docSong(danhSachSong, object : OnDatabaseCallBack{
                 override fun onSuccess(size: Long) {
                     println("Đọc Song thành công, tổng số: $size")
                     danhSachSong.forEach {

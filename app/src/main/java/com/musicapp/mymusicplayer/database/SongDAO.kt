@@ -13,6 +13,8 @@ interface SongDAO {
     suspend fun themSong(song:Song):Long
     @Query("SELECT * FROM ${Song.TABLE_NAME} order by ${Song.ID} ASC")
     suspend fun docSong():List<Song>
+    @Query("SELECT * FROM ${Song.TABLE_NAME} WHERE ${Song.ID} = :id")
+    suspend fun getSong(id: Long):Song?
     @Update
     suspend fun capNhatSong(song: Song):Int
 }
