@@ -5,6 +5,8 @@ import android.media.browse.MediaBrowser.MediaItem
 import android.os.Bundle
 import android.util.Log
 import android.util.Size
+import android.widget.SeekBar
+import android.widget.SeekBar.OnSeekBarChangeListener
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.OptIn
 import androidx.appcompat.app.AppCompatActivity
@@ -19,8 +21,12 @@ import androidx.media3.session.SessionToken
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.MoreExecutors
 import com.musicapp.mymusicplayer.R
+import com.musicapp.mymusicplayer.database.DatabaseAPI
+import com.musicapp.mymusicplayer.database.OnDatabaseCallBack
+import com.musicapp.mymusicplayer.database.OnGetItemCallback
 import com.musicapp.mymusicplayer.databinding.MainLayoutBinding
 import com.musicapp.mymusicplayer.databinding.MusicDetailLayoutBinding
+import com.musicapp.mymusicplayer.model.FavoriteSong
 import com.musicapp.mymusicplayer.model.Song
 import com.musicapp.mymusicplayer.service.PlayBackService
 import com.musicapp.mymusicplayer.utils.songGetter
@@ -30,9 +36,11 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 
 class MusicDetailActivity : AppCompatActivity() {
+    private var databaseApi: DatabaseAPI? = null
     private val playerListener = object:Player.Listener{
         override fun onMediaItemTransition(
             mediaItem: androidx.media3.common.MediaItem?,
@@ -55,6 +63,8 @@ class MusicDetailActivity : AppCompatActivity() {
     private var mode: MusicPlayerMode = MusicPlayerMode.Line
     private var mediaController: MediaController? = null
     private lateinit var coroutineScope: CoroutineScope
+    //if true, will update seekbar every second
+    private var isUpdateSeekbar: Boolean = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -78,6 +88,7 @@ class MusicDetailActivity : AppCompatActivity() {
     @OptIn(UnstableApi::class)
     fun setup(){
         createMediaController()
+        databaseApi = DatabaseAPI(this)
 
         coroutineScope = CoroutineScope(Dispatchers.IO + Job())
         setupUpdateSeekbar()
@@ -91,12 +102,12 @@ class MusicDetailActivity : AppCompatActivity() {
                 mediaController?.seekToPreviousMediaItem()
         }
         binding.btnContinue.setOnClickListener{
-            if (binding.btnContinue.isSelected == false && mediaController != null && mediaController!!.isPlaying)
-                mediaController?.pause()
-            else if (binding.btnContinue.isSelected == true && mediaController != null && mediaController!!.isPlaying == false)
+            if (binding.btnContinue.isSelected == false && mediaController != null)
                 mediaController?.play()
+            else if (binding.btnContinue.isSelected == true && mediaController != null)
+                mediaController?.pause()
 
-            binding.btnContinue.isSelected = !binding.btnContinue.isSelected
+            updateStateStartPauseButton()
         }
 
         binding.btnMode.setOnClickListener{
@@ -117,12 +128,83 @@ class MusicDetailActivity : AppCompatActivity() {
                 mode = MusicPlayerMode.Line
             }
 
-
             updateModePlayer()
         }
 
         binding.btnDown.setOnClickListener{
             this@MusicDetailActivity.finish()
+        }
+
+        binding.seekbar.setOnSeekBarChangeListener(object: OnSeekBarChangeListener{
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+            }
+
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {
+                isUpdateSeekbar = false
+            }
+
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {
+                Log.d("myLog", "process bar ${seekBar?.progress}")
+                mediaController?.seekTo((seekBar?.progress ?: 0).toLong() * 1000)
+                isUpdateSeekbar = true
+                this@MusicDetailActivity.onResume()
+            }
+        })
+
+        binding.btnFavorite.setOnClickListener{
+            var favoriteId: Int = -1
+
+            val mediaItem = mediaController?.currentMediaItem
+            if (mediaItem == null){
+                binding.btnFavorite.isSelected = false
+                return@setOnClickListener
+            }
+
+            val uri = mediaItem.localConfiguration?.uri!!
+            val songId : Long? = songGetter.getSong(this, uri)?.id
+            if (songId == null){
+                binding.btnFavorite.isSelected = false
+                return@setOnClickListener
+            }
+
+            databaseApi?.getFavorite(songId, object: OnGetItemCallback{
+                override fun onSuccess(value: Any) {
+                    favoriteId = (value as FavoriteSong).id
+                }
+
+                override fun onFailure(e: Exception) {
+                    favoriteId = -1
+                }
+            })
+
+            /*
+            runBlocking {
+                databaseApi?.join()
+                if (favoriteId == -1){
+                    databaseApi?.insertFavoriteSong(FavoriteSong(songId), object: OnDatabaseCallBack{
+                        override fun onSuccess(id: Long) {
+                        }
+
+                        override fun onFailure(e: Exception) {
+                        }
+                    })
+
+                    binding.btnFavorite.isSelected = true
+                    return@runBlocking
+                }
+
+                databaseApi?.deleteFavroiteSong(favoriteId, object: OnDatabaseCallBack{
+                    override fun onSuccess(id: Long) {
+                    }
+
+                    override fun onFailure(e: Exception) {
+                    }
+                })
+
+                binding.btnFavorite.isSelected = false
+                return@runBlocking
+            }
+             */
         }
     }
 
@@ -151,7 +233,7 @@ class MusicDetailActivity : AppCompatActivity() {
 
     fun setupUpdateSeekbar(){
         coroutineScope.launch {
-            while(true){
+            while(this@MusicDetailActivity.isUpdateSeekbar){
                 delay(1000)
                 var isFineMediaControl = false;
                 var process: Int = 0 ;
@@ -183,8 +265,6 @@ class MusicDetailActivity : AppCompatActivity() {
         Log.d("myLog", "start resume")
         val mediaItem = mediaController?.currentMediaItem
 
-        if (mediaController != null)
-            binding.btnContinue.isSelected = mediaController!!.isPlaying
         if (mediaItem == null){
             binding.tvTitle.setText("Not playing music")
             binding.tvArtist.setText("Unknown")
@@ -193,17 +273,58 @@ class MusicDetailActivity : AppCompatActivity() {
         }
 
         val uri = mediaItem.localConfiguration?.uri!!
-        val song: Song? = songGetter.getSong(this, uri)
-        try{
-            val bitmap = this.contentResolver.loadThumbnail(uri, Size(640, 480), null)
-            binding.imgThumbnail.setImageBitmap(bitmap)
-        }catch (e: Exception){
-            binding.imgThumbnail.setImageResource(this.DEFAULT_THUMBNAIL)
+        val songId : Long? = songGetter.getSong(this, uri)?.id
+        if (songId == null)
+            setDefaultMusicDetail()
+        else{
+            databaseApi?.getSong(songId, object: OnGetItemCallback{
+                override fun onSuccess(value: Any) {
+                    val song: Song = value as Song
+
+                    try{
+                        val bitmap = this@MusicDetailActivity.contentResolver.loadThumbnail(uri, Size(640, 480), null)
+                        binding.imgThumbnail.setImageBitmap(bitmap)
+                    }catch (e: Exception){
+                        binding.imgThumbnail.setImageResource(this@MusicDetailActivity.DEFAULT_THUMBNAIL)
+                    }
+
+                    binding.tvTitle.setText(song.title)
+                    binding.tvArtist.setText(song.artist)
+                }
+
+                override fun onFailure(e: Exception) {
+                    setDefaultMusicDetail()
+                }
+            })
+
+            databaseApi?.getFavorite(songId, object: OnGetItemCallback{
+                override fun onSuccess(value: Any) {
+                    binding.btnFavorite.isSelected = value != null
+                }
+
+                override fun onFailure(e: Exception) {
+                    binding.btnFavorite.isSelected = false
+                }
+            })
+        }
+        updateModePlayer()
+        updateStateStartPauseButton()
+    }
+
+    private fun setDefaultMusicDetail(){
+        binding.tvTitle.setText("unknown")
+        binding.tvArtist.setText("unknown")
+        binding.imgThumbnail.setImageResource(this.DEFAULT_THUMBNAIL)
+
+    }
+
+    private fun updateStateStartPauseButton(){
+        if (mediaController == null){
+            binding.btnContinue.isSelected = false
+            return
         }
 
-        binding.tvTitle.setText(song?.title ?: "unknown")
-        binding.tvArtist.setText(song?.artist ?: "unknown")
-        updateModePlayer()
+        binding.btnContinue.isSelected = mediaController!!.isPlaying
     }
 
     fun updateModePlayer(){
@@ -221,7 +342,7 @@ class MusicDetailActivity : AppCompatActivity() {
         }
         else if (mode == MusicPlayerMode.Shuffle){
             mediaController?.repeatMode = Player.REPEAT_MODE_OFF
-            mediaController?.shuffleModeEnabled = false
+            mediaController?.shuffleModeEnabled = true
         }
     }
 }
