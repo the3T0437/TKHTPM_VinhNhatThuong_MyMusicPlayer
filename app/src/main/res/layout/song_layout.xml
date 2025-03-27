@@ -13,7 +13,7 @@
         android:layout_marginTop="4dp"
         android:layout_marginEnd="10dp"
         android:text="TextView"
-        app:layout_constraintEnd_toStartOf="@+id/imgThreeDot"
+        app:layout_constraintEnd_toStartOf="@+id/threeDotMenu"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toEndOf="@+id/img"
         app:layout_constraintTop_toTopOf="parent" />
@@ -26,22 +26,20 @@
         android:layout_marginEnd="10dp"
         android:text="TextView"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/imgThreeDot"
+        app:layout_constraintEnd_toStartOf="@+id/threeDotMenu"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toEndOf="@+id/img"
         app:layout_constraintTop_toBottomOf="@+id/tvTitle"
         app:layout_constraintVertical_bias="0.004" />
 
-    <ImageButton
-        android:id="@+id/imgThreeDot"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
+    <com.musicapp.mymusicplayer.widget.ThreeDotMenuView
+        android:id="@+id/threeDotMenu"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
         android:layout_marginEnd="16dp"
-        android:background="@color/transparent"
-        android:src="@drawable/baseline_more_vert_24"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
 
     <com.mikhaellopez.circularimageview.CircularImageView
         android:id="@+id/img"
