@@ -4,8 +4,12 @@ import android.content.Context
 import android.database.Cursor
 import android.net.Uri
 import android.provider.MediaStore
+import android.util.Log
 import androidx.core.database.getIntOrNull
 import androidx.core.database.getStringOrNull
+import com.musicapp.mymusicplayer.adapters.PlayingQueueAdapter
+import com.musicapp.mymusicplayer.database.DatabaseAPI
+import com.musicapp.mymusicplayer.database.OnGetItemCallback
 import com.musicapp.mymusicplayer.model.Song
 
 object songGetter {
@@ -81,5 +85,22 @@ object songGetter {
 
         cursor.close()
         return song;
+    }
+    fun Context.loadRelatedSongs(
+        currentSongId: Long,
+        databaseApi: DatabaseAPI,
+        adapter: PlayingQueueAdapter
+    ) {
+
+        databaseApi.getRelatedSongs(currentSongId, object : OnGetItemCallback {
+            override fun onSuccess(value: Any) {
+                val songs = value as List<Song>
+                adapter.updateSongs(songs)
+            }
+
+            override fun onFailure(e: Exception) {
+                Log.e("SongList", "Failed to load related songs", e)
+            }
+        })
     }
 }

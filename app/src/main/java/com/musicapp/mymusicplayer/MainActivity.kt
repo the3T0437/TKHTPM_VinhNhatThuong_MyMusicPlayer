@@ -5,6 +5,7 @@ import android.content.ComponentName
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.widget.ImageButton
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -19,6 +20,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.MoreExecutors
 import com.musicapp.mymusicplayer.activities.MusicDetailActivity
+import com.musicapp.mymusicplayer.activity.RelatedSongsActivity
 import com.musicapp.mymusicplayer.adapters.SongAdapter
 import com.musicapp.mymusicplayer.adapters.SongClickListener
 import com.musicapp.mymusicplayer.database.DatabaseAPI
@@ -29,8 +31,6 @@ import com.musicapp.mymusicplayer.service.PlayBackService
 import com.musicapp.mymusicplayer.utils.songGetter
 import com.musicapp.mymusicplayer.utils.store
 import com.musicapp.mymusicplayer.widget.MusicPlayerSmallClickListener
-import com.musicapp.mymusicplayer.widget.test
-import kotlinx.coroutines.Dispatchers
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: MainLayoutBinding
@@ -55,6 +55,13 @@ class MainActivity : AppCompatActivity() {
         setup()
         //val testRunner = test(this)
         //testRunner.runTests()
+
+        val btnMenu: ImageButton = findViewById(R.id.btnMenu)
+        btnMenu.setOnClickListener {
+            val intent = Intent(this, RelatedSongsActivity::class.java)
+            startActivity(intent)
+        }
+
     }
 
     override fun onStart() {
