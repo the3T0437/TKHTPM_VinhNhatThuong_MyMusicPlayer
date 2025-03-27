@@ -1,14 +1,13 @@
 package com.musicapp.mymusicplayer.widget
 
 import android.content.Context
-import android.graphics.Color
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
-import android.widget.ImageButton
 import android.widget.PopupMenu
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.musicapp.mymusicplayer.R
+import com.musicapp.mymusicplayer.databinding.ViewThreeDotMenuLayoutBinding
 
 interface ThreeDotMenuListener {
     fun onPlayNext()
@@ -16,22 +15,43 @@ interface ThreeDotMenuListener {
     fun onAddToPlaylist()
 }
 
-class ThreeDotMenuView @JvmOverloads constructor(
-    context: Context,
-    attrs: AttributeSet? = null,
-    defStyleAttr: Int = 0
-) : ConstraintLayout(context, attrs, defStyleAttr) {
+class ThreeDotMenuView : ConstraintLayout {
 
+
+    private lateinit var binding: ViewThreeDotMenuLayoutBinding
     private var menuListener: ThreeDotMenuListener? = null
     private var menuResId: Int = R.menu.menu_song_options
-    private val imgThreeDot: ImageButton
+    private lateinit var context: Context
 
-    init {
-        LayoutInflater.from(context).inflate(R.layout.view_three_dot_menu_layout, this, true)
-        imgThreeDot = findViewById(R.id.imgThreeDot)
+    constructor(context: Context) : super(context){
+        this.context = context
+        setupWidget()
+    }
+    constructor(context: Context, attrs: AttributeSet?) : super(context, attrs){
+        this.context = context
+        setupWidget()
+    }
+    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(
+        context,
+        attrs,
+        defStyleAttr
+    ){
+        this.context = context
+        setupWidget()
+    }
 
+    constructor(
+        context: Context,
+        attrs: AttributeSet?,
+        defStyleAttr: Int,
+        defStyleRes: Int
+    ) : super(context, attrs, defStyleAttr, defStyleRes){
+        this.context = context
+        setupWidget()
+    }
 
-        imgThreeDot.setOnClickListener { showPopupMenu(it) }
+    private fun setupWidget(){
+        binding = ViewThreeDotMenuLayoutBinding.inflate(LayoutInflater.from(context), this, true)
     }
 
     fun setMenuResource(menuResId: Int) {
@@ -43,7 +63,7 @@ class ThreeDotMenuView @JvmOverloads constructor(
     }
 
     private fun showPopupMenu(view: View) {
-        val popupMenu = PopupMenu(view.context, imgThreeDot)
+        val popupMenu = PopupMenu(view.context, binding.imgThreeDot)
         popupMenu.menuInflater.inflate(menuResId, popupMenu.menu)
 
         popupMenu.setOnMenuItemClickListener { item ->
