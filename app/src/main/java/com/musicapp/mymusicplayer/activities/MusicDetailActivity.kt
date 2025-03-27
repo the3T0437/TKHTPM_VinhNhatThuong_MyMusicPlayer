@@ -30,6 +30,7 @@ import com.musicapp.mymusicplayer.model.FavoriteSong
 import com.musicapp.mymusicplayer.model.Song
 import com.musicapp.mymusicplayer.service.PlayBackService
 import com.musicapp.mymusicplayer.utils.songGetter
+import com.musicapp.mymusicplayer.utils.store
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -53,7 +54,7 @@ class MusicDetailActivity : AppCompatActivity() {
 
         override fun onIsPlayingChanged(isPlaying: Boolean) {
             super.onIsPlayingChanged(isPlaying)
-            this@MusicDetailActivity.onResume()
+            updateStateStartPauseButton()
         }
     }
     private val DEFAULT_THUMBNAIL = R.drawable.thumbnail
@@ -88,7 +89,8 @@ class MusicDetailActivity : AppCompatActivity() {
 
     @OptIn(UnstableApi::class)
     fun setup(){
-        createMediaController()
+        mediaController = store.mediaController
+        mediaController?.addListener(playerListener)
         databaseApi = DatabaseAPI(this)
 
         coroutineScope = CoroutineScope(Dispatchers.IO + Job())
@@ -148,7 +150,6 @@ class MusicDetailActivity : AppCompatActivity() {
                 Log.d("myLog", "process bar ${seekBar?.progress}")
                 mediaController?.seekTo((seekBar?.progress ?: 0).toLong() * 1000)
                 isUpdateSeekbar = true
-                this@MusicDetailActivity.onResume()
             }
         })
 
@@ -198,47 +199,15 @@ class MusicDetailActivity : AppCompatActivity() {
         }
     }
 
-    fun createMediaController(){
-        val sessionToken = SessionToken(this, ComponentName(this, PlayBackService::class.java))
-        val factory: ListenableFuture<MediaController> = MediaController.Builder(this, sessionToken).buildAsync()
-
-        var tempMediaController: MediaController? = null
-        factory.addListener(
-            {
-                // MediaController is available here with controllerFuture.get()
-                this.mediaController = factory.let {
-                    if (it.isDone)
-                        it.get()
-                    else
-                        null
-                }
-
-                this.mediaController?.addListener(playerListener)
-
-                this@MusicDetailActivity.onResume()
-            },
-            MoreExecutors.directExecutor()
-        )
-    }
-
     fun setupUpdateSeekbar(){
         coroutineScope.launch {
-            while(this@MusicDetailActivity.isUpdateSeekbar){
+            while(true){
                 delay(1000)
-                var isFineMediaControl = false;
-                var process: Int = 0 ;
-                var duration: Int = 0;
+                if (isUpdateSeekbar == false)
+                    continue
+
                 withContext(Dispatchers.Main){
-                    isFineMediaControl = mediaController != null && mediaController!!.currentMediaItem != null
-                    if (isFineMediaControl){
-                        process = (mediaController!!.currentPosition/ 1000).toInt()
-                        duration = (mediaController!!.contentDuration / 1000).toInt()
-                        Log.d("myLog", "seekbar: $process $duration")
-                    }
-                }
-                if (isFineMediaControl){
-                    binding.seekbar.progress = process
-                    binding.seekbar.max = duration
+                    updateSeekbar()
                 }
             }
         }
@@ -297,6 +266,7 @@ class MusicDetailActivity : AppCompatActivity() {
                 }
             })
         }
+        updateSeekbar()
         updateModePlayer()
         updateStateStartPauseButton()
     }
@@ -333,6 +303,22 @@ class MusicDetailActivity : AppCompatActivity() {
         else if (mode == MusicPlayerMode.Shuffle){
             mediaController?.repeatMode = Player.REPEAT_MODE_OFF
             mediaController?.shuffleModeEnabled = true
+        }
+    }
+
+    fun updateSeekbar(){
+        var isFineMediaControl = false;
+        var process: Int = 0 ;
+        var duration: Int = 0;
+        isFineMediaControl = mediaController?.currentMediaItem != null
+        if (isFineMediaControl){
+            process = (mediaController!!.currentPosition / 1000).toInt()
+            duration = (mediaController!!.contentDuration / 1000).toInt()
+            Log.d("myLog", "seekbar: $process $duration")
+        }
+        if (isFineMediaControl){
+            binding.seekbar.progress = process
+            binding.seekbar.max = duration
         }
     }
 }
