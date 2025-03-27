@@ -4,6 +4,7 @@ import android.app.PendingIntent
 import android.content.ComponentName
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -26,6 +27,7 @@ import com.musicapp.mymusicplayer.databinding.MainLayoutBinding
 import com.musicapp.mymusicplayer.model.Song
 import com.musicapp.mymusicplayer.service.PlayBackService
 import com.musicapp.mymusicplayer.utils.songGetter
+import com.musicapp.mymusicplayer.utils.store
 import com.musicapp.mymusicplayer.widget.MusicPlayerSmallClickListener
 import com.musicapp.mymusicplayer.widget.test
 import kotlinx.coroutines.Dispatchers
@@ -63,8 +65,8 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
         songGetter.getAllSongs(this, songs)
         adapter.notifyDataSetChanged()
-        createMediaController()
         addToDatabase()
+        mediaController = store.mediaController
     }
 
     private fun addToDatabase(){
@@ -80,15 +82,8 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    override fun onStop() {
-        factory?.let {
-            MediaController.releaseFuture(it)
-        }
-        factory = null
-        super.onStop()
-    }
-
     fun setup(){
+        createMediaController()
         val layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
         adapter = SongAdapter(this, songs)
 
@@ -145,13 +140,13 @@ class MainActivity : AppCompatActivity() {
         factory?.addListener(
             {
                 // MediaController is available here with controllerFuture.get()
-                mediaController = factory?.let {
+                store.mediaController = factory?.let {
                     if (it.isDone)
                         it.get()
                     else
                         null
                 }
-
+                mediaController = store.mediaController
                 binding.musicPlayer.mediaController = mediaController
             },
             MoreExecutors.directExecutor()
