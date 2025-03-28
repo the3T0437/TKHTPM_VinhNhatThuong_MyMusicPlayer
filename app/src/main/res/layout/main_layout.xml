@@ -62,11 +62,12 @@
             android:src="@drawable/sort"
             />
 
-        <ImageView
+        <com.musicapp.mymusicplayer.widget.ThreeDotMenuView
             android:id="@+id/btnFilter"
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:src="@drawable/filter"
+            android:background="@color/transparent"
             android:layout_marginLeft="10dp"
             />
 
