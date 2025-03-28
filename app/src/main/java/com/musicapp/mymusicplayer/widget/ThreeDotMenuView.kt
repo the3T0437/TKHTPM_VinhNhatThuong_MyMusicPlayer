@@ -3,6 +3,7 @@ package com.musicapp.mymusicplayer.widget
 import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
+import android.view.MenuItem
 import android.view.View
 import android.widget.PopupMenu
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -10,9 +11,7 @@ import com.musicapp.mymusicplayer.R
 import com.musicapp.mymusicplayer.databinding.ViewThreeDotMenuLayoutBinding
 
 interface ThreeDotMenuListener {
-    fun onPlayNext()
-    fun onAddToFavorite()
-    fun onAddToPlaylist()
+    fun onMenuItemClick(item: MenuItem): Boolean
 }
 
 class ThreeDotMenuView : ConstraintLayout {
@@ -21,7 +20,7 @@ class ThreeDotMenuView : ConstraintLayout {
     private lateinit var binding: ViewThreeDotMenuLayoutBinding
     private var menuListener: ThreeDotMenuListener? = null
     private var menuResId: Int = R.menu.menu_song_options
-    private lateinit var context: Context
+    private var context: Context
 
     constructor(context: Context) : super(context){
         this.context = context
@@ -52,6 +51,9 @@ class ThreeDotMenuView : ConstraintLayout {
 
     private fun setupWidget(){
         binding = ViewThreeDotMenuLayoutBinding.inflate(LayoutInflater.from(context), this, true)
+        binding.imgThreeDot.setOnClickListener{
+            showPopupMenu()
+        }
     }
 
     fun setMenuResource(menuResId: Int) {
@@ -62,26 +64,12 @@ class ThreeDotMenuView : ConstraintLayout {
         this.menuListener = listener
     }
 
-    private fun showPopupMenu(view: View) {
-        val popupMenu = PopupMenu(view.context, binding.imgThreeDot)
+    private fun showPopupMenu() {
+        val popupMenu = PopupMenu(binding.imgThreeDot.context, binding.imgThreeDot)
         popupMenu.menuInflater.inflate(menuResId, popupMenu.menu)
 
         popupMenu.setOnMenuItemClickListener { item ->
-            when (item.itemId) {
-                R.id.action_play_next -> {
-                    menuListener?.onPlayNext()
-                    true
-                }
-                R.id.action_add_favorite -> {
-                    menuListener?.onAddToFavorite()
-                    true
-                }
-                R.id.action_add_to -> {
-                    menuListener?.onAddToPlaylist()
-                    true
-                }
-                else -> false
-            }
+            menuListener?.onMenuItemClick(item) ?: false
         }
         popupMenu.show()
     }

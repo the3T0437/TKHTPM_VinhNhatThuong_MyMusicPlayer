@@ -28,7 +28,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="com.example.mymusicplayer.adapters.PlaylistActivity" android:exported="true" />
+        <activity android:name=".activities.PlaylistActivity" android:exported="false" />
 
 
         <service
