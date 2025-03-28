@@ -34,6 +34,7 @@ class MusicPlaySmall : ConstraintLayout {
 
             value.addListener(listener)
             field = value;
+            updateState()
         }
 
     private val listener: Player.Listener = object : Player.Listener {
