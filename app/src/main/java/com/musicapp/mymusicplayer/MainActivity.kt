@@ -3,6 +3,8 @@ package com.musicapp.mymusicplayer
 import android.content.ComponentName
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
+import android.view.MenuItem
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.Toast
@@ -18,6 +20,7 @@ import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.MoreExecutors
 import com.musicapp.mymusicplayer.activities.FavoriteActitivy
 import com.musicapp.mymusicplayer.activities.MusicDetailActivity
+import com.musicapp.mymusicplayer.activities.PlaylistActivity
 import com.musicapp.mymusicplayer.activities.PlayingSongsActivity
 import com.musicapp.mymusicplayer.adapters.SongAdapter
 import com.musicapp.mymusicplayer.adapters.SongClickListener
@@ -29,6 +32,9 @@ import com.musicapp.mymusicplayer.service.PlayBackService
 import com.musicapp.mymusicplayer.utils.songGetter
 import com.musicapp.mymusicplayer.utils.store
 import com.musicapp.mymusicplayer.widget.MusicPlayerSmallClickListener
+import com.musicapp.mymusicplayer.widget.ThreeDotMenuListener
+import com.musicapp.mymusicplayer.widget.test
+import kotlinx.coroutines.Dispatchers
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: MainLayoutBinding
@@ -53,12 +59,6 @@ class MainActivity : AppCompatActivity() {
         setup()
         //val testRunner = test(this)
         //testRunner.runTests()
-
-        val btnMenu: ImageButton = findViewById(R.id.btnMenu)
-        btnMenu.setOnClickListener {
-            val intent = Intent(this, PlayingSongsActivity::class.java)
-            startActivity(intent)
-        }
     }
 
     override fun onStart() {
@@ -91,24 +91,29 @@ class MainActivity : AppCompatActivity() {
         val layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
         adapter = SongAdapter(this, songs)
 
+        binding.btnFilter.setMenuResource(R.menu.menu_filter_options)
+        binding.btnFilter.setThreeDotMenuListener(object: ThreeDotMenuListener{
+            override fun onMenuItemClick(item: MenuItem): Boolean {
+                when(item.itemId){
+                    R.id.playlist->{
+                        val intent = Intent(this@MainActivity, PlaylistActivity::class.java)
+                        startActivity(intent)
+                        return true
+                    }
+                    R.id.favorite->{
+                        val intent = Intent(this@MainActivity, FavoriteActitivy::class.java)
+                        startActivity(intent)
+                        return true
+                    }
+                }
+
+                return false
+            }
+        })
+
         binding.recyclerView.adapter = adapter
         binding.recyclerView.layoutManager = layoutManager
         adapter.notifyDataSetChanged()
-
-        /*
-         * chi de test favorite
-         *
-         *********/
-
-        binding.btnFilter.setOnClickListener{
-            val intent = Intent(this, FavoriteActitivy::class.java)
-            startActivity(intent)
-        }
-
-        /*
-         * chi de test favorite
-         *
-         *********/
 
         binding.musicPlayer.setOnMusicPlayerClickListener(object: MusicPlayerSmallClickListener{
             override fun onPauseClick() {
