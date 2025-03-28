@@ -244,10 +244,14 @@ class DatabaseAPI(context: Context) {
         }
     }
 
-    fun getAllFavoriteSong(arr: ArrayList<FavoriteSong>, callback: OnDatabaseCallBack){
+    fun getAllFavoriteSong(arr: ArrayList<Song>, callback: OnDatabaseCallBack){
         coroutineScope.launch {
             try{
-                arr.addAll(favoriteSongDAO.readAllFavoriteSongs())
+                arr.clear()
+                val songIds = favoriteSongDAO.readAllFavoriteSongs().map {it.songId}
+                songIds.forEach{
+                    songDAO.getSong(it)?.let { arr.add(it) }
+                }
 
                 withContext(Dispatchers.Main){
                     callback.onSuccess(arr.size.toLong())
