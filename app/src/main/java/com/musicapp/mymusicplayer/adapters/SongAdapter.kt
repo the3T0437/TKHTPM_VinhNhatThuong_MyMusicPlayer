@@ -4,25 +4,25 @@ import android.content.ContentUris
 import android.content.Context
 import android.content.Intent
 import android.provider.MediaStore
+import android.util.Log
 import android.util.Size
 import android.view.LayoutInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.View.OnClickListener
 import android.view.ViewGroup
-import android.widget.PopupMenu
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
-import com.example.mymusicplayer.adapters.PlaylistActivity
 import com.musicapp.mymusicplayer.R
+import com.musicapp.mymusicplayer.activities.PlaylistActivity
 import com.musicapp.mymusicplayer.databinding.SongLayoutBinding
 import com.musicapp.mymusicplayer.model.Song
+import com.musicapp.mymusicplayer.widget.ThreeDotMenuListener
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.*
 
 interface SongClickListener{
     fun onArtistClick(artist: String)
@@ -36,6 +36,7 @@ class SongAdapter(private val context: Context, private val arr: List<Song>) :
     inner class ViewHolder(val binding: SongLayoutBinding) : RecyclerView.ViewHolder(binding.root) {
         private var loadJob: Job? = null
         var songPosition: Int = -1
+
 
         val callback: OnClickListener = object : OnClickListener {
             override fun onClick(v: View?) {
@@ -58,10 +59,12 @@ class SongAdapter(private val context: Context, private val arr: List<Song>) :
             binding.tvArtist.setOnClickListener(callback)
             binding.root.setOnClickListener(callback)
         }
-
         fun bind(song: Song) {
+            Log.d("SongAdapter", "Binding song: ${song.title}, Artist: ${song.artist}")
+
             binding.tvTitle.text = song.title
             binding.tvArtist.text = song.artist
+
             loadJob?.cancel()
             loadJob = CoroutineScope(Dispatchers.IO).launch {
                 try {
@@ -81,47 +84,34 @@ class SongAdapter(private val context: Context, private val arr: List<Song>) :
                 }
             }
 
-            binding.imgThreeDot.setOnClickListener { view ->
-                val popupMenu = PopupMenu(view.context, binding.imgThreeDot)
-                popupMenu.menuInflater.inflate(R.menu.menu_song_options, popupMenu.menu)
+            Log.d("SongAdapter", "ThreeDotMenuView: ${binding.threeDotMenu}")
 
-                popupMenu.setOnMenuItemClickListener { item ->
-                    when (item.itemId) {
+            binding.threeDotMenu.setMenuResource(R.menu.menu_song_options)
+            binding.threeDotMenu.setThreeDotMenuListener(object : ThreeDotMenuListener{
+                override fun onMenuItemClick(item: MenuItem): Boolean {
+                    when(item.itemId){
                         R.id.action_play_next -> {
-                            Toast.makeText(
-                                view.context,
-                                "Play Next: ${song.title}",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                            true
+                            Toast.makeText(context, "Play Next: ${song.title}", Toast.LENGTH_SHORT).show()
+                            return true
                         }
-
-                        R.id.action_add_favorite -> {
-                            Toast.makeText(
-                                view.context,
-                                "Add to Favorite: ${song.title}",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                            true
-                        }
-
-                        R.id.action_add_to -> {
+                        R.id.action_add_to ->{
                             val intent = Intent(binding.root.context, PlaylistActivity::class.java)
                             binding.root.context.startActivity(intent)
-                            Toast.makeText(
-                                view.context,
-                                "Add to: ${song.title}",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                            true
+                            Toast.makeText(context, "Add to: ${song.title}", Toast.LENGTH_SHORT).show()
+                            return true
                         }
-
-                        else -> false
+                        R.id.action_add_favorite ->{
+                            Toast.makeText(context, "Added to Favorite: ${song.title}", Toast.LENGTH_SHORT).show()
+                            return true
+                        }
                     }
+
+                    return false;
                 }
-                popupMenu.show()
-            }
+            })
+
         }
+
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {

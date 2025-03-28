@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" /> <!-- <uses-permission android:name="android.permission.ACCESS_MEDIA_LOCATION" /> -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
 
@@ -30,6 +30,9 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".activities.FavoriteActitivy"
+            android:exported="false" />
+        <activity
             android:name=".activities.MusicDetailActivity"
             android:exported="false" />
         <activity
@@ -41,9 +44,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name="com.example.mymusicplayer.adapters.PlaylistActivity"
-            android:exported="true" />
+
+        <activity android:name=".activities.PlaylistActivity" android:exported="false" />
 
         <service
             android:name=".service.PlayBackService"
