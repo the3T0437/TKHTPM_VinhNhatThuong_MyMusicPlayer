@@ -17,4 +17,7 @@ interface SongDAO {
     suspend fun getSong(id: Long):Song?
     @Update
     suspend fun capNhatSong(song: Song):Int
+
+    @Query("SELECT * FROM song WHERE album = (SELECT album FROM song WHERE id = :songId) AND id != :songId ORDER BY RANDOM() LIMIT 10")
+    suspend fun getRelatedSongs(songId: Long): List<Song>
 }
