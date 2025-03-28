@@ -56,14 +56,14 @@
             android:layout_weight="1"/>
 
         <ImageView
-            android:id="@+id/imgSort"
+            android:id="@+id/btnSort"
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:src="@drawable/sort"
             />
 
         <ImageView
-            android:id="@+id/imgFilter"
+            android:id="@+id/btnFilter"
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:src="@drawable/filter"

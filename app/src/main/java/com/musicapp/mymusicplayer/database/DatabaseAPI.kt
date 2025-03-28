@@ -1,7 +1,6 @@
 package com.musicapp.mymusicplayer.database
 
 import android.content.Context
-
 import com.musicapp.mymusicplayer.model.FavoriteSong
 import com.musicapp.mymusicplayer.model.PlayList
 import com.musicapp.mymusicplayer.model.Song
@@ -106,7 +105,7 @@ class DatabaseAPI(context: Context) {
         }
     }
 
-    fun docSong(danhSachNhanSu: ArrayList<Song>, callback: OnDatabaseCallBack) {
+    fun docSong(danhSachNhanSu:ArrayList<Song>, callback: OnDatabaseCallBack) {
         coroutineScope.launch {
             try {
                 val danhsachDocVe = songDAO.docSong()
@@ -123,7 +122,7 @@ class DatabaseAPI(context: Context) {
         }
     }
 
-    fun getSong(songId: Long, callback: OnGetItemCallback) {
+    fun getSong(songId: Long, callback: OnGetItemCallback){
         coroutineScope.launch {
             try {
                 val value = songDAO.getSong(songId)
@@ -174,7 +173,7 @@ class DatabaseAPI(context: Context) {
     }
 
     // 2. Dinh nghia ham doc du lieu tu CSDL
-    fun docPlayList(danhSachNhanSu: ArrayList<PlayList>, callback: OnDatabaseCallBack) {
+    fun docPlayList(danhSachNhanSu:ArrayList<PlayList>, callback: OnDatabaseCallBack) {
         coroutineScope.launch {
             try {
                 val danhsachDocVe = playListDAO.docPlayList()
@@ -190,7 +189,6 @@ class DatabaseAPI(context: Context) {
             }
         }
     }
-
     // 3. Dinh nghia ham cap nhat lai du lieu
     fun capNhatPlayList(playList: PlayList, callback: OnDatabaseCallBack) {
         coroutineScope.launch {
@@ -207,89 +205,96 @@ class DatabaseAPI(context: Context) {
         }
     }
 
-    fun insertFavoriteSong(favoriteSong: FavoriteSong, callback: OnDatabaseCallBack) {
+    fun insertFavoriteSong(favoriteSong: FavoriteSong, callback: OnDatabaseCallBack){
         coroutineScope.launch {
-            try {
+            try{
                 val index = favoriteSongDAO.insertFavoriteSong(favoriteSong)
 
-                if (index != -1L) {
+                if (index != -1L){
                     favoriteSong.id = index.toInt()
                 }
 
-                withContext(Dispatchers.Main) {
+                withContext(Dispatchers.Main){
                     callback.onSuccess(index)
                 }
-            } catch (e: Exception) {
-                withContext(Dispatchers.Main) {
+            }
+            catch(e: Exception){
+                withContext(Dispatchers.Main){
                     callback.onFailure(e)
                 }
             }
         }
     }
 
-    fun deleteFavroiteSong(id: Int, callback: OnDatabaseCallBack) {
+    fun deleteFavroiteSong(id: Int, callback: OnDatabaseCallBack){
         coroutineScope.launch {
-            try {
+            try{
                 val value = favoriteSongDAO.deleteByUserId(id.toLong())
 
-                withContext(Dispatchers.Main) {
+                withContext(Dispatchers.Main){
                     callback.onSuccess(value.toLong())
                 }
-            } catch (e: Exception) {
-                withContext(Dispatchers.Main) {
+            }
+            catch(e: Exception){
+                withContext(Dispatchers.Main){
                     callback.onFailure(e)
                 }
             }
         }
     }
 
-    fun getAllFavoriteSong(arr: ArrayList<FavoriteSong>, callback: OnDatabaseCallBack) {
+    fun getAllFavoriteSong(arr: ArrayList<Song>, callback: OnDatabaseCallBack){
         coroutineScope.launch {
-            try {
-                arr.addAll(favoriteSongDAO.readAllFavoriteSongs())
+            try{
+                arr.clear()
+                val songIds = favoriteSongDAO.readAllFavoriteSongs().map {it.songId}
+                songIds.forEach{
+                    songDAO.getSong(it)?.let { arr.add(it) }
+                }
 
-                withContext(Dispatchers.Main) {
+                withContext(Dispatchers.Main){
                     callback.onSuccess(arr.size.toLong())
                 }
-            } catch (e: Exception) {
-                withContext(Dispatchers.Main) {
+            }
+            catch(e: Exception){
+                withContext(Dispatchers.Main){
                     callback.onFailure(e)
                 }
             }
         }
     }
 
-    fun getFavorite(songId: Long, callback: OnGetItemCallback): Job {
+    fun getFavorite(songId: Long, callback: OnGetItemCallback): Job{
         return coroutineScope.launch {
-            try {
+            try{
                 val favoriteSong = favoriteSongDAO.readFavoriteSongFromId(songId)
 
-                withContext(Dispatchers.Main) {
+                withContext(Dispatchers.Main){
                     callback.onSuccess(favoriteSong as Any)
                 }
-            } catch (e: Exception) {
-                withContext(Dispatchers.Main) {
+            }
+            catch(e: Exception){
+                withContext(Dispatchers.Main){
                     callback.onFailure(e)
                 }
             }
         }
     }
 
-    suspend fun getFavorite(songId: Long): FavoriteSong? =
-        runBlocking(coroutineScope.coroutineContext) {
-            var favoriteSong: FavoriteSong? = null
-            favoriteSong = favoriteSongDAO.readFavoriteSongFromId(songId)
-            favoriteSong
-        }
+    suspend fun getFavorite(songId: Long): FavoriteSong? = runBlocking(coroutineScope.coroutineContext){
+        var favoriteSong : FavoriteSong? = null
+        favoriteSong = favoriteSongDAO.readFavoriteSongFromId(songId)
+        favoriteSong
+    }
 
-    suspend fun join() {
+    suspend fun join(){
         val job = Job()
         val coroutineScope = CoroutineScope(Dispatchers.IO + job)
 
-        coroutineScope.launch {
+        coroutineScope.launch{
             print("1")
             delay(1000)
-            withContext(Dispatchers.Main) {
+            withContext(Dispatchers.Main){
                 print("2")
             }
         }

@@ -16,6 +16,7 @@ import androidx.media3.session.SessionToken
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.MoreExecutors
+import com.musicapp.mymusicplayer.activities.FavoriteActitivy
 import com.musicapp.mymusicplayer.activities.MusicDetailActivity
 import com.musicapp.mymusicplayer.activities.PlayingSongsActivity
 import com.musicapp.mymusicplayer.adapters.SongAdapter
@@ -93,6 +94,21 @@ class MainActivity : AppCompatActivity() {
         binding.recyclerView.adapter = adapter
         binding.recyclerView.layoutManager = layoutManager
         adapter.notifyDataSetChanged()
+
+        /*
+         * chi de test favorite
+         *
+         *********/
+
+        binding.btnFilter.setOnClickListener{
+            val intent = Intent(this, FavoriteActitivy::class.java)
+            startActivity(intent)
+        }
+
+        /*
+         * chi de test favorite
+         *
+         *********/
 
         binding.musicPlayer.setOnMusicPlayerClickListener(object: MusicPlayerSmallClickListener{
             override fun onPauseClick() {
