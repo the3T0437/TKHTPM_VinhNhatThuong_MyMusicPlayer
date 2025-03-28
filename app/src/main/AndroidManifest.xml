@@ -18,14 +18,17 @@
         android:theme="@style/Theme.MyMusicPlayer"
         tools:targetApi="31">
         <activity
-            android:name="com.musicapp.mymusicplayer.activity.RelatedSongsActivity"
+            android:name=".activities.PlayListActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activities.PlayingSongsActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".activities.MusicDetailActivity"
             android:exported="false" />

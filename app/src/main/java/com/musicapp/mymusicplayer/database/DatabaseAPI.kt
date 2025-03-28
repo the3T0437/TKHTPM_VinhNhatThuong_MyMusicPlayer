@@ -295,16 +295,19 @@ class DatabaseAPI(context: Context) {
         }
     }
 
-    fun getRelatedSongs(songId: Long, callback: OnGetItemCallback){
+    fun getSongs(songIds: ArrayList<Long>, callback: OnGetItemCallback){
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val relatedSongs: List<Song> = songDAO.getRelatedSongs(songId)
+                val songs = arrayListOf<Song>()
+                for (songId in songIds){
+                    val song = songDAO.getSong(songId)
+                    if (song == null)
+                        continue;
+                    songs.add(song)
+                }
+
                 withContext(Dispatchers.Main) {
-                    if (relatedSongs.isNotEmpty()) {
-                        callback.onSuccess(relatedSongs)
-                    } else {
-                        callback.onFailure(Exception("No related songs found"))
-                    }
+                    callback.onSuccess(songs as Any)
                 }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
