@@ -6,10 +6,8 @@ import com.musicapp.mymusicplayer.model.PlayList
 import com.musicapp.mymusicplayer.model.Song
 import com.musicapp.mymusicplayer.model.SongPlayList
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -139,6 +137,7 @@ class DatabaseAPI(context: Context) {
             }
         }
     }
+
     fun capNhatSong(song: Song, callback: OnDatabaseCallBack) {
         coroutineScope.launch {
             try {
@@ -297,6 +296,28 @@ class DatabaseAPI(context: Context) {
             delay(1000)
             withContext(Dispatchers.Main){
                 print("2")
+            }
+        }
+    }
+
+    fun getSongs(songIds: ArrayList<Long>, callback: OnGetItemCallback){
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val songs = arrayListOf<Song>()
+                for (songId in songIds){
+                    val song = songDAO.getSong(songId)
+                    if (song == null)
+                        continue;
+                    songs.add(song)
+                }
+
+                withContext(Dispatchers.Main) {
+                    callback.onSuccess(songs as Any)
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    callback.onFailure(e)
+                }
             }
         }
     }
