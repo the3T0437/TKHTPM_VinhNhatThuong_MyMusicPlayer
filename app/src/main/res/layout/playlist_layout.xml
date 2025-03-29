@@ -31,15 +31,16 @@
                 app:tint="@color/white"
                 android:contentDescription="Back"
                 android:padding="8dp"/>
+
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
                 android:text="Playlist"
                 android:textColor="@color/white"
                 android:textSize="18sp"
-                android:textStyle="bold"
-                android:layout_weight="1"
-                android:gravity="center"/>
+                android:textStyle="bold" />
         </LinearLayout>
     </androidx.appcompat.widget.Toolbar>
     <androidx.recyclerview.widget.RecyclerView
