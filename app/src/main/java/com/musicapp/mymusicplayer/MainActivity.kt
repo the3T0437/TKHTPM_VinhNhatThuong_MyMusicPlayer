@@ -132,6 +132,8 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun onMenuClick() {
+                val intent = Intent(this@MainActivity, PlayingSongsActivity::class.java)
+                startActivity(intent)
             }
 
             override fun onMusicPlayerClick() {
