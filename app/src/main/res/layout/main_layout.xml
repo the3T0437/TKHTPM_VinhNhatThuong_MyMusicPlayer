@@ -21,6 +21,7 @@
             android:layout_height="match_parent">
 
             <SearchView
+                android:id="@+id/svSearch"
                 android:outlineSpotShadowColor="@color/black"
                 android:outlineAmbientShadowColor="@color/black"
                 android:queryHint="search"
