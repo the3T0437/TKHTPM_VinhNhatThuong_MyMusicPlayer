@@ -39,7 +39,6 @@ class SongAdapter(private val context: Context, private val arr: List<Song>) :
         private var loadJob: Job? = null
         var songPosition: Int = -1
 
-
         val callback: OnClickListener = object : OnClickListener {
             override fun onClick(v: View?) {
                 if (v == null)
@@ -96,7 +95,7 @@ class SongAdapter(private val context: Context, private val arr: List<Song>) :
                 }
 
                 override fun onAddToFavorite() {
-                    Toast.makeText(context, "Added to Favorite: ${song.title}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "Add to Favorite: ${song.title}", Toast.LENGTH_SHORT).show()
                 }
 
                 override fun onAddToPlaylist() {

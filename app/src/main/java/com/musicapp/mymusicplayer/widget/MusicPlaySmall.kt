@@ -33,7 +33,7 @@ class MusicPlaySmall : ConstraintLayout {
             }
 
             value.addListener(listener)
-            field = value;
+            field = value
         }
 
     private val listener: Player.Listener = object : Player.Listener {
@@ -86,7 +86,6 @@ class MusicPlaySmall : ConstraintLayout {
         override fun onClick(v: View?) {
             if (v == null)
                 return
-
             when (v.id) {
                 binding.btnPauseStart.id -> {
                     if (mediaController?.currentMediaItem != null) {
