@@ -1,25 +1,28 @@
 package com.musicapp.mymusicplayer
 
-import android.app.PendingIntent
 import android.content.ComponentName
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.MenuItem
+import android.widget.ImageButton
+import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.media3.common.MediaItem
-import androidx.media3.exoplayer.ExoPlayer
-import androidx.media3.session.DefaultMediaNotificationProvider
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.MoreExecutors
+import com.musicapp.mymusicplayer.activities.FavoriteActitivy
 import com.musicapp.mymusicplayer.activities.MusicDetailActivity
 import com.musicapp.mymusicplayer.activities.SearchSongActivity
+import com.musicapp.mymusicplayer.activities.PlaylistActivity
+import com.musicapp.mymusicplayer.activities.PlayingSongsActivity
 import com.musicapp.mymusicplayer.adapters.SongAdapter
 import com.musicapp.mymusicplayer.adapters.SongClickListener
 import com.musicapp.mymusicplayer.database.DatabaseAPI
@@ -30,6 +33,7 @@ import com.musicapp.mymusicplayer.service.PlayBackService
 import com.musicapp.mymusicplayer.utils.songGetter
 import com.musicapp.mymusicplayer.utils.store
 import com.musicapp.mymusicplayer.widget.MusicPlayerSmallClickListener
+import com.musicapp.mymusicplayer.widget.ThreeDotMenuListener
 import com.musicapp.mymusicplayer.widget.test
 import kotlinx.coroutines.Dispatchers
 
@@ -87,6 +91,26 @@ class MainActivity : AppCompatActivity() {
         createMediaController()
         val layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
         adapter = SongAdapter(this, songs)
+
+        binding.btnFilter.setMenuResource(R.menu.menu_filter_options)
+        binding.btnFilter.setThreeDotMenuListener(object: ThreeDotMenuListener{
+            override fun onMenuItemClick(item: MenuItem): Boolean {
+                when(item.itemId){
+                    R.id.playlist->{
+                        val intent = Intent(this@MainActivity, PlaylistActivity::class.java)
+                        startActivity(intent)
+                        return true
+                    }
+                    R.id.favorite->{
+                        val intent = Intent(this@MainActivity, FavoriteActitivy::class.java)
+                        startActivity(intent)
+                        return true
+                    }
+                }
+
+                return false
+            }
+        })
 
         binding.recyclerView.adapter = adapter
         binding.recyclerView.layoutManager = layoutManager

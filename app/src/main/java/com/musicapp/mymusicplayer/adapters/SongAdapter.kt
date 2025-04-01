@@ -7,24 +7,22 @@ import android.provider.MediaStore
 import android.util.Log
 import android.util.Size
 import android.view.LayoutInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.View.OnClickListener
 import android.view.ViewGroup
-import android.widget.PopupMenu
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
-import com.example.mymusicplayer.adapters.PlaylistActivity
 import com.musicapp.mymusicplayer.R
+import com.musicapp.mymusicplayer.activities.PlaylistActivity
 import com.musicapp.mymusicplayer.databinding.SongLayoutBinding
 import com.musicapp.mymusicplayer.model.Song
 import com.musicapp.mymusicplayer.widget.ThreeDotMenuListener
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.*
 
 interface SongClickListener{
     fun onArtistClick(artist: String)
@@ -38,6 +36,7 @@ class SongAdapter(private val context: Context, private val arr: List<Song>) :
     inner class ViewHolder(val binding: SongLayoutBinding) : RecyclerView.ViewHolder(binding.root) {
         private var loadJob: Job? = null
         var songPosition: Int = -1
+
 
         val callback: OnClickListener = object : OnClickListener {
             override fun onClick(v: View?) {
@@ -88,20 +87,26 @@ class SongAdapter(private val context: Context, private val arr: List<Song>) :
             Log.d("SongAdapter", "ThreeDotMenuView: ${binding.threeDotMenu}")
 
             binding.threeDotMenu.setMenuResource(R.menu.menu_song_options)
-            binding.threeDotMenu.setThreeDotMenuListener(object : ThreeDotMenuListener {
+            binding.threeDotMenu.setThreeDotMenuListener(object : ThreeDotMenuListener{
+                override fun onMenuItemClick(item: MenuItem): Boolean {
+                    when(item.itemId){
+                        R.id.action_play_next -> {
+                            Toast.makeText(context, "Play Next: ${song.title}", Toast.LENGTH_SHORT).show()
+                            return true
+                        }
+                        R.id.action_add_to ->{
+                            val intent = Intent(binding.root.context, PlaylistActivity::class.java)
+                            binding.root.context.startActivity(intent)
+                            Toast.makeText(context, "Add to: ${song.title}", Toast.LENGTH_SHORT).show()
+                            return true
+                        }
+                        R.id.action_add_favorite ->{
+                            Toast.makeText(context, "Added to Favorite: ${song.title}", Toast.LENGTH_SHORT).show()
+                            return true
+                        }
+                    }
 
-                override fun onPlayNext() {
-                    Toast.makeText(context, "Play Next: ${song.title}", Toast.LENGTH_SHORT).show()
-                }
-
-                override fun onAddToFavorite() {
-                    Toast.makeText(context, "Add to Favorite: ${song.title}", Toast.LENGTH_SHORT).show()
-                }
-
-                override fun onAddToPlaylist() {
-                    val intent = Intent(binding.root.context, PlaylistActivity::class.java)
-                    binding.root.context.startActivity(intent)
-                    Toast.makeText(context, "Add to: ${song.title}", Toast.LENGTH_SHORT).show()
+                    return false;
                 }
             })
         }
