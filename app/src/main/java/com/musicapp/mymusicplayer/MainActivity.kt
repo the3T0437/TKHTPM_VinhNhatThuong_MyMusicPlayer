@@ -27,6 +27,7 @@ import com.musicapp.mymusicplayer.database.OnDatabaseCallBack
 import com.musicapp.mymusicplayer.databinding.MainLayoutBinding
 import com.musicapp.mymusicplayer.model.Song
 import com.musicapp.mymusicplayer.service.PlayBackService
+import com.musicapp.mymusicplayer.utils.MediaControllerWrapper
 import com.musicapp.mymusicplayer.utils.songGetter
 import com.musicapp.mymusicplayer.utils.store
 import com.musicapp.mymusicplayer.widget.MusicPlayerSmallClickListener
@@ -36,7 +37,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.newSingleThreadContext
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 
 class MainActivity : AppCompatActivity() {
@@ -44,7 +44,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var adapter: SongAdapter
     private lateinit var songs: ArrayList<Song>
     private var factory: ListenableFuture<MediaController>? = null
-    private var mediaController: MediaController? = null
+    private lateinit var mediaController: MediaControllerWrapper
     private val mediaControllerThread = newSingleThreadContext("mediaControllerThread")
     private val getDataFromDatabasethread = newSingleThreadContext("getDataFromDatabase")
     private lateinit var databaseApi: DatabaseAPI
@@ -67,6 +67,110 @@ class MainActivity : AppCompatActivity() {
         //testRunner.runTests()
     }
 
+    fun setup(){
+        databaseApi = DatabaseAPI(this)
+        createMediaController()
+        setupButtonFillter()
+        setupMusicPlayer()
+        setupRecyclerView()
+    }
+
+    fun createMediaController(){
+        val sessionToken = SessionToken(this, ComponentName(this, PlayBackService::class.java))
+        factory = MediaController.Builder(this, sessionToken).buildAsync()
+
+        factory?.addListener(
+            {
+                // MediaController is available here with controllerFuture.get()
+                store.mediaController = factory?.let {
+                    if (it.isDone){
+                        return@let it.get()
+                    }
+                    else
+                        null
+                }
+                binding.musicPlayer.mediaController = store.mediaController
+                mediaController = MediaControllerWrapper.getInstance(store.mediaController)
+            },
+            MoreExecutors.directExecutor()
+        )
+
+    }
+
+
+    private fun setupButtonFillter() {
+        binding.btnFilter.setMenuResource(R.menu.menu_filter_options)
+        binding.btnFilter.setThreeDotMenuListener(object : ThreeDotMenuListener {
+            override fun onMenuItemClick(item: MenuItem): Boolean {
+                when (item.itemId) {
+                    R.id.playlist -> {
+                        val intent = Intent(this@MainActivity, PlaylistActivity::class.java)
+                        startActivity(intent)
+                        return true
+                    }
+
+                    R.id.favorite -> {
+                        val intent = Intent(this@MainActivity, FavoriteActitivy::class.java)
+                        startActivity(intent)
+                        return true
+                    }
+                }
+
+                return false
+            }
+        })
+    }
+
+    private fun setupMusicPlayer() {
+        binding.musicPlayer.setOnMusicPlayerClickListener(object : MusicPlayerSmallClickListener {
+            override fun onPauseClick() {
+                if (mediaController.isPlaying())
+                    mediaController.pause()
+            }
+
+            override fun onStartClick() {
+                if (mediaController.currentMediaItem() != null)
+                    mediaController.play()
+            }
+
+            override fun onNextClick() {
+                if (mediaController.hasNextMediaItem())
+                    mediaController.seekToNextMediaItem()
+            }
+
+            override fun onMenuClick() {
+                val intent = Intent(this@MainActivity, PlayingSongsActivity::class.java)
+                startActivity(intent)
+            }
+
+            override fun onMusicPlayerClick() {
+                val intent = Intent(this@MainActivity, MusicDetailActivity::class.java)
+                startActivity(intent)
+            }
+        })
+    }
+
+    fun setupRecyclerView(){
+        val layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
+        adapter = SongAdapter(this, songs)
+        binding.recyclerView.adapter = adapter
+        binding.recyclerView.layoutManager = layoutManager
+
+        adapter.setSongClickListener(object: SongClickListener {
+            override fun onArtistClick(artist: String) {
+            }
+
+            override fun onSongClick(song: Song, position: Int) {
+                Log.d("myLog", "playing songs count: ${mediaController.playingSongs.size}")
+                mediaController.clear()
+                mediaController.addSongs(songs)
+                mediaController.seekToMediaItem(position)
+                mediaController.prepare()
+                mediaController.play()
+            }
+        })
+    }
+
     override fun onStart() {
         super.onStart()
     }
@@ -74,96 +178,11 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
 
-        updateArrSongs()
+        val job = updateSongsDatabase()
+        updateArrSongs(job)
 
-        mediaController = store.mediaController
-    }
-
-    private fun updateArrSongs(){
-        runBlocking {
-
-            CoroutineScope(getDataFromDatabasethread).launch {
-                updateSongsDatabase().join()
-                Log.d("concurrent", "2")
-
-                val arr = songGetter.getAllSongs(this@MainActivity)
-                arr.sortBy { it.id }
-                val oldSongs = arrayListOf<Song>()
-                oldSongs.addAll(songs)
-                oldSongs.sortBy { it.id }
-
-                val arrAddSongs = arrayListOf<Song>()
-                val arrRemoveSongIds = arrayListOf<Long>()
-                Log.d("myLog", "old songs: ${oldSongs.size}, new songs: ${arr.size}")
-
-                val newArr = arrayListOf<Song>()
-                var songIndex = 0;
-                var tempIndex = 0;
-                while (songIndex < oldSongs.size && tempIndex < arr.size){
-                    val songId = oldSongs[songIndex].id
-                    val tempId = arr[tempIndex].id
-
-                    when{
-                        songId == tempId ->{
-                            newArr.add(oldSongs[songIndex])
-                            songIndex ++
-                            tempIndex ++
-                        }
-                        songId < tempId ->{
-                            songIndex++
-                            arrRemoveSongIds.add(songId)
-                        }
-                        songId > tempId ->{
-                            newArr.add(arr[tempIndex])
-                            arrAddSongs.add(arr[tempIndex])
-                            tempIndex++
-                        }
-                    }
-                }
-
-                while (songIndex < oldSongs.size){
-                    arrRemoveSongIds.add(oldSongs[songIndex].id)
-                    songIndex++
-                }
-
-                while (tempIndex < arr.size){
-                    arrAddSongs.add(arr[tempIndex])
-                    newArr.add(arr[tempIndex])
-                    tempIndex++
-                }
-
-                launch {
-                    for(song in arrAddSongs){
-                        databaseApi.insertSong(song, object: OnDatabaseCallBack{
-                            override fun onSuccess(id: Long) {
-                            }
-
-                            override fun onFailure(e: Exception) {
-                            }
-                        })
-                    }
-
-                    for (id in arrRemoveSongIds){
-                        databaseApi.deleteSong(id, object : OnDatabaseCallBack{
-                            override fun onSuccess(id: Long) {
-                            }
-
-                            override fun onFailure(e: Exception) {
-                            }
-                        })
-                    }
-                }
-
-                withContext(Dispatchers.Main){
-                    Log.d("myLog","add ${arrAddSongs.size}, remove: ${arrRemoveSongIds.size}")
-                    if (arrAddSongs.size == 0 && arrRemoveSongIds.size == 0)
-                        return@withContext
-                    songs.clear()
-                    newArr.sortBy { it.title}
-                    songs.addAll(newArr)
-                    adapter.notifyDataSetChanged()
-                }
-            }
+        store.mediaController?.let{
+            mediaController = MediaControllerWrapper.getInstance(store.mediaController)
         }
     }
 
@@ -186,121 +205,109 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
-    fun setup(){
-        databaseApi = DatabaseAPI(this)
-        createMediaController()
-        val layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
-        adapter = SongAdapter(this, songs)
+    private fun updateArrSongs(jobForWainting: Job): Job{
+        return CoroutineScope(getDataFromDatabasethread).launch {
+            jobForWainting.join()
+            Log.d("concurrent", "2")
 
-        binding.btnFilter.setMenuResource(R.menu.menu_filter_options)
-        binding.btnFilter.setThreeDotMenuListener(object: ThreeDotMenuListener{
-            override fun onMenuItemClick(item: MenuItem): Boolean {
-                when(item.itemId){
-                    R.id.playlist->{
-                        val intent = Intent(this@MainActivity, PlaylistActivity::class.java)
-                        startActivity(intent)
-                        return true
-                    }
-                    R.id.favorite->{
-                        val intent = Intent(this@MainActivity, FavoriteActitivy::class.java)
-                        startActivity(intent)
-                        return true
-                    }
+            val localSongs = songGetter.getAllSongs(this@MainActivity)
+            val databaseSongs = arrayListOf<Song>()
+            databaseSongs.addAll(songs)
+            val addSongs = arrayListOf<Song>()
+            val removeSongs = arrayListOf<Song>()
+            val newArr = getDifferencesSongs(databaseSongs, localSongs, addSongs, removeSongs)
+
+            launch {
+                for(song in addSongs){
+                    databaseApi.insertSong(song, object: OnDatabaseCallBack{
+                        override fun onSuccess(id: Long) {
+                        }
+
+                        override fun onFailure(e: Exception) {
+                        }
+                    })
                 }
 
-                return false
-            }
-        })
+                for (song in removeSongs){
+                    databaseApi.deleteSong(song.id, object : OnDatabaseCallBack{
+                        override fun onSuccess(id: Long) {
+                        }
 
-        binding.recyclerView.adapter = adapter
-        binding.recyclerView.layoutManager = layoutManager
-
-        binding.musicPlayer.setOnMusicPlayerClickListener(object: MusicPlayerSmallClickListener{
-            override fun onPauseClick() {
-                if (mediaController!= null && mediaController!!.isPlaying)
-                    mediaController?.pause()
+                        override fun onFailure(e: Exception) {
+                        }
+                    })
+                }
             }
 
-            override fun onStartClick() {
-                if (mediaController!= null && mediaController?.currentMediaItem != null)
-                    mediaController?.play()
+            withContext(Dispatchers.Main){
+                Log.d("myLog","add ${addSongs.size}, remove: ${removeSongs.size}")
+                if (addSongs.size == 0 && removeSongs.size == 0)
+                    return@withContext
+                songs.clear()
+                newArr.sortBy { it.title}
+                songs.addAll(newArr)
+                adapter.notifyDataSetChanged()
             }
-
-            override fun onNextClick() {
-                if (mediaController != null && mediaController!!.hasNextMediaItem())
-                    mediaController?.seekToNextMediaItem()
-            }
-
-            override fun onMenuClick() {
-                val intent = Intent(this@MainActivity, PlayingSongsActivity::class.java)
-                startActivity(intent)
-            }
-
-            override fun onMusicPlayerClick() {
-                val intent= Intent(this@MainActivity, MusicDetailActivity::class.java)
-                startActivity(intent)
-            }
-        })
-
-        setupPlayMusic()
+        }
     }
 
-    fun setupPlayMusic(){
-        adapter.setSongClickListener(object: SongClickListener {
-            override fun onArtistClick(artist: String) {
-            }
+    /*
+     * proritize get songs from oldSongs
+     * if this song id have in oldSongs, newSongs, all to resultSongs
+     * if this song id don't have in newSongs, add to removeSongs
+     * if this song id have in newSongs, but don't have in oldSongs, add to addSongs, resultSongs
+     */
+    private fun getDifferencesSongs(
+        oldSongs: ArrayList<Song>,
+        newSongs: ArrayList<Song>,
+        addSongs: ArrayList<Song>,
+        removeSongs: ArrayList<Song>,
+    ): ArrayList<Song> {
+        oldSongs.sortBy { it.id }
+        newSongs.sortBy { it.id }
+        addSongs.clear()
+        removeSongs.clear()
+        Log.d("myLog", "old songs: ${oldSongs.size}, new songs: ${newSongs.size}")
 
-            override fun onSongClick(song: Song, position: Int) {
-                val mediaItem = MediaItem.fromUri(song.getUri())
-                mediaController?.removeMediaItems(0, mediaController?.mediaItemCount?:0)
-                mediaController?.addMediaItem(mediaItem)
-                val coroutineScope = CoroutineScope(mediaControllerThread + Job())
-                coroutineScope.launch {
-                    val mediaItems = arrayListOf<MediaItem>()
-                    for (i in 0 until position){
-                        val mediaItem = MediaItem.fromUri(songs[i].getUri())
-                        mediaItems.add(mediaItem)
-                    }
-                    withContext(Dispatchers.Main){
-                        mediaController?.addMediaItems(0, mediaItems)
-                    }
-                }
-                coroutineScope.launch {
-                    val mediaItems = arrayListOf<MediaItem>()
-                    for (i in position+1 until songs.size){
-                        val mediaItem = MediaItem.fromUri(songs[i].getUri())
-                        mediaItems.add(mediaItem)
-                    }
-                    withContext(Dispatchers.Main){
-                        mediaController?.addMediaItems(mediaItems)
-                    }
+        val resultSongs = arrayListOf<Song>()
+        var songIndex = 0;
+        var tempIndex = 0;
+        while (songIndex < oldSongs.size && tempIndex < newSongs.size) {
+            val songId = oldSongs[songIndex].id
+            val tempId = newSongs[tempIndex].id
+
+            when {
+                songId == tempId -> {
+                    resultSongs.add(oldSongs[songIndex])
+                    songIndex++
+                    tempIndex++
                 }
 
-                store.playingSongs?.addAll(songs)
-                mediaController?.prepare()
-                mediaController?.play()
+                songId < tempId -> {
+                    songIndex++
+                    removeSongs.add(oldSongs[songIndex])
+                }
+
+                songId > tempId -> {
+                    resultSongs.add(newSongs[tempIndex])
+                    addSongs.add(newSongs[tempIndex])
+                    tempIndex++
+                }
             }
-        })
+        }
+
+        while (songIndex < oldSongs.size) {
+            removeSongs.add(oldSongs[songIndex])
+            songIndex++
+        }
+
+        while (tempIndex < newSongs.size) {
+            addSongs.add(newSongs[tempIndex])
+            resultSongs.add(newSongs[tempIndex])
+            tempIndex++
+        }
+        return resultSongs
     }
 
-    fun createMediaController(){
-        val sessionToken = SessionToken(this, ComponentName(this, PlayBackService::class.java))
-        factory = MediaController.Builder(this, sessionToken).buildAsync()
 
-        factory?.addListener(
-            {
-                // MediaController is available here with controllerFuture.get()
-                store.mediaController = factory?.let {
-                    if (it.isDone)
-                        it.get()
-                    else
-                        null
-                }
-                mediaController = store.mediaController
-                binding.musicPlayer.mediaController = mediaController
-            },
-            MoreExecutors.directExecutor()
-        )
-
-    }
 }

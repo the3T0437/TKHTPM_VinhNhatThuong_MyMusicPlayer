@@ -24,8 +24,6 @@ class PlayingSongAdapter(context: Context, arr: ArrayList<Song>) : DragableSongA
                 when(item.itemId){
                     R.id.menuRemove ->{
                         removeSongListener?.onRemoveSong(song, holder.bindingAdapterPosition)
-                        arr.removeAt(position)
-                        notifyDataSetChanged()
                         return true
                     }
                 }
