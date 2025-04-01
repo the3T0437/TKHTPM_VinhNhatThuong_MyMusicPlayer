@@ -2,9 +2,13 @@ package com.musicapp.mymusicplayer.activities
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
+import androidx.media3.common.MediaItem
 import androidx.media3.session.MediaController
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.musicapp.mymusicplayer.adapters.DragableSongAdapter
 import com.musicapp.mymusicplayer.adapters.PlayingSongAdapter
 import com.musicapp.mymusicplayer.adapters.RemoveSongListener
@@ -12,6 +16,8 @@ import com.musicapp.mymusicplayer.database.DatabaseAPI
 import com.musicapp.mymusicplayer.database.OnGetItemCallback
 import com.musicapp.mymusicplayer.databinding.PlayingSongLayoutBinding
 import com.musicapp.mymusicplayer.model.Song
+import com.musicapp.mymusicplayer.utils.MoveListener
+import com.musicapp.mymusicplayer.utils.SimpleItemTouchHelperCallBack
 import com.musicapp.mymusicplayer.utils.songGetter
 import com.musicapp.mymusicplayer.utils.store
 import com.musicapp.mymusicplayer.widget.MusicPlayerSmallClickListener
@@ -42,6 +48,29 @@ class PlayingSongsActivity : AppCompatActivity() {
         databaseApi = DatabaseAPI(this)
 
         loadPlayingSongs()
+        makeDragable()
+    }
+
+    fun makeDragable(){
+        val callBack = SimpleItemTouchHelperCallBack()
+        callBack.setMoveListener(object: MoveListener{
+            override fun onMove(from: Int, to: Int): Boolean {
+                Log.d("myLog", "move $from to $to")
+
+                val song = playingSongs.removeAt(from)
+                playingSongs.add(to, song)
+
+                mediaController?.moveMediaItem(from, to)
+                adapter.notifyItemMoved(from, to)
+                return true
+            }
+
+            override fun onSwipe(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+            }
+        })
+        val itemTouchHelper = ItemTouchHelper(callBack)
+        itemTouchHelper.attachToRecyclerView(binding.recyclerView)
+        adapter.setItemTouchHelper(itemTouchHelper)
     }
 
     fun setEvent(){
@@ -52,6 +81,7 @@ class PlayingSongsActivity : AppCompatActivity() {
         adapter.setRemoveSongListener(object: RemoveSongListener{
             override fun onRemoveSong(song: Song, index: Int) {
                 mediaController?.removeMediaItem(index)
+                Log.d("myLog", "remove at: $index")
             }
         })
 
@@ -95,23 +125,6 @@ class PlayingSongsActivity : AppCompatActivity() {
         if (store.mediaController == null)
             return
 
-        val mediaItemCount = store.mediaController!!.mediaItemCount
-        val songIds = arrayListOf<Long>()
-        for (i in 0 until mediaItemCount) {
-            val mediaItem = store.mediaController!!.getMediaItemAt(i)
-            val song = songGetter.getSong(this, mediaItem.localConfiguration!!.uri)
-            songIds.add(song!!.id)
-        }
-
-        databaseApi.getSongs(songIds, object : OnGetItemCallback {
-            override fun onSuccess(value: Any) {
-                playingSongs.clear()
-                playingSongs.addAll(value as ArrayList<Song>)
-                adapter.notifyDataSetChanged()
-            }
-
-            override fun onFailure(e: Exception) {
-            }
-        })
+        playingSongs.addAll(store.playingSongs ?: arrayListOf())
     }
 }
