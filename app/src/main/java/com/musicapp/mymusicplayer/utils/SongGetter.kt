@@ -4,8 +4,11 @@ import android.content.Context
 import android.database.Cursor
 import android.net.Uri
 import android.provider.MediaStore
+import android.util.Log
 import androidx.core.database.getIntOrNull
 import androidx.core.database.getStringOrNull
+import com.musicapp.mymusicplayer.database.DatabaseAPI
+import com.musicapp.mymusicplayer.database.OnGetItemCallback
 import com.musicapp.mymusicplayer.model.Song
 
 object songGetter {
@@ -82,4 +85,5 @@ object songGetter {
         cursor.close()
         return song;
     }
+
 }

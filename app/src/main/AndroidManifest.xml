@@ -17,6 +17,21 @@
         android:theme="@style/Theme.MyMusicPlayer"
         tools:targetApi="31">
         <activity
+            android:name=".activities.PlayListActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activities.PlayingSongsActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".activities.FavoriteActitivy"
+            android:exported="false" />
+        <activity
             android:name=".activities.SearchSongActivity"
             android:exported="false" />
         <activity
@@ -27,12 +42,12 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
-        <activity android:name="com.example.mymusicplayer.adapters.PlaylistActivity" android:exported="true" />
-
+        <activity android:name=".activities.PlaylistActivity" android:exported="false" />
 
         <service
             android:name=".service.PlayBackService"

@@ -7,10 +7,8 @@ import com.musicapp.mymusicplayer.model.PlayList
 import com.musicapp.mymusicplayer.model.Song
 import com.musicapp.mymusicplayer.model.SongPlayList
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -140,6 +138,7 @@ class DatabaseAPI(context: Context) {
             }
         }
     }
+
     fun capNhatSong(song: Song, callback: OnDatabaseCallBack) {
         coroutineScope.launch {
             try {
@@ -245,10 +244,14 @@ class DatabaseAPI(context: Context) {
         }
     }
 
-    fun getAllFavoriteSong(arr: ArrayList<FavoriteSong>, callback: OnDatabaseCallBack){
+    fun getAllFavoriteSong(arr: ArrayList<Song>, callback: OnDatabaseCallBack){
         coroutineScope.launch {
             try{
-                arr.addAll(favoriteSongDAO.readAllFavoriteSongs())
+                arr.clear()
+                val songIds = favoriteSongDAO.readAllFavoriteSongs().map {it.songId}
+                songIds.forEach{
+                    songDAO.getSong(it)?.let { arr.add(it) }
+                }
 
                 withContext(Dispatchers.Main){
                     callback.onSuccess(arr.size.toLong())
@@ -315,4 +318,26 @@ class DatabaseAPI(context: Context) {
     }
 
 
+
+    fun getSongs(songIds: ArrayList<Long>, callback: OnGetItemCallback){
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val songs = arrayListOf<Song>()
+                for (songId in songIds){
+                    val song = songDAO.getSong(songId)
+                    if (song == null)
+                        continue;
+                    songs.add(song)
+                }
+
+                withContext(Dispatchers.Main) {
+                    callback.onSuccess(songs as Any)
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    callback.onFailure(e)
+                }
+            }
+        }
+    }
 }
