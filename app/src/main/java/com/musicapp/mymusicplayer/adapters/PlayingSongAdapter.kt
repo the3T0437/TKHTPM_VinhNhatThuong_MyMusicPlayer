@@ -23,7 +23,7 @@ class PlayingSongAdapter(context: Context, arr: ArrayList<Song>) : DragableSongA
             override fun onMenuItemClick(item: MenuItem): Boolean {
                 when(item.itemId){
                     R.id.menuRemove ->{
-                        removeSongListener?.onRemoveSong(song, position)
+                        removeSongListener?.onRemoveSong(song, holder.bindingAdapterPosition)
                         arr.removeAt(position)
                         notifyDataSetChanged()
                         return true

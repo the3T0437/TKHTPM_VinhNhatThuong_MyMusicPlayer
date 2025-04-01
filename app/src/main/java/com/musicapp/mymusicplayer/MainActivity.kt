@@ -5,8 +5,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.MenuItem
-import android.widget.ImageButton
-import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -33,8 +31,13 @@ import com.musicapp.mymusicplayer.utils.songGetter
 import com.musicapp.mymusicplayer.utils.store
 import com.musicapp.mymusicplayer.widget.MusicPlayerSmallClickListener
 import com.musicapp.mymusicplayer.widget.ThreeDotMenuListener
-import com.musicapp.mymusicplayer.widget.test
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.newSingleThreadContext
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: MainLayoutBinding
@@ -42,6 +45,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var songs: ArrayList<Song>
     private var factory: ListenableFuture<MediaController>? = null
     private var mediaController: MediaController? = null
+    private val mediaControllerThread = newSingleThreadContext("mediaControllerThread")
+    private val getDataFromDatabasethread = newSingleThreadContext("getDataFromDatabase")
+    private lateinit var databaseApi: DatabaseAPI
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -67,26 +73,121 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        songGetter.getAllSongs(this, songs)
-        adapter.notifyDataSetChanged()
-        addToDatabase()
+
+        updateArrSongs()
+
         mediaController = store.mediaController
     }
 
-    private fun addToDatabase(){
-        val dataBaseSongAPI = DatabaseAPI(this)
-        for(song in songs){
-            dataBaseSongAPI.themSong(song, object: OnDatabaseCallBack{
-                override fun onSuccess(id: Long) {
+    private fun updateArrSongs(){
+        runBlocking {
+
+            CoroutineScope(getDataFromDatabasethread).launch {
+                updateSongsDatabase().join()
+                Log.d("concurrent", "2")
+
+                val arr = songGetter.getAllSongs(this@MainActivity)
+                arr.sortBy { it.id }
+                val oldSongs = arrayListOf<Song>()
+                oldSongs.addAll(songs)
+                oldSongs.sortBy { it.id }
+
+                val arrAddSongs = arrayListOf<Song>()
+                val arrRemoveSongIds = arrayListOf<Long>()
+                Log.d("myLog", "old songs: ${oldSongs.size}, new songs: ${arr.size}")
+
+                val newArr = arrayListOf<Song>()
+                var songIndex = 0;
+                var tempIndex = 0;
+                while (songIndex < oldSongs.size && tempIndex < arr.size){
+                    val songId = oldSongs[songIndex].id
+                    val tempId = arr[tempIndex].id
+
+                    when{
+                        songId == tempId ->{
+                            newArr.add(oldSongs[songIndex])
+                            songIndex ++
+                            tempIndex ++
+                        }
+                        songId < tempId ->{
+                            songIndex++
+                            arrRemoveSongIds.add(songId)
+                        }
+                        songId > tempId ->{
+                            newArr.add(arr[tempIndex])
+                            arrAddSongs.add(arr[tempIndex])
+                            tempIndex++
+                        }
+                    }
                 }
 
-                override fun onFailure(e: Exception) {
+                while (songIndex < oldSongs.size){
+                    arrRemoveSongIds.add(oldSongs[songIndex].id)
+                    songIndex++
                 }
-            })
+
+                while (tempIndex < arr.size){
+                    arrAddSongs.add(arr[tempIndex])
+                    newArr.add(arr[tempIndex])
+                    tempIndex++
+                }
+
+                launch {
+                    for(song in arrAddSongs){
+                        databaseApi.insertSong(song, object: OnDatabaseCallBack{
+                            override fun onSuccess(id: Long) {
+                            }
+
+                            override fun onFailure(e: Exception) {
+                            }
+                        })
+                    }
+
+                    for (id in arrRemoveSongIds){
+                        databaseApi.deleteSong(id, object : OnDatabaseCallBack{
+                            override fun onSuccess(id: Long) {
+                            }
+
+                            override fun onFailure(e: Exception) {
+                            }
+                        })
+                    }
+                }
+
+                withContext(Dispatchers.Main){
+                    Log.d("myLog","add ${arrAddSongs.size}, remove: ${arrRemoveSongIds.size}")
+                    if (arrAddSongs.size == 0 && arrRemoveSongIds.size == 0)
+                        return@withContext
+                    songs.clear()
+                    newArr.sortBy { it.title}
+                    songs.addAll(newArr)
+                    adapter.notifyDataSetChanged()
+                }
+            }
         }
     }
 
+    private fun updateSongsDatabase(): Job{
+        val arrSongs = arrayListOf<Song>()
+        return databaseApi.getAllSongs(arrSongs, object: OnDatabaseCallBack{
+            override fun onSuccess(id: Long) {
+                if (arrSongs.size == songs.size)
+                    return
+
+                songs.clear()
+                songs.addAll(arrSongs)
+                songs.sortBy { it.title }
+                adapter.notifyDataSetChanged()
+                Log.d("concurrent", "1")
+            }
+
+            override fun onFailure(e: Exception) {
+            }
+        })
+    }
+
     fun setup(){
+        databaseApi = DatabaseAPI(this)
         createMediaController()
         val layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
         adapter = SongAdapter(this, songs)
@@ -113,7 +214,6 @@ class MainActivity : AppCompatActivity() {
 
         binding.recyclerView.adapter = adapter
         binding.recyclerView.layoutManager = layoutManager
-        adapter.notifyDataSetChanged()
 
         binding.musicPlayer.setOnMusicPlayerClickListener(object: MusicPlayerSmallClickListener{
             override fun onPauseClick() {
@@ -150,9 +250,33 @@ class MainActivity : AppCompatActivity() {
             override fun onArtistClick(artist: String) {
             }
 
-            override fun onSongClick(song: Song) {
+            override fun onSongClick(song: Song, position: Int) {
                 val mediaItem = MediaItem.fromUri(song.getUri())
+                mediaController?.removeMediaItems(0, mediaController?.mediaItemCount?:0)
                 mediaController?.addMediaItem(mediaItem)
+                val coroutineScope = CoroutineScope(mediaControllerThread + Job())
+                coroutineScope.launch {
+                    val mediaItems = arrayListOf<MediaItem>()
+                    for (i in 0 until position){
+                        val mediaItem = MediaItem.fromUri(songs[i].getUri())
+                        mediaItems.add(mediaItem)
+                    }
+                    withContext(Dispatchers.Main){
+                        mediaController?.addMediaItems(0, mediaItems)
+                    }
+                }
+                coroutineScope.launch {
+                    val mediaItems = arrayListOf<MediaItem>()
+                    for (i in position+1 until songs.size){
+                        val mediaItem = MediaItem.fromUri(songs[i].getUri())
+                        mediaItems.add(mediaItem)
+                    }
+                    withContext(Dispatchers.Main){
+                        mediaController?.addMediaItems(mediaItems)
+                    }
+                }
+
+                store.playingSongs?.addAll(songs)
                 mediaController?.prepare()
                 mediaController?.play()
             }

@@ -67,7 +67,7 @@ class FavoriteActitivy : AppCompatActivity() {
             override fun onArtistClick(artist: String) {
             }
 
-            override fun onSongClick(song: Song) {
+            override fun onSongClick(song: Song, position: Int) {
                 val mediaItem = MediaItem.fromUri(song.getUri())
                 mediaController?.addMediaItem(mediaItem)
                 mediaController?.prepare()

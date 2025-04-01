@@ -85,7 +85,7 @@ class DatabaseAPI(context: Context) {
         }
     }
 
-    fun themSong(song: Song, callback: OnDatabaseCallBack) {
+    fun insertSong(song: Song, callback: OnDatabaseCallBack) {
         coroutineScope.launch {
             try {
                 val id = songDAO.themSong(song)
@@ -105,14 +105,14 @@ class DatabaseAPI(context: Context) {
         }
     }
 
-    fun docSong(danhSachNhanSu:ArrayList<Song>, callback: OnDatabaseCallBack) {
-        coroutineScope.launch {
+    fun getAllSongs(songs:ArrayList<Song>, callback: OnDatabaseCallBack) : Job{
+        return coroutineScope.launch {
             try {
-                val danhsachDocVe = songDAO.docSong()
-                danhSachNhanSu.addAll(danhsachDocVe)
+                songs.clear()
+                songs.addAll(songDAO.getAllSongs())
 
                 withContext(Dispatchers.Main) {
-                    callback.onSuccess(danhsachDocVe.size.toLong())
+                    callback.onSuccess(songs.size.toLong())
                 }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
@@ -141,7 +141,7 @@ class DatabaseAPI(context: Context) {
     fun capNhatSong(song: Song, callback: OnDatabaseCallBack) {
         coroutineScope.launch {
             try {
-                val index = songDAO.capNhatSong(song)
+                val index = songDAO.updateSong(song)
                 withContext(Dispatchers.Main) {
                     callback.onSuccess(index.toLong())
                 }
@@ -316,6 +316,23 @@ class DatabaseAPI(context: Context) {
                 }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
+                    callback.onFailure(e)
+                }
+            }
+        }
+    }
+
+    fun deleteSong(id: Long, callback: OnDatabaseCallBack){
+        coroutineScope.launch {
+            try{
+                val value = songDAO.deleteSong(id)
+
+                withContext(Dispatchers.Main){
+                    callback.onSuccess(value.toLong())
+                }
+            }
+            catch(e: Exception){
+                withContext(Dispatchers.Main){
                     callback.onFailure(e)
                 }
             }

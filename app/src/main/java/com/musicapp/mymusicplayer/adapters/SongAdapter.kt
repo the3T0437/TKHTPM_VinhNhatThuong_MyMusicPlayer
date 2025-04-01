@@ -30,7 +30,7 @@ import kotlinx.coroutines.withContext
 
 interface SongClickListener{
     fun onArtistClick(artist: String)
-    fun onSongClick(song: Song)
+    fun onSongClick(song: Song, index: Int)
 }
 
 interface ViewHolderWrapper{
@@ -95,7 +95,7 @@ open class SongAdapter(protected val context: Context, protected val arr: ArrayL
                     }
 
                     else -> {
-                        _songClickListener?.onSongClick(arr[position])
+                        _songClickListener?.onSongClick(arr[position], position)
                     }
                 }
             }

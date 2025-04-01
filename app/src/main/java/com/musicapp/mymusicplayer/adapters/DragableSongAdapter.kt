@@ -2,18 +2,22 @@ package com.musicapp.mymusicplayer.adapters
 
 import android.content.Context
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.View.OnClickListener
+import android.view.View.OnTouchListener
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.viewbinding.ViewBinding
 import com.mikhaellopez.circularimageview.CircularImageView
 import com.musicapp.mymusicplayer.databinding.DragableSongLayoutBinding
-import com.musicapp.mymusicplayer.databinding.SongLayoutBinding
 import com.musicapp.mymusicplayer.model.Song
 import com.musicapp.mymusicplayer.widget.ThreeDotMenuView
 
 open class DragableSongAdapter(context: Context, arr: ArrayList<Song>) : SongAdapter(context, arr){
+    private var itemTouchHelper: ItemTouchHelper? = null
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val binding: DragableSongLayoutBinding = DragableSongLayoutBinding.inflate(LayoutInflater.from(context), parent, false)
         return ViewHolder(binding)
@@ -23,6 +27,22 @@ open class DragableSongAdapter(context: Context, arr: ArrayList<Song>) : SongAda
         return super.getCallback(viewHolder)
     }
 
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        super.onBindViewHolder(holder, position)
+        val binding = holder.getBinding() as DragableSongLayoutBinding
+        binding.btnDrag.setOnClickListener{
+
+        }
+
+        binding.btnDrag.setOnTouchListener { v, event ->
+            itemTouchHelper?.startDrag(holder)
+            true
+        }
+    }
+
+    fun setItemTouchHelper(itemTouchHelper: ItemTouchHelper){
+        this.itemTouchHelper = itemTouchHelper
+    }
 
     override fun getSongLayoutBindingWrapper(binding: ViewBinding): SongLayoutBindingWrapper {
         val dragableBinding = binding as DragableSongLayoutBinding
