@@ -20,6 +20,7 @@ import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.MoreExecutors
 import com.musicapp.mymusicplayer.activities.FavoriteActitivy
 import com.musicapp.mymusicplayer.activities.MusicDetailActivity
+import com.musicapp.mymusicplayer.activities.SearchSongActivity
 import com.musicapp.mymusicplayer.activities.PlaylistActivity
 import com.musicapp.mymusicplayer.activities.PlayingSongsActivity
 import com.musicapp.mymusicplayer.adapters.SongAdapter
@@ -114,12 +115,25 @@ class MainActivity : AppCompatActivity() {
         binding.recyclerView.adapter = adapter
         binding.recyclerView.layoutManager = layoutManager
         adapter.notifyDataSetChanged()
+        binding.svSearch.setOnQueryTextFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                val intent = Intent(this, SearchSongActivity::class.java)
+                startActivity(intent)
+                binding.svSearch.clearFocus()
+            }
+        }
+        binding.svSearch.setOnClickListener{
+            val intent = Intent(this, SearchSongActivity::class.java)
+            startActivity(intent)
+        }
+
 
         binding.musicPlayer.setOnMusicPlayerClickListener(object: MusicPlayerSmallClickListener{
             override fun onPauseClick() {
                 if (mediaController!= null && mediaController!!.isPlaying)
                     mediaController?.pause()
             }
+
 
             override fun onStartClick() {
                 if (mediaController!= null && mediaController?.currentMediaItem != null)
@@ -138,6 +152,7 @@ class MainActivity : AppCompatActivity() {
                 val intent= Intent(this@MainActivity, MusicDetailActivity::class.java)
                 startActivity(intent)
             }
+
         })
 
         setupPlayMusic()
