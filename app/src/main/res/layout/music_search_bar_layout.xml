@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:padding="10dp"
+        android:backgroundTint="@color/black"
+        android:background="@color/black"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <ImageButton
+                android:id="@+id/btnBack"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="@null"
+                android:src="@drawable/back"
+                android:contentDescription="Back"
+                android:padding="8dp"/>
+
+            <SearchView
+                android:id="@+id/svSearch"
+                android:outlineSpotShadowColor="@color/black"
+                android:outlineAmbientShadowColor="@color/black"
+                android:queryHint="Search"
+                android:layout_weight="1"
+                android:iconifiedByDefault="false"
+                android:background="@drawable/search_background"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"/>
+
+
+        </LinearLayout>
+    </androidx.appcompat.widget.Toolbar>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvSearchResults"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+        app:spanCount="1"
+        android:padding="8dp"/>
+</LinearLayout>

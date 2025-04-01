@@ -109,7 +109,6 @@ class SongAdapter(private val context: Context, private val arr: List<Song>) :
                     return false;
                 }
             })
-
         }
 
     }
