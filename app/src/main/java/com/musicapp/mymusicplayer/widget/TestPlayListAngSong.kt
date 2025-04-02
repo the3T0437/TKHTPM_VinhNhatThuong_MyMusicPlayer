@@ -6,7 +6,6 @@ import com.musicapp.mymusicplayer.database.OnDatabaseCallBack
 import com.musicapp.mymusicplayer.model.PlayList
 import com.musicapp.mymusicplayer.model.Song
 import kotlinx.coroutines.runBlocking
-import java.util.Date
 
 class TestPlayListAndSong(context: Context) {
     val databaseAPI = DatabaseAPI(context)
@@ -71,7 +70,7 @@ class TestPlayListAndSong(context: Context) {
     fun testThemSong() {
         songs.forEach { song ->
             runBlocking {
-                databaseAPI.themSong(song, object : OnDatabaseCallBack{
+                databaseAPI.insertSong(song, object : OnDatabaseCallBack{
                     override fun onSuccess(id: Long) {
                         println("Thêm Song thành công: $song với ID = $id")
                     }
@@ -107,7 +106,7 @@ class TestPlayListAndSong(context: Context) {
     fun testDocSong() {
         val danhSachSong = ArrayList<Song>()
         runBlocking {
-            databaseAPI.docSong(danhSachSong, object : OnDatabaseCallBack{
+            databaseAPI.getAllSongs(danhSachSong, object : OnDatabaseCallBack{
                 override fun onSuccess(size: Long) {
                     println("Đọc Song thành công, tổng số: $size")
                     danhSachSong.forEach {
