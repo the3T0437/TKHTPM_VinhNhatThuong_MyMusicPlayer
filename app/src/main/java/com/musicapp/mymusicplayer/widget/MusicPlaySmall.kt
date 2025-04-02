@@ -20,16 +20,12 @@ interface MusicPlayerSmallClickListener{
     fun onPauseClick()
 
     fun onStartClick()
-
     fun onNextClick()
-
     fun onMenuClick()
-
     fun onMusicPlayerClick()
 }
 
 class MusicPlaySmall : ConstraintLayout {
-
     private val context: Context;
     private lateinit var binding: MusicPlayerSmallLayoutBinding
     private var musicPlayerClickListener: MusicPlayerSmallClickListener? = null

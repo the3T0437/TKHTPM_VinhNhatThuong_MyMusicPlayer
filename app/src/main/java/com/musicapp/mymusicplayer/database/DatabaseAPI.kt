@@ -1,6 +1,7 @@
 package com.musicapp.mymusicplayer.database
 
 import android.content.Context
+import android.util.Log
 import com.musicapp.mymusicplayer.model.FavoriteSong
 import com.musicapp.mymusicplayer.model.PlayList
 import com.musicapp.mymusicplayer.model.Song
@@ -299,6 +300,24 @@ class DatabaseAPI(context: Context) {
             }
         }
     }
+    fun searchSongs(title: String, callback: OnGetItemCallback) {
+        coroutineScope.launch {
+            try {
+                val results = songDAO.searchSongs(title)
+                Log.d("Database", "Search result size: ${results.size}")
+                withContext(Dispatchers.Main) {
+                    callback.onSuccess(results)
+                }
+            } catch (e: Exception) {
+                Log.e("Database", "Search error: ${e.message}")
+                withContext(Dispatchers.Main) {
+                    callback.onFailure(e)
+                }
+            }
+        }
+    }
+
+
 
     fun getSongs(songIds: ArrayList<Long>, callback: OnGetItemCallback){
         CoroutineScope(Dispatchers.IO).launch {
