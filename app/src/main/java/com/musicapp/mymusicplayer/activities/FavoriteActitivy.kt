@@ -17,6 +17,7 @@ import com.musicapp.mymusicplayer.database.OnDatabaseCallBack
 import com.musicapp.mymusicplayer.databinding.FavoriteScreenLayoutBinding
 import com.musicapp.mymusicplayer.model.FavoriteSong
 import com.musicapp.mymusicplayer.model.Song
+import com.musicapp.mymusicplayer.utils.MediaControllerWrapper
 import com.musicapp.mymusicplayer.utils.store
 import com.musicapp.mymusicplayer.widget.MusicPlayerSmallClickListener
 
@@ -25,7 +26,7 @@ class FavoriteActitivy : AppCompatActivity() {
     private lateinit var adapter: SongAdapter
     private lateinit var favoriteSongs: ArrayList<Song>
     private lateinit var databaseAPI: DatabaseAPI
-    private var mediaController: MediaController? = null
+    private lateinit var mediaController: MediaControllerWrapper
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -44,8 +45,8 @@ class FavoriteActitivy : AppCompatActivity() {
     fun setup(){
         favoriteSongs = arrayListOf()
         databaseAPI = DatabaseAPI(this)
-        mediaController = store.mediaController
-        binding.musicPlayer.mediaController = mediaController
+        mediaController = MediaControllerWrapper.getInstance(store.mediaController)
+        binding.musicPlayer.mediaController = store.mediaController
 
         binding.btnDown.setOnClickListener{
             this@FavoriteActitivy.finish()
@@ -67,11 +68,12 @@ class FavoriteActitivy : AppCompatActivity() {
             override fun onArtistClick(artist: String) {
             }
 
-            override fun onSongClick(song: Song) {
-                val mediaItem = MediaItem.fromUri(song.getUri())
-                mediaController?.addMediaItem(mediaItem)
-                mediaController?.prepare()
-                mediaController?.play()
+            override fun onSongClick(song: Song, position: Int) {
+                mediaController.clear()
+                mediaController.addSongs(favoriteSongs)
+                mediaController.seekToMediaItem(position)
+                mediaController.prepare()
+                mediaController.play()
             }
         })
     }
@@ -79,18 +81,18 @@ class FavoriteActitivy : AppCompatActivity() {
     fun setupOnSmallMusicPlayerClick(){
         binding.musicPlayer.setOnMusicPlayerClickListener(object: MusicPlayerSmallClickListener {
             override fun onPauseClick() {
-                if (mediaController!= null && mediaController!!.isPlaying)
-                    mediaController?.pause()
+                if (mediaController.isPlaying())
+                    mediaController.pause()
             }
 
             override fun onStartClick() {
-                if (mediaController!= null && mediaController?.currentMediaItem != null)
-                    mediaController?.play()
+                if (mediaController.currentMediaItem() != null)
+                    mediaController.play()
             }
 
             override fun onNextClick() {
-                if (mediaController != null && mediaController!!.hasNextMediaItem())
-                    mediaController?.seekToNextMediaItem()
+                if (mediaController.hasNextMediaItem())
+                    mediaController.seekToNextMediaItem()
             }
 
             override fun onMenuClick() {

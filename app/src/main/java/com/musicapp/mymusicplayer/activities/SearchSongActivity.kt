@@ -15,7 +15,7 @@ import com.musicapp.mymusicplayer.model.Song
 class SearchSongActivity : AppCompatActivity() {
     private lateinit var binding: MusicSearchBarLayoutBinding
     private lateinit var songAdapter: SongAdapter
-    private var songList = mutableListOf<Song>()
+    private var songList = ArrayList<Song>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

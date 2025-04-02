@@ -10,6 +10,18 @@ import androidx.core.database.getStringOrNull
 import com.musicapp.mymusicplayer.database.DatabaseAPI
 import com.musicapp.mymusicplayer.database.OnGetItemCallback
 import com.musicapp.mymusicplayer.model.Song
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import kotlin.coroutines.coroutineContext
+
+interface GetDataListener{
+    suspend fun onGetData(arr: ArrayList<Song>)
+    suspend fun onDone(arr: ArrayList<Song>)
+}
 
 object songGetter {
     private const val ID = MediaStore.Audio.Media._ID
@@ -26,35 +38,79 @@ object songGetter {
         RELEASE_DATE
     )
 
-    fun getAllSongs(context: Context, arr: ArrayList<Song>){
-        val uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
+    fun getAllSongs(context: Context, arr: ArrayList<Song>, callback: GetDataListener){
+        CoroutineScope(Dispatchers.IO + Job()).launch {
+            arr.clear()
 
-        val sort = "$TITLE ASC"
-        val cursor: Cursor? = context.contentResolver.query(uri, project, null, null, sort)
-        if (cursor == null){
-            return
-        }
+            val uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
 
-        val idColumn = cursor.getColumnIndexOrThrow(ID)
-        val titleColumn = cursor.getColumnIndexOrThrow(TITLE)
-        val artistColumn = cursor.getColumnIndexOrThrow(ARTIST)
-        val albumColumn = cursor.getColumnIndexOrThrow(ALBUM)
-        val releaseColumn = cursor.getColumnIndexOrThrow(RELEASE_DATE)
-
-        cursor.use{
-            while(it.moveToNext()){
-                val id = it.getLong(idColumn)
-                val title= it.getString(titleColumn)
-                val artist = it.getStringOrNull(artistColumn)
-                val album = it.getStringOrNull(albumColumn)
-                val releaseDate = it.getIntOrNull(releaseColumn)
-
-                val song = Song(id, title, artist, album, "", releaseDate, 0)
-                arr.add(song)
+            val sort = "$TITLE ASC"
+            val cursor: Cursor? = context.contentResolver.query(uri, project, null, null, sort)
+            if (cursor == null){
+                return@launch
             }
-        }
 
-        cursor.close()
+            val idColumn = cursor.getColumnIndexOrThrow(ID)
+            val titleColumn = cursor.getColumnIndexOrThrow(TITLE)
+            val artistColumn = cursor.getColumnIndexOrThrow(ARTIST)
+            val albumColumn = cursor.getColumnIndexOrThrow(ALBUM)
+            val releaseColumn = cursor.getColumnIndexOrThrow(RELEASE_DATE)
+
+            cursor.use{
+                while(it.moveToNext()){
+                    val id = it.getLong(idColumn)
+                    val title= it.getString(titleColumn)
+                    val artist = it.getStringOrNull(artistColumn)
+                    val album = it.getStringOrNull(albumColumn)
+                    val releaseDate = it.getIntOrNull(releaseColumn)
+
+                    val song = Song(id, title, artist, album, "", releaseDate, 0)
+                    arr.add(song)
+                }
+
+                callback.onGetData(arr)
+            }
+
+            callback.onGetData(arr)
+
+            cursor.close()
+        }
+    }
+
+
+    suspend fun getAllSongs(context: Context): ArrayList<Song> = runBlocking(Dispatchers.IO + Job()){
+            val arr = arrayListOf<Song>()
+
+            val uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
+
+            val sort = "$TITLE ASC"
+            val cursor: Cursor? = context.contentResolver.query(uri, project, null, null, sort)
+            if (cursor == null){
+                return@runBlocking arr
+            }
+
+            val idColumn = cursor.getColumnIndexOrThrow(ID)
+            val titleColumn = cursor.getColumnIndexOrThrow(TITLE)
+            val artistColumn = cursor.getColumnIndexOrThrow(ARTIST)
+            val albumColumn = cursor.getColumnIndexOrThrow(ALBUM)
+            val releaseColumn = cursor.getColumnIndexOrThrow(RELEASE_DATE)
+
+            cursor.use{
+                while(it.moveToNext()){
+                    val id = it.getLong(idColumn)
+                    val title= it.getString(titleColumn)
+                    val artist = it.getStringOrNull(artistColumn)
+                    val album = it.getStringOrNull(albumColumn)
+                    val releaseDate = it.getIntOrNull(releaseColumn)
+
+                    val song = Song(id, title, artist, album, "", releaseDate, 0)
+                    arr.add(song)
+                }
+            }
+
+            cursor.close()
+
+        return@runBlocking arr
     }
 
     fun getSong(context: Context, uri: Uri): Song?{
