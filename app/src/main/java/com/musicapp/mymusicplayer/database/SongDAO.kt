@@ -20,4 +20,10 @@ interface SongDAO {
     suspend fun updateSong(song: Song):Int
     @Query("DELETE FROM ${Song.TABLE_NAME} WHERE ${Song.ID} = :songId")
     suspend fun deleteSong(songId: Long): Int
+
+    @Query("SELECT * FROM ${Song.TABLE_NAME} WHERE ${Song.TITLE} LIKE '%' || :title || '%'")
+    suspend fun searchSongs(title: String): List<Song>
+
+    @Query("SELECT * FROM song WHERE album = (SELECT album FROM song WHERE id = :songId) AND id != :songId ORDER BY RANDOM() LIMIT 10")
+    suspend fun getRelatedSongs(songId: Long): List<Song>
 }
