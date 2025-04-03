@@ -5,7 +5,7 @@
         android:title="Play next"/>
     <item
         android:id="@+id/action_add_favorite"
-        android:title="Add to favorite"/>
+        android:title="Add/Remove favorite"/>
     <item
         android:id="@+id/action_add_to"
         android:title="Add to"/>

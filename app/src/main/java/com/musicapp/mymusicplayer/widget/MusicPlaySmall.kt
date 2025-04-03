@@ -18,7 +18,6 @@ import com.musicapp.mymusicplayer.utils.songGetter
 
 interface MusicPlayerSmallClickListener{
     fun onPauseClick()
-
     fun onStartClick()
     fun onNextClick()
     fun onMenuClick()
@@ -79,7 +78,7 @@ class MusicPlaySmall : ConstraintLayout {
         updateStateOfStartPauseButton()
     }
 
-    private fun updateStateOfStartPauseButton() {
+    fun updateStateOfStartPauseButton() {
         if (mediaController == null) {
             binding.btnPauseStart.isSelected = false
             return
@@ -87,37 +86,7 @@ class MusicPlaySmall : ConstraintLayout {
         binding.btnPauseStart.isSelected = mediaController!!.isPlaying
     }
 
-    private val callback: OnClickListener = object : OnClickListener {
-        override fun onClick(v: View?) {
-            if (v == null)
-                return
-
-            when (v.id) {
-                binding.btnPauseStart.id -> {
-                    if (mediaController?.currentMediaItem != null) {
-                        if (binding.btnPauseStart.isSelected)
-                            musicPlayerClickListener?.onPauseClick()
-                        else
-                            musicPlayerClickListener?.onStartClick()
-
-                        updateStateOfStartPauseButton()
-                    }
-                }
-
-                binding.btnNext.id -> {
-                    musicPlayerClickListener?.onNextClick()
-                }
-
-                binding.btnMenu.id -> {
-                    musicPlayerClickListener?.onMenuClick()
-                }
-
-                else -> {
-                    musicPlayerClickListener?.onMusicPlayerClick()
-                }
-            }
-        }
-    }
+    private var callback: OnClickListener? = null
 
     constructor(context: Context) : super(context) {
         this.context = context
@@ -150,11 +119,52 @@ class MusicPlaySmall : ConstraintLayout {
 
     private fun setUp(context: Context) {
         binding = MusicPlayerSmallLayoutBinding.inflate(LayoutInflater.from(context), this, true)
+        setUpCallback()
 
         binding.btnMenu.setOnClickListener(callback)
         binding.btnNext.setOnClickListener(callback)
         binding.btnPauseStart.setOnClickListener(callback)
         binding.root.setOnClickListener(callback)
+    }
+
+    private fun setUpCallback(){
+        callback = object : OnClickListener {
+            override fun onClick(v: View?) {
+                if (v == null)
+                    return
+
+                when (v.id) {
+                    binding.btnPauseStart.id -> {
+                        if (mediaController?.currentMediaItem != null) {
+                            if (binding.btnPauseStart.isSelected){
+                                mediaController?.pause()
+                                musicPlayerClickListener?.onPauseClick()
+                            }
+                            else{
+                                mediaController?.play()
+                                musicPlayerClickListener?.onStartClick()
+                            }
+
+                            updateStateOfStartPauseButton()
+                        }
+                    }
+
+                    binding.btnNext.id -> {
+                        musicPlayerClickListener?.onNextClick()
+                        if (mediaController != null && mediaController!!.hasNextMediaItem())
+                            mediaController?.seekToNextMediaItem()
+                    }
+
+                    binding.btnMenu.id -> {
+                        musicPlayerClickListener?.onMenuClick()
+                    }
+
+                    else -> {
+                        musicPlayerClickListener?.onMusicPlayerClick()
+                    }
+                }
+            }
+        }
     }
 
     fun setOnMusicPlayerClickListener(musicPlayerSmallClickListener: MusicPlayerSmallClickListener) {
