@@ -45,8 +45,8 @@ class FavoriteActitivy : AppCompatActivity() {
     fun setup(){
         favoriteSongs = arrayListOf()
         databaseAPI = DatabaseAPI(this)
-        mediaController = MediaControllerWrapper.getInstance(store.mediaController)
-        binding.musicPlayer.mediaController = store.mediaController
+        mediaController = MediaControllerWrapper.getInstance(store.mediaBrowser)
+        binding.musicPlayer.mediaController = store.mediaBrowser
 
         binding.btnDown.setOnClickListener{
             this@FavoriteActitivy.finish()
@@ -81,21 +81,17 @@ class FavoriteActitivy : AppCompatActivity() {
     fun setupOnSmallMusicPlayerClick(){
         binding.musicPlayer.setOnMusicPlayerClickListener(object: MusicPlayerSmallClickListener {
             override fun onPauseClick() {
-                if (mediaController.isPlaying())
-                    mediaController.pause()
             }
 
             override fun onStartClick() {
-                if (mediaController.currentMediaItem() != null)
-                    mediaController.play()
             }
 
             override fun onNextClick() {
-                if (mediaController.hasNextMediaItem())
-                    mediaController.seekToNextMediaItem()
             }
 
             override fun onMenuClick() {
+                val intent= Intent(this@FavoriteActitivy, PlayingSongsActivity::class.java)
+                startActivity(intent)
             }
 
             override fun onMusicPlayerClick() {

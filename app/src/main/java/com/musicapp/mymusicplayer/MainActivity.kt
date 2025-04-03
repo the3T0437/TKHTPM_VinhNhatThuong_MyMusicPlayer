@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.media3.common.MediaItem
+import androidx.media3.session.MediaBrowser
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -44,7 +45,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: MainLayoutBinding
     private lateinit var adapter: SongAdapter
     private lateinit var songs: ArrayList<Song>
-    private var factory: ListenableFuture<MediaController>? = null
+    private var factory: ListenableFuture<MediaBrowser>? = null
     private lateinit var mediaController: MediaControllerWrapper
     private val mediaControllerThread = newSingleThreadContext("mediaControllerThread")
     private val getDataFromDatabasethread = newSingleThreadContext("getDataFromDatabase")
@@ -70,29 +71,30 @@ class MainActivity : AppCompatActivity() {
 
     fun setup(){
         databaseApi = DatabaseAPI(this)
+        setupRecyclerView()
         createMediaController()
         setupButtonFillter()
         setupSearch()
         setupMusicPlayer()
-        setupRecyclerView()
     }
 
     fun createMediaController(){
         val sessionToken = SessionToken(this, ComponentName(this, PlayBackService::class.java))
-        factory = MediaController.Builder(this, sessionToken).buildAsync()
+        factory = MediaBrowser.Builder(this, sessionToken).buildAsync()
 
         factory?.addListener(
             {
                 // MediaController is available here with controllerFuture.get()
-                store.mediaController = factory?.let {
+                store.mediaBrowser = factory?.let {
                     if (it.isDone){
                         return@let it.get()
                     }
                     else
                         null
                 }
-                binding.musicPlayer.mediaController = store.mediaController
-                mediaController = MediaControllerWrapper.getInstance(store.mediaController)
+                binding.musicPlayer.mediaController = store.mediaBrowser
+                mediaController = MediaControllerWrapper.getInstance(store.mediaBrowser)
+                adapter.mediaController = mediaController
             },
             MoreExecutors.directExecutor()
         )
@@ -140,18 +142,13 @@ class MainActivity : AppCompatActivity() {
     private fun setupMusicPlayer() {
         binding.musicPlayer.setOnMusicPlayerClickListener(object : MusicPlayerSmallClickListener {
             override fun onPauseClick() {
-                if (mediaController.isPlaying())
-                    mediaController.pause()
             }
 
             override fun onStartClick() {
-                if (mediaController.currentMediaItem() != null)
-                    mediaController.play()
+                binding.musicPlayer.updateStateOfStartPauseButton()
             }
 
             override fun onNextClick() {
-                if (mediaController.hasNextMediaItem())
-                    mediaController.seekToNextMediaItem()
             }
 
             override fun onMenuClick() {
@@ -197,8 +194,8 @@ class MainActivity : AppCompatActivity() {
         val job = updateSongsDatabase()
         updateArrSongs(job)
 
-        store.mediaController?.let{
-            mediaController = MediaControllerWrapper.getInstance(store.mediaController)
+        store.mediaBrowser?.let{
+            mediaController = MediaControllerWrapper.getInstance(store.mediaBrowser)
         }
     }
 
