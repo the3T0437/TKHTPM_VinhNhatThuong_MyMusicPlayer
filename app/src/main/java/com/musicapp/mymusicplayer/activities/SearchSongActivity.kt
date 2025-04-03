@@ -7,29 +7,61 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.musicapp.mymusicplayer.adapters.SongAdapter
+import com.musicapp.mymusicplayer.adapters.SongClickListener
 import com.musicapp.mymusicplayer.database.DatabaseAPI
 import com.musicapp.mymusicplayer.database.OnGetItemCallback
 import com.musicapp.mymusicplayer.databinding.MusicSearchBarLayoutBinding
 import com.musicapp.mymusicplayer.model.Song
+import com.musicapp.mymusicplayer.utils.MediaControllerWrapper
+import com.musicapp.mymusicplayer.utils.store
 
 class SearchSongActivity : AppCompatActivity() {
     private lateinit var binding: MusicSearchBarLayoutBinding
     private lateinit var songAdapter: SongAdapter
+    private lateinit var mediaController :MediaControllerWrapper
     private var songList = ArrayList<Song>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         binding = MusicSearchBarLayoutBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Thiết lập LayoutManager cho RecyclerView
-        binding.rvSearchResults.layoutManager = LinearLayoutManager(this)
+        mediaController = MediaControllerWrapper.getInstance(store.mediaBrowser)
+        binding.svSearch.requestFocusFromTouch()
+
+        setupRecyclerView()
+        setEvents()
+    }
+
+    private fun setupRecyclerView(){
+        binding.recyclerView.layoutManager = LinearLayoutManager(this)
 
         songAdapter = SongAdapter(this, songList)
-        binding.rvSearchResults.adapter = songAdapter
+        songAdapter.mediaController = MediaControllerWrapper.getInstance(store.mediaBrowser)
 
-        // Xử lý tìm kiếm
+        binding.recyclerView.adapter = songAdapter
+    }
+
+    private fun setEvents(){
+        setEventRecyclerView()
+        setEventSearch()
+        setEventBtnBack()
+    }
+
+    private fun setEventRecyclerView(){
+        songAdapter.setSongClickListener( object: SongClickListener{
+            override fun onArtistClick(artist: String) {
+
+            }
+
+            override fun onSongClick(song: Song, index: Int) {
+                mediaController.clear()
+                mediaController.addSongs(songList)
+            }
+        })
+    }
+
+    private fun setEventSearch(){
         binding.svSearch.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
                 Log.d("SearchView", "Query submitted: $query")
@@ -47,7 +79,9 @@ class SearchSongActivity : AppCompatActivity() {
                 return true
             }
         })
+    }
 
+    private fun setEventBtnBack(){
         binding.btnBack.setOnClickListener {
             finish()
         }

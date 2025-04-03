@@ -31,7 +31,7 @@ class PlayingSongsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = PlayingSongLayoutBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        mediaController = MediaControllerWrapper.getInstance(store.mediaController)
+        mediaController = MediaControllerWrapper.getInstance(store.mediaBrowser)
         playingSongs = mediaController.playingSongs
 
         setup()
@@ -70,11 +70,17 @@ class PlayingSongsActivity : AppCompatActivity() {
             finish()
         }
 
+
+        setEventAdapter()
+        setEventMusicPlayerSmall()
+    }
+
+    private fun setEventAdapter(){
         adapter.setRemoveSongListener(object: RemoveSongListener{
             override fun onRemoveSong(song: Song, index: Int) {
                 mediaController.removeSong(index)
-                Log.d("myLog", "remove at: $index")
                 adapter.notifyItemRemoved(index)
+                Log.d("myLog", "remove at: $index")
             }
         })
 
@@ -86,11 +92,9 @@ class PlayingSongsActivity : AppCompatActivity() {
                 mediaController.seekToMediaItem(index)
             }
         })
-
-        setupMusicPlayerSmall()
     }
 
-    private fun setupMusicPlayerSmall(){
+    private fun setEventMusicPlayerSmall(){
         binding.musicPlayer.setOnMusicPlayerClickListener(object: MusicPlayerSmallClickListener {
             override fun onPauseClick() {
                 if (mediaController.isPlaying())
@@ -121,7 +125,7 @@ class PlayingSongsActivity : AppCompatActivity() {
         super.onResume()
 
         loadPlayingSongs()
-        binding.musicPlayer.mediaController = store.mediaController
+        binding.musicPlayer.mediaController = store.mediaBrowser
     }
 
     private fun loadPlayingSongs() {

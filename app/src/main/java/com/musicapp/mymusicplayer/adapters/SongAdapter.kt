@@ -18,14 +18,19 @@ import androidx.viewbinding.ViewBinding
 import com.mikhaellopez.circularimageview.CircularImageView
 import com.musicapp.mymusicplayer.R
 import com.musicapp.mymusicplayer.activities.PlaylistActivity
+import com.musicapp.mymusicplayer.database.DatabaseAPI
+import com.musicapp.mymusicplayer.database.OnDatabaseCallBack
 import com.musicapp.mymusicplayer.databinding.SongLayoutBinding
+import com.musicapp.mymusicplayer.model.FavoriteSong
 import com.musicapp.mymusicplayer.model.Song
+import com.musicapp.mymusicplayer.utils.MediaControllerWrapper
 import com.musicapp.mymusicplayer.widget.ThreeDotMenuListener
 import com.musicapp.mymusicplayer.widget.ThreeDotMenuView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 
 interface SongClickListener{
@@ -51,8 +56,10 @@ interface SongLayoutBindingWrapper{
  * to reuse onBindViewHolder, override getSongLayoutBindingWrapper
  *
  * override getMenuResource, getThreeDotMenuListener to change behavior of three dot widget
+ *
+ * need to set mediaController to make threeDotWidget work
  */
-open class SongAdapter(protected val context: Context, protected val arr: ArrayList<Song>) :
+open class SongAdapter(protected val context: Context, protected val arr: ArrayList<Song>, var mediaController: MediaControllerWrapper? = null) :
     RecyclerView.Adapter<SongAdapter.ViewHolder>() {
     protected var _songClickListener: SongClickListener? = null
 
@@ -177,6 +184,7 @@ open class SongAdapter(protected val context: Context, protected val arr: ArrayL
                when(item.itemId){
                    R.id.action_play_next -> {
                        Toast.makeText(context, "Play Next: ${song.title}", Toast.LENGTH_SHORT).show()
+                       mediaController?.addSong(song)
                        return true
                    }
                    R.id.action_add_to ->{
@@ -186,7 +194,11 @@ open class SongAdapter(protected val context: Context, protected val arr: ArrayL
                        return true
                    }
                    R.id.action_add_favorite ->{
-                       Toast.makeText(context, "Added to Favorite: ${song.title}", Toast.LENGTH_SHORT).show()
+                       if (isFavoriteSong(song))
+                           Toast.makeText(context, "Removed to Favorite: ${song.title}", Toast.LENGTH_SHORT).show()
+                       else
+                           Toast.makeText(context, "Added to Favorite: ${song.title}", Toast.LENGTH_SHORT).show()
+                       toggleFavoriteSong(song)
                        return true
                    }
                }
@@ -194,6 +206,39 @@ open class SongAdapter(protected val context: Context, protected val arr: ArrayL
                return false;
            }
        }
+    }
+
+    private fun toggleFavoriteSong(song: Song){
+        val databaseApi = DatabaseAPI(context)
+        runBlocking {
+            val favoriteId = databaseApi.getFavorite(song.id)?.id ?: -1
+
+            if (favoriteId == -1){
+                databaseApi.insertFavoriteSong(FavoriteSong(song.id), object:
+                    OnDatabaseCallBack {
+                    override fun onSuccess(id: Long) {
+                    }
+
+                    override fun onFailure(e: Exception) {
+                    }
+                })
+            }
+            else{
+                databaseApi.deleteFavroiteSong(favoriteId, object: OnDatabaseCallBack {
+                    override fun onSuccess(id: Long) {
+                    }
+
+                    override fun onFailure(e: Exception) {
+                    }
+                })
+            }
+            return@runBlocking favoriteId
+        }
+    }
+
+    private fun isFavoriteSong(song: Song): Boolean = runBlocking {
+        val databaseApi = DatabaseAPI(context)
+        return@runBlocking databaseApi.getFavorite(song.id) != null
     }
 
     override fun getItemCount(): Int {
