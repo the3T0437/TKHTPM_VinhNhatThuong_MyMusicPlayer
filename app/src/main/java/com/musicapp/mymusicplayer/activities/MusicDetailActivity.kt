@@ -1,7 +1,6 @@
 package com.musicapp.mymusicplayer.activities
 
-import android.content.ComponentName
-import android.media.browse.MediaBrowser.MediaItem
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.util.Size
@@ -13,22 +12,15 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.media3.common.Player
-import androidx.media3.common.Player.RepeatMode
-import androidx.media3.common.util.RepeatModeUtil
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaController
-import androidx.media3.session.SessionToken
-import com.google.common.util.concurrent.ListenableFuture
-import com.google.common.util.concurrent.MoreExecutors
 import com.musicapp.mymusicplayer.R
 import com.musicapp.mymusicplayer.database.DatabaseAPI
 import com.musicapp.mymusicplayer.database.OnDatabaseCallBack
 import com.musicapp.mymusicplayer.database.OnGetItemCallback
-import com.musicapp.mymusicplayer.databinding.MainLayoutBinding
 import com.musicapp.mymusicplayer.databinding.MusicDetailLayoutBinding
 import com.musicapp.mymusicplayer.model.FavoriteSong
 import com.musicapp.mymusicplayer.model.Song
-import com.musicapp.mymusicplayer.service.PlayBackService
 import com.musicapp.mymusicplayer.utils.songGetter
 import com.musicapp.mymusicplayer.utils.store
 import kotlinx.coroutines.CoroutineScope
@@ -36,7 +28,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
@@ -89,21 +80,55 @@ class MusicDetailActivity : AppCompatActivity() {
 
     @OptIn(UnstableApi::class)
     fun setup(){
-        mediaController = store.mediaController
+        mediaController = store.mediaBrowser
         mediaController?.addListener(playerListener)
         databaseApi = DatabaseAPI(this)
 
         coroutineScope = CoroutineScope(Dispatchers.IO + Job())
         setupUpdateSeekbar()
+        setEvents()
+    }
 
+    private fun setupUpdateSeekbar(){
+        coroutineScope.launch {
+            while(true){
+                delay(1000)
+                if (isUpdateSeekbar == false)
+                    continue
+
+                withContext(Dispatchers.Main){
+                    updateSeekbar()
+                }
+            }
+        }
+    }
+
+    private fun setEvents(){
+        setEventButtonNext()
+        setEventButtonPrevious()
+        setEventButtonContinue()
+        setEventButtonMode()
+        setEventButtonDown()
+        setEventSeekbar()
+        setEventButtonFavorite()
+        setEventBtnMenu()
+    }
+
+    private fun setEventButtonNext(){
         binding.btnNext.setOnClickListener{
             if (mediaController != null && mediaController!!.hasNextMediaItem())
                 mediaController?.seekToNextMediaItem()
         }
+    }
+
+    private fun setEventButtonPrevious(){
         binding.btnPrevious.setOnClickListener{
             if (mediaController != null && mediaController!!.hasPreviousMediaItem())
                 mediaController?.seekToPreviousMediaItem()
         }
+    }
+
+    private fun setEventButtonContinue(){
         binding.btnContinue.setOnClickListener{
             if (binding.btnContinue.isSelected == false && mediaController != null)
                 mediaController?.play()
@@ -112,7 +137,9 @@ class MusicDetailActivity : AppCompatActivity() {
 
             updateStateStartPauseButton()
         }
+    }
 
+    private fun setEventButtonMode(){
         binding.btnMode.setOnClickListener{
             if (mode == MusicPlayerMode.Line){
                 binding.btnMode.setImageResource(R.drawable.music_mode_circle)
@@ -133,11 +160,16 @@ class MusicDetailActivity : AppCompatActivity() {
 
             updateModePlayer()
         }
+    }
+
+    private fun setEventButtonDown(){
 
         binding.btnDown.setOnClickListener{
             this@MusicDetailActivity.finish()
         }
+    }
 
+    private fun setEventSeekbar(){
         binding.seekbar.setOnSeekBarChangeListener(object: OnSeekBarChangeListener{
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
             }
@@ -153,6 +185,9 @@ class MusicDetailActivity : AppCompatActivity() {
             }
         })
 
+    }
+
+    private fun setEventButtonFavorite(){
         binding.btnFavorite.setOnClickListener{
             var favoriteId: Int = -1
 
@@ -197,21 +232,16 @@ class MusicDetailActivity : AppCompatActivity() {
                 }
             }
         }
+
     }
 
-    fun setupUpdateSeekbar(){
-        coroutineScope.launch {
-            while(true){
-                delay(1000)
-                if (isUpdateSeekbar == false)
-                    continue
-
-                withContext(Dispatchers.Main){
-                    updateSeekbar()
-                }
-            }
+    private fun setEventBtnMenu(){
+        binding.btnMenu.setOnClickListener{
+            val intent = Intent(this@MusicDetailActivity, PlayingSongsActivity::class.java)
+            startActivity(intent)
         }
     }
+
 
     override fun onStop() {
         this.coroutineScope.cancel()
