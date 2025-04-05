@@ -12,9 +12,9 @@ class TestPlayListAndSong(context: Context) {
 
     // Dữ liệu giả cho PlayList
     private val playLists = listOf(
-        PlayList(id = 1, name = "Pop Hits"),
-        PlayList(id = 2, name = "Relaxing Music"),
-        PlayList(id = 3, name = "Workout Beats")
+        PlayList(name = "Pop Hits"),
+        PlayList(name = "Relaxing Music"),
+        PlayList(name = "Workout Beats")
     )
 
     // Dữ liệu giả cho Song
@@ -53,7 +53,7 @@ class TestPlayListAndSong(context: Context) {
     fun testThemPlayList() {
         playLists.forEach { playList ->
             runBlocking {
-                databaseAPI.themPlayList(playList, object : OnDatabaseCallBack {
+                databaseAPI.insertPlaylist(playList, object : OnDatabaseCallBack {
                     override fun onSuccess(id: Long) {
                         println("Thêm PlayList thành công: $playList với ID = $id")
                     }
@@ -87,7 +87,7 @@ class TestPlayListAndSong(context: Context) {
     fun testDocPlayList() {
         val danhSachPlayList = ArrayList<PlayList>()
         runBlocking {
-            databaseAPI.docPlayList(danhSachPlayList, object : OnDatabaseCallBack {
+            databaseAPI.getAllPlaylists(danhSachPlayList, object : OnDatabaseCallBack {
                 override fun onSuccess(size: Long) {
                     println("Đọc PlayList thành công, tổng số: $size")
                     danhSachPlayList.forEach {
