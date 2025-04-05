@@ -16,6 +16,7 @@ import androidx.media3.session.SessionToken
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.MoreExecutors
+import com.musicapp.mymusicplayer.activities.AddPlayListActivity
 import com.musicapp.mymusicplayer.activities.FavoriteActitivy
 import com.musicapp.mymusicplayer.activities.MusicDetailActivity
 import com.musicapp.mymusicplayer.activities.SearchSongActivity
@@ -324,6 +325,4 @@ class MainActivity : AppCompatActivity() {
         }
         return resultSongs
     }
-
-
 }

@@ -12,7 +12,7 @@ interface PlayListDAO {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun themPlayList(playList: PlayList):Long
     @Query("SELECT * FROM ${PlayList.TABLE_NAME} order by ${PlayList.ID} ASC")
-    suspend fun docPlayList():List<PlayList>
+    suspend fun getAllPlaylists():List<PlayList>
     @Update
     suspend fun capNhatPlayList(playList: PlayList):Int
 }

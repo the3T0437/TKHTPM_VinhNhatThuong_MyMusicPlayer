@@ -6,13 +6,13 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.musicapp.mymusicplayer.database.DatabaseAPI
+import com.musicapp.mymusicplayer.database.OnDatabaseCallBack
 import com.musicapp.mymusicplayer.databinding.PlaylistMemberLayoutBinding
 import com.musicapp.mymusicplayer.model.PlayList
+import kotlinx.coroutines.coroutineScope
 
 class PlayListAdapter(private val context: Context, private val arr: List<PlayList>):
 RecyclerView.Adapter<PlayListAdapter.ViewHolder>(){
-    private var databaseAPI: DatabaseAPI = DatabaseAPI(context)
-    private var playLists = ArrayList<PlayList>()
     inner class ViewHolder(val binding: PlaylistMemberLayoutBinding) :RecyclerView.ViewHolder(binding.root){
 
     }
@@ -28,6 +28,5 @@ RecyclerView.Adapter<PlayListAdapter.ViewHolder>(){
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.binding.name.text = arr[position].name
-
     }
 }

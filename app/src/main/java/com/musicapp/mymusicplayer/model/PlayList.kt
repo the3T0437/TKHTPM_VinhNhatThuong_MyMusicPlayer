@@ -21,13 +21,9 @@ class PlayList {
     @ColumnInfo(name = NAME)
     var name:String =""
 
-
-
     // Constructor
-    constructor(id:Int, name:String) {
-        this.id = id
+    constructor(name:String) {
         this.name = name
-
     }
     constructor()
 }
