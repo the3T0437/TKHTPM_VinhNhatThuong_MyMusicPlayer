@@ -154,8 +154,8 @@ class DatabaseAPI(context: Context) {
         }
     }
 
-    // 1. Định nghia ham ghi du lieu nhan su
-    fun themPlayList(playList: PlayList, callback: OnDatabaseCallBack) {
+
+    fun insertPlaylist(playList: PlayList, callback: OnDatabaseCallBack) {
         coroutineScope.launch {
             try {
                 val id = playListDAO.themPlayList(playList)
@@ -174,14 +174,15 @@ class DatabaseAPI(context: Context) {
     }
 
     // 2. Dinh nghia ham doc du lieu tu CSDL
-    fun docPlayList(danhSachNhanSu:ArrayList<PlayList>, callback: OnDatabaseCallBack) {
+    fun getAllPlaylists(playlists:ArrayList<PlayList>, callback: OnDatabaseCallBack) {
         coroutineScope.launch {
             try {
-                val danhsachDocVe = playListDAO.docPlayList()
-                danhSachNhanSu.addAll(danhsachDocVe)
+                val databasePlaylists = playListDAO.getAllPlaylists()
+                playlists.clear()
+                playlists.addAll(databasePlaylists)
 
                 withContext(Dispatchers.Main) {
-                    callback.onSuccess(danhsachDocVe.size.toLong())
+                    callback.onSuccess(databasePlaylists.size.toLong())
                 }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
