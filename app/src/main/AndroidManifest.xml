@@ -57,7 +57,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".activities.PlaylistActivity"
+            android:name=".activities.PlayListActivity"
             android:exported="false" />
 
         <service
