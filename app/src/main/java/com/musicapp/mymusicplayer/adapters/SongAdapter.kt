@@ -18,7 +18,6 @@ import androidx.viewbinding.ViewBinding
 import com.mikhaellopez.circularimageview.CircularImageView
 import com.musicapp.mymusicplayer.R
 import com.musicapp.mymusicplayer.activities.AddPlayListActivity
-import com.musicapp.mymusicplayer.activities.PlaylistActivity
 import com.musicapp.mymusicplayer.database.DatabaseAPI
 import com.musicapp.mymusicplayer.database.OnDatabaseCallBack
 import com.musicapp.mymusicplayer.databinding.SongLayoutBinding
