@@ -21,7 +21,7 @@ import com.musicapp.mymusicplayer.activities.AddPlayListActivity
 import com.musicapp.mymusicplayer.activities.FavoriteActitivy
 import com.musicapp.mymusicplayer.activities.MusicDetailActivity
 import com.musicapp.mymusicplayer.activities.SearchSongActivity
-import com.musicapp.mymusicplayer.activities.PlaylistActivity
+
 import com.musicapp.mymusicplayer.activities.PlayingSongsActivity
 import com.musicapp.mymusicplayer.adapters.SongAdapter
 import com.musicapp.mymusicplayer.adapters.SongClickListener
