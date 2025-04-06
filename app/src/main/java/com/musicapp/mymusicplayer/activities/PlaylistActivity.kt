@@ -22,7 +22,7 @@ class PlayListActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         databaseApi = DatabaseAPI(this)
-        playListAdapter = PlayListAdapter(this, playList)
+        playListAdapter = PlayListAdapter(this, playList,-1,false)
 
     }
 }
