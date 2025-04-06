@@ -31,7 +31,6 @@ class DatabaseAPI(context: Context) {
     private var favoriteSongDAO: FavoriteSongDAO
     private val job = Job()
     val coroutineScope = CoroutineScope(Dispatchers.IO + job)
-
     init {
         val myRoomDatabase = MyRoomDatabase.getDatabase(context)
         songPlayListDAO = myRoomDatabase.songPlayListDao()
@@ -40,16 +39,19 @@ class DatabaseAPI(context: Context) {
         favoriteSongDAO = myRoomDatabase.favroiteSongDAO()
     }
 
-    fun themSongPlayList(songPlayList: SongPlayList, callback: OnDatabaseCallBack) {
+    fun themSongPlayList(songID: Long,playListID: Int, callback: OnDatabaseCallBack) {
         coroutineScope.launch {
-            try {
+            val count = songPlayListDAO.checkSongExists(playListID, songID)
+
+            if (count == 0) { // Nếu chưa tồn tại thì thêm mới
+                val songPlayList = SongPlayList(playListID, songID)
                 val id = songPlayListDAO.insertSongPlayList(songPlayList)
                 withContext(Dispatchers.Main) {
                     callback.onSuccess(id)
                 }
-            } catch (e: Exception) {
+            } else {
                 withContext(Dispatchers.Main) {
-                    callback.onFailure(e)
+                    callback.onFailure(Exception("Bài hát đã tồn tại trong playlist"))
                 }
             }
         }
@@ -158,7 +160,7 @@ class DatabaseAPI(context: Context) {
     fun insertPlaylist(playList: PlayList, callback: OnDatabaseCallBack) {
         coroutineScope.launch {
             try {
-                val id = playListDAO.themPlayList(playList)
+                val id = playListDAO.insertPlayList(playList)
                 if (id != -1L) {
                     playList.id = id.toInt()
                 }
@@ -172,8 +174,26 @@ class DatabaseAPI(context: Context) {
             }
         }
     }
-
-    // 2. Dinh nghia ham doc du lieu tu CSDL
+    fun deletePlayList(playlistID: Long, callback: OnDatabaseCallBack){
+        coroutineScope.launch(Dispatchers.IO) {
+            try {
+                val rowDel = playListDAO.deletePlaylist(playlistID)
+                if(rowDel > 0){
+                    withContext(Dispatchers.Main) {
+                        callback.onSuccess(playlistID)
+                    }
+                } else {
+                    withContext(Dispatchers.Main) {
+                        callback.onFailure(Exception("Không tìm thấy Playlist để xóa"))
+                    }
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    callback.onFailure(e)
+                }
+            }
+        }
+    }
     fun getAllPlaylists(playlists:ArrayList<PlayList>, callback: OnDatabaseCallBack) {
         coroutineScope.launch {
             try {
@@ -195,7 +215,7 @@ class DatabaseAPI(context: Context) {
     fun capNhatPlayList(playList: PlayList, callback: OnDatabaseCallBack) {
         coroutineScope.launch {
             try {
-                val index = playListDAO.capNhatPlayList(playList)
+                val index = playListDAO.updatePlayList(playList)
                 withContext(Dispatchers.Main) {
                     callback.onSuccess(index.toLong())
                 }
@@ -353,6 +373,24 @@ class DatabaseAPI(context: Context) {
             }
             catch(e: Exception){
                 withContext(Dispatchers.Main){
+                    callback.onFailure(e)
+                }
+            }
+        }
+    }
+    fun getSongPlayListDAO(): SongPlayListDAO {
+        return songPlayListDAO
+    }
+    fun deleteSongFromPlaylist(playlistId: Int, songId: Long, callback: OnDatabaseCallBack) {
+        coroutineScope.launch {
+            try {
+                val value = songPlayListDAO.deleteSongFromPlaylist(playlistId, songId)
+
+                withContext(Dispatchers.Main) {
+                    callback.onSuccess(value.toLong())
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
                     callback.onFailure(e)
                 }
             }
