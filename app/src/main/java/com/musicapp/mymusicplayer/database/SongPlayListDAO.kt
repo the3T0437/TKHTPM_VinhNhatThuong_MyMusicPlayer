@@ -20,4 +20,13 @@ interface SongPlayListDAO {
 
     @Delete
     suspend fun deleteSongPlayList(songPlayList: SongPlayList): Int
+
+    @Query(" SELECT COUNT(*) FROM song_play_list WHERE play_list_id = :playlistId AND song_id = :songId ")
+    suspend fun checkSongExists(playlistId: Int, songId: Long): Int
+
+    @Query("SELECT * FROM song WHERE ID IN (SELECT song_id FROM song_play_list WHERE play_list_id = :playListId)")
+    fun getSongsInPlayList(playListId: Int): List<Song>
+
+    @Query("DELETE FROM song_play_list WHERE play_list_id = :playlistId AND song_id = :songId")
+    fun deleteSongFromPlaylist(playlistId: Int, songId: Long): Int
 }

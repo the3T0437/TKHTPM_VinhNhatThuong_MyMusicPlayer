@@ -10,19 +10,17 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.media3.common.MediaItem
 import androidx.media3.session.MediaBrowser
-import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.MoreExecutors
-import com.musicapp.mymusicplayer.activities.AddPlayListActivity
 import com.musicapp.mymusicplayer.activities.FavoriteActitivy
 import com.musicapp.mymusicplayer.activities.MusicDetailActivity
 import com.musicapp.mymusicplayer.activities.SearchSongActivity
-import com.musicapp.mymusicplayer.activities.PlaylistActivity
+
 import com.musicapp.mymusicplayer.activities.PlayingSongsActivity
+import com.musicapp.mymusicplayer.activities.PlayListActivity
 import com.musicapp.mymusicplayer.adapters.SongAdapter
 import com.musicapp.mymusicplayer.adapters.SongClickListener
 import com.musicapp.mymusicplayer.database.DatabaseAPI
@@ -109,7 +107,7 @@ class MainActivity : AppCompatActivity() {
             override fun onMenuItemClick(item: MenuItem): Boolean {
                 when (item.itemId) {
                     R.id.playlist -> {
-                        val intent = Intent(this@MainActivity, PlaylistActivity::class.java)
+                        val intent = Intent(this@MainActivity, PlayListActivity::class.java)
                         startActivity(intent)
                         return true
                     }

@@ -18,6 +18,9 @@
         android:theme="@style/Theme.MyMusicPlayer"
         tools:targetApi="31">
         <activity
+            android:name=".activities.AllSongInPlayListActivity"
+            android:exported="false" />
+        <activity
             android:name=".activities.AddPlayListActivity"
             android:exported="false" />
         <activity
@@ -54,19 +57,18 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".activities.PlaylistActivity"
+            android:name=".activities.PlayListActivity"
             android:exported="false" />
 
         <service
             android:name=".service.PlayBackService"
-            android:foregroundServiceType="mediaPlayback"
-            android:exported="true">
+            android:exported="true"
+            android:foregroundServiceType="mediaPlayback">
             <intent-filter>
-                <action android:name="androidx.media3.session.MediaSessionService"/>
-                <action android:name="android.media.browse.MediaBrowserService"/>
+                <action android:name="androidx.media3.session.MediaSessionService" />
+                <action android:name="android.media.browse.MediaBrowserService" />
             </intent-filter>
         </service>
-
     </application>
 
 </manifest>
