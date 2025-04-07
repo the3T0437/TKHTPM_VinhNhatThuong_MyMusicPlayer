@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/main"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
@@ -13,6 +13,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
         android:backgroundTint="@color/transparent"
+        android:padding="15dp"
         android:src="@drawable/shuffle"
         app:layout_constraintEnd_toStartOf="@+id/btnPrevious"
         app:layout_constraintHorizontal_bias="0.5"
@@ -25,6 +26,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
         android:backgroundTint="@color/transparent"
+        android:padding="15dp"
         android:src="@drawable/img_menu"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
@@ -37,6 +39,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
         android:backgroundTint="@color/transparent"
+        android:padding="15dp"
         android:src="@drawable/next"
         app:layout_constraintEnd_toStartOf="@+id/btnMenu"
         app:layout_constraintHorizontal_bias="0.5"
@@ -49,6 +52,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
         android:backgroundTint="@color/transparent"
+        android:padding="15dp"
         android:src="@drawable/previous"
         app:layout_constraintEnd_toStartOf="@+id/btnContinue"
         app:layout_constraintHorizontal_bias="0.5"
@@ -59,8 +63,9 @@
         android:id="@+id/btnContinue"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="40dp"
+        android:layout_marginTop="34dp"
         android:backgroundTint="@color/transparent"
+        android:padding="15dp"
         android:src="@drawable/play_pause"
         app:layout_constraintEnd_toStartOf="@+id/btnNext"
         app:layout_constraintHorizontal_bias="0.5"
@@ -79,8 +84,8 @@
             android:id="@+id/btnDown"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/down"
-            android:background="@color/transparent"/>
+            android:background="@color/transparent"
+            android:src="@drawable/down" />
 
     </Toolbar>
 
@@ -103,6 +108,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="50dp"
         android:max="100"
+        android:padding="15dp"
         android:progress="25"
         android:progressBackgroundTint="@color/progressBarUnloaded"
         android:progressTint="@color/progressBarLoaded"
@@ -138,11 +144,12 @@
 
     <ImageButton
         android:id="@+id/btnFavorite"
-        android:layout_width="0dp"
-        android:layout_height="42dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
         android:layout_marginEnd="10dp"
         android:backgroundTint="@color/transparent"
+        android:padding="15dp"
         android:src="@drawable/favorite_not_favorite"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/tvTitle" />

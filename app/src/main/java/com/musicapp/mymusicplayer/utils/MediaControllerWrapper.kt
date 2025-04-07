@@ -1,6 +1,9 @@
 package com.musicapp.mymusicplayer.utils
 
+import android.content.Context
 import androidx.media3.common.MediaItem
+import androidx.media3.common.Player
+import androidx.media3.common.Player.Listener
 import androidx.media3.session.MediaController
 import com.musicapp.mymusicplayer.model.Song
 import kotlinx.coroutines.CoroutineScope
@@ -113,5 +116,22 @@ class MediaControllerWrapper {
 
     fun getSize(): Int{
         return mediaController?.mediaItemCount ?: 0
+    }
+
+    fun getCurrentSongId(context: Context): Long{
+        val mediaItem = mediaController!!.currentMediaItem
+        if (mediaItem == null)
+            return -1
+
+        val song = songGetter.getSong(context, mediaItem.localConfiguration!!.uri)
+        return song?.id ?: -1
+    }
+
+    fun addListener(listener: Player.Listener){
+        mediaController?.addListener(listener)
+    }
+
+    fun removeListener(listener: Player.Listener){
+        mediaController?.removeListener(listener)
     }
 }

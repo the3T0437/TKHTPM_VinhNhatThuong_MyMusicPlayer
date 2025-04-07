@@ -24,9 +24,6 @@
             android:name=".activities.AddPlayListActivity"
             android:exported="false" />
         <activity
-            android:name=".activities.AddToPlayList"
-            android:exported="false" />
-        <activity
             android:name=".activities.PlayListActivity"
             android:exported="false" />
         <activity
@@ -56,19 +53,16 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".activities.PlayListActivity"
-            android:exported="false" />
-
         <service
             android:name=".service.PlayBackService"
             android:exported="true"
             android:foregroundServiceType="mediaPlayback">
             <intent-filter>
-                <action android:name="androidx.media3.session.MediaSessionService" />
-                <action android:name="android.media.browse.MediaBrowserService" />
+                <action android:name="androidx.media3.session.MediaSessionService"/>
+                <action android:name="android.media.browse.MediaBrowserService"/>
             </intent-filter>
         </service>
+
     </application>
 
 </manifest>

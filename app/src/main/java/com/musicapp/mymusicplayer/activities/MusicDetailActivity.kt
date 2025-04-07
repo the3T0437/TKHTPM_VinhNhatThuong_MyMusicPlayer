@@ -118,6 +118,10 @@ class MusicDetailActivity : AppCompatActivity() {
         binding.btnNext.setOnClickListener{
             if (mediaController != null && mediaController!!.hasNextMediaItem())
                 mediaController?.seekToNextMediaItem()
+            else if (mediaController != null && !mediaController!!.hasNextMediaItem() &&
+                getStateMode() == MusicPlayerMode.Repeat && mediaController?.mediaItemCount != 0){
+                mediaController?.seekTo(0, 0)
+            }
         }
     }
 
@@ -142,19 +146,15 @@ class MusicDetailActivity : AppCompatActivity() {
     private fun setEventButtonMode(){
         binding.btnMode.setOnClickListener{
             if (mode == MusicPlayerMode.Line){
-                binding.btnMode.setImageResource(R.drawable.music_mode_circle)
                 mode = MusicPlayerMode.Circle
             }
             else if (mode == MusicPlayerMode.Circle){
-                binding.btnMode.setImageResource(R.drawable.music_mode_repeat)
                 mode = MusicPlayerMode.Repeat
             }
             else if (mode == MusicPlayerMode.Repeat){
-                binding.btnMode.setImageResource(R.drawable.shuffle)
                 mode = MusicPlayerMode.Shuffle
             }
             else if (mode == MusicPlayerMode.Shuffle){
-                binding.btnMode.setImageResource(R.drawable.music_mode_repeat)
                 mode = MusicPlayerMode.Line
             }
 
@@ -297,6 +297,7 @@ class MusicDetailActivity : AppCompatActivity() {
             })
         }
         updateSeekbar()
+        mode = getStateMode()
         updateModePlayer()
         updateStateStartPauseButton()
     }
@@ -317,23 +318,41 @@ class MusicDetailActivity : AppCompatActivity() {
         binding.btnContinue.isSelected = mediaController!!.isPlaying
     }
 
-    fun updateModePlayer(){
+    private fun getStateMode(): MusicPlayerMode{
+        if (mediaController == null)
+            return MusicPlayerMode.Line;
+        if (mediaController!!.repeatMode == Player.REPEAT_MODE_OFF && mediaController!!.shuffleModeEnabled == false)
+            return MusicPlayerMode.Line;
+        if (mediaController?.repeatMode == Player.REPEAT_MODE_ONE)
+            return MusicPlayerMode.Repeat;
+        if (mediaController?.repeatMode == Player.REPEAT_MODE_ALL)
+            return MusicPlayerMode.Circle;
+
+        return MusicPlayerMode.Shuffle;
+    }
+
+    private fun updateModePlayer(){
         if (mode == MusicPlayerMode.Line){
             mediaController?.repeatMode = Player.REPEAT_MODE_OFF
             mediaController?.shuffleModeEnabled = false
+            binding.btnMode.setImageResource(R.drawable.line)
         }
         else if (mode == MusicPlayerMode.Circle){
             mediaController?.repeatMode = Player.REPEAT_MODE_ALL
             mediaController?.shuffleModeEnabled = false
+            binding.btnMode.setImageResource(R.drawable.music_mode_circle)
         }
         else if (mode == MusicPlayerMode.Repeat){
             mediaController?.repeatMode = Player.REPEAT_MODE_ONE
             mediaController?.shuffleModeEnabled = false
+            binding.btnMode.setImageResource(R.drawable.music_mode_repeat)
         }
         else if (mode == MusicPlayerMode.Shuffle){
             mediaController?.repeatMode = Player.REPEAT_MODE_OFF
             mediaController?.shuffleModeEnabled = true
+            binding.btnMode.setImageResource(R.drawable.shuffle)
         }
+
     }
 
     fun updateSeekbar(){

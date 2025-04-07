@@ -3,6 +3,7 @@ package com.musicapp.mymusicplayer.adapters
 import android.content.ContentUris
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import android.provider.MediaStore
 import android.util.Log
 import android.util.Size
@@ -17,6 +18,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
 import com.mikhaellopez.circularimageview.CircularImageView
 import com.musicapp.mymusicplayer.R
+import com.musicapp.mymusicplayer.activities.PlayListActivity
 import com.musicapp.mymusicplayer.activities.AddPlayListActivity
 import com.musicapp.mymusicplayer.database.DatabaseAPI
 import com.musicapp.mymusicplayer.database.OnDatabaseCallBack
@@ -58,10 +60,42 @@ interface SongLayoutBindingWrapper{
  * override getMenuResource, getThreeDotMenuListener to change behavior of three dot widget
  *
  * need to set mediaController to make threeDotWidget work
+ * set currentPlayingSongId to hightlight playing song
  */
-open class SongAdapter(protected val context: Context, protected val arr: ArrayList<Song>, var mediaController: MediaControllerWrapper? = null) :
+open class SongAdapter(protected val context: Context, protected val songs: ArrayList<Song>, var mediaController: MediaControllerWrapper? = null) :
     RecyclerView.Adapter<SongAdapter.ViewHolder>() {
     protected var _songClickListener: SongClickListener? = null
+    var currentPlayingSongId : Long = -1
+        set(value) {
+            CoroutineScope(Dispatchers.IO).launch{
+                val oldPlayingSongId = field
+                val newPlayingSongId = value
+                field = value
+
+                hightlightPlayingSong(oldPlayingSongId, newPlayingSongId)
+            }
+        }
+
+    private suspend fun hightlightPlayingSong(oldPlayingSongId: Long, newPlayingSongId: Long) {
+        if (oldPlayingSongId == newPlayingSongId)
+            return
+
+        try {
+            for (i in 0 until songs.size) {
+                if (songs[i].id == oldPlayingSongId)
+                    withContext(Dispatchers.Main) {
+                        this@SongAdapter.notifyItemChanged(i)
+                    }
+                if (songs[i].id == newPlayingSongId)
+                    withContext(Dispatchers.Main) {
+                        this@SongAdapter.notifyItemChanged(i)
+                    }
+            }
+        }catch(e: IndexOutOfBoundsException){
+            //it is fine if remove while hightlighting
+            Log.d("myLog", "remove while highlighting")
+        }
+    }
 
     inner class ViewHolder(private val binding: ViewBinding) : RecyclerView.ViewHolder(binding.root), ViewHolderWrapper{
         var loadJob: Job? = null
@@ -98,11 +132,11 @@ open class SongAdapter(protected val context: Context, protected val arr: ArrayL
                 val position = viewHolder.getItemPosition()
                 when (v.id) {
                     bindingWrapper.getTvArtirst().id -> {
-                        _songClickListener?.onArtistClick(arr[position].artist ?: "")
+                        _songClickListener?.onArtistClick(songs[position].artist ?: "")
                     }
 
                     else -> {
-                        _songClickListener?.onSongClick(arr[position], position)
+                        _songClickListener?.onSongClick(songs[position], position)
                     }
                 }
             }
@@ -117,12 +151,18 @@ open class SongAdapter(protected val context: Context, protected val arr: ArrayL
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val song = arr[position]
+        val song = songs[position]
         Log.d("SongAdapter", "Binding song: ${song.title}, Artist: ${song.artist}")
 
         val binding = getSongLayoutBindingWrapper(holder.getBinding())
         binding.getTvTitle().text = song.title
         binding.getTvArtirst().text = song.artist
+
+        if (song.id == currentPlayingSongId)
+            binding.getRoot().setBackgroundColor(Color.rgb(48, 210, 210))
+        else
+            binding.getRoot().setBackgroundColor(Color.TRANSPARENT)
+
 
         holder.loadJob?.cancel()
         holder.loadJob = CoroutineScope(Dispatchers.IO).launch {
@@ -243,7 +283,7 @@ open class SongAdapter(protected val context: Context, protected val arr: ArrayL
     }
 
     override fun getItemCount(): Int {
-        return arr.size
+        return songs.size
     }
 
     fun setSongClickListener(songClickListener: SongClickListener){
