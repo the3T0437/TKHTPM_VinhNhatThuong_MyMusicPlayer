@@ -4,6 +4,8 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
+import androidx.media3.common.MediaItem
+import androidx.media3.common.Player
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -26,12 +28,20 @@ class PlayingSongsActivity : AppCompatActivity() {
     private lateinit var playingSongs: ArrayList<Song>
     private var currentSongId: Long = -1
     private lateinit var mediaController: MediaControllerWrapper
+    private val mediaControllerListener: Player.Listener = object : Player.Listener {
+        override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
+            super.onMediaItemTransition(mediaItem, reason)
+            hightlightPlayingSong()
+        }
+    }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = PlayingSongLayoutBinding.inflate(layoutInflater)
         setContentView(binding.root)
         mediaController = MediaControllerWrapper.getInstance(store.mediaBrowser)
+        mediaController.addListener(mediaControllerListener)
         playingSongs = mediaController.playingSongs
 
         setup()
@@ -42,6 +52,7 @@ class PlayingSongsActivity : AppCompatActivity() {
         adapter = PlayingSongAdapter(this, playingSongs)
         binding.recyclerView.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
         binding.recyclerView.adapter = adapter
+        adapter.mediaController = mediaController
 
         databaseApi = DatabaseAPI(this)
         makeDragable()
@@ -97,21 +108,17 @@ class PlayingSongsActivity : AppCompatActivity() {
     private fun setEventMusicPlayerSmall(){
         binding.musicPlayer.setOnMusicPlayerClickListener(object: MusicPlayerSmallClickListener {
             override fun onPauseClick() {
-                if (mediaController.isPlaying())
-                    mediaController.pause()
             }
 
             override fun onStartClick() {
-                if (mediaController.currentMediaItem() != null)
-                    mediaController.play()
             }
 
             override fun onNextClick() {
-                if (mediaController.hasNextMediaItem())
-                    mediaController.seekToNextMediaItem()
             }
 
             override fun onMenuClick() {
+                val intent = Intent(this@PlayingSongsActivity, PlayingSongsActivity::class.java)
+                startActivity(intent)
             }
 
             override fun onMusicPlayerClick() {
@@ -123,12 +130,22 @@ class PlayingSongsActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        hightlightPlayingSong()
 
         loadPlayingSongs()
         binding.musicPlayer.mediaController = store.mediaBrowser
     }
 
+    private fun hightlightPlayingSong(){
+        adapter.currentPlayingSongId = mediaController.getCurrentSongId(this)
+    }
+
     private fun loadPlayingSongs() {
         adapter.notifyDataSetChanged()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        mediaController.removeListener(mediaControllerListener)
     }
 }
