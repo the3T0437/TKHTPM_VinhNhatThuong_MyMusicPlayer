@@ -11,17 +11,16 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.media3.common.MediaItem
+import androidx.media3.common.Player
 import androidx.media3.session.MediaBrowser
-import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.MoreExecutors
-import com.musicapp.mymusicplayer.activities.AddPlayListActivity
 import com.musicapp.mymusicplayer.activities.FavoriteActitivy
 import com.musicapp.mymusicplayer.activities.MusicDetailActivity
 import com.musicapp.mymusicplayer.activities.SearchSongActivity
-import com.musicapp.mymusicplayer.activities.PlaylistActivity
+import com.musicapp.mymusicplayer.activities.PlayListActivity
 import com.musicapp.mymusicplayer.activities.PlayingSongsActivity
 import com.musicapp.mymusicplayer.adapters.SongAdapter
 import com.musicapp.mymusicplayer.adapters.SongClickListener
@@ -51,6 +50,14 @@ class MainActivity : AppCompatActivity() {
     private val mediaControllerThread = newSingleThreadContext("mediaControllerThread")
     private val getDataFromDatabasethread = newSingleThreadContext("getDataFromDatabase")
     private lateinit var databaseApi: DatabaseAPI
+
+    private val mediaControllerListener: Player.Listener = object : Player.Listener {
+        override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
+            super.onMediaItemTransition(mediaItem, reason)
+            hightlightPlayingSong()
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -94,12 +101,12 @@ class MainActivity : AppCompatActivity() {
                         null
                 }
                 binding.musicPlayer.mediaController = store.mediaBrowser
+                store.mediaBrowser?.addListener(mediaControllerListener)
                 mediaController = MediaControllerWrapper.getInstance(store.mediaBrowser)
                 adapter.mediaController = mediaController
             },
             MoreExecutors.directExecutor()
         )
-
     }
 
 
@@ -109,7 +116,7 @@ class MainActivity : AppCompatActivity() {
             override fun onMenuItemClick(item: MenuItem): Boolean {
                 when (item.itemId) {
                     R.id.playlist -> {
-                        val intent = Intent(this@MainActivity, PlaylistActivity::class.java)
+                        val intent = Intent(this@MainActivity, PlayListActivity::class.java)
                         startActivity(intent)
                         return true
                     }
@@ -192,8 +199,9 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
 
-        val job = updateSongsDatabase()
-        updateArrSongs(job)
+        var job = updateSongsDatabase()
+        job = updateArrSongs(job)
+        hightlightPlayingSong(job)
 
         store.mediaBrowser?.let{
             mediaController = MediaControllerWrapper.getInstance(store.mediaBrowser)
@@ -265,6 +273,16 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun hightlightPlayingSong(jobForWainting: Job? = null): Job{
+        return CoroutineScope(getDataFromDatabasethread).launch {
+            jobForWainting?.join()
+
+            withContext(Dispatchers.Main){
+                adapter.currentPlayingSongId = mediaController.getCurrentSongId(this@MainActivity)
+            }
+        }
+    }
+
     /*
      * proritize get songs from oldSongs
      * if this song id have in oldSongs, newSongs, all to resultSongs
@@ -321,5 +339,10 @@ class MainActivity : AppCompatActivity() {
             tempIndex++
         }
         return resultSongs
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        store.mediaBrowser?.removeListener(mediaControllerListener)
     }
 }
