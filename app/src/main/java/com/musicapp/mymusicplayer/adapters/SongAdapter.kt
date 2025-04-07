@@ -19,6 +19,7 @@ import androidx.viewbinding.ViewBinding
 import com.mikhaellopez.circularimageview.CircularImageView
 import com.musicapp.mymusicplayer.R
 import com.musicapp.mymusicplayer.activities.PlayListActivity
+import com.musicapp.mymusicplayer.activities.AddPlayListActivity
 import com.musicapp.mymusicplayer.database.DatabaseAPI
 import com.musicapp.mymusicplayer.database.OnDatabaseCallBack
 import com.musicapp.mymusicplayer.databinding.SongLayoutBinding
@@ -227,7 +228,8 @@ open class SongAdapter(protected val context: Context, protected val songs: Arra
                        return true
                    }
                    R.id.action_add_to ->{
-                       val intent = Intent(binding.root.context, PlayListActivity::class.java)
+                       val intent = Intent(binding.root.context, AddPlayListActivity::class.java)
+                       intent.putExtra("song_id", song.id)
                        binding.root.context.startActivity(intent)
                        Toast.makeText(context, "Add to: ${song.title}", Toast.LENGTH_SHORT).show()
                        return true

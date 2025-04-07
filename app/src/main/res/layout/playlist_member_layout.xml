@@ -13,7 +13,7 @@
         android:hint="asdsd"
         android:layout_weight="9"/>
     <com.musicapp.mymusicplayer.widget.ThreeDotMenuView
-        android:id="@+id/threeDotMenu"
+        android:id="@+id/optionPlayList"
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:layout_weight="1"
