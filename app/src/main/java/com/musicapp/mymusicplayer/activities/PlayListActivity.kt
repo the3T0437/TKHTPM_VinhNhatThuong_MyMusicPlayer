@@ -15,8 +15,9 @@ import com.musicapp.mymusicplayer.model.PlayList
 class PlayListActivity : AppCompatActivity() {
     private lateinit var binding: PlaylistLayoutBinding
     private lateinit var adapter : PlayListAdapter
-    private var playlist = arrayListOf<PlayList>()
+    private var playlists = arrayListOf<PlayList>()
     private lateinit var databaseApi: DatabaseAPI
+    private var selectedPlayList: PlayList? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,14 +27,13 @@ class PlayListActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         binding.recyclerViewPlaylist.layoutManager = LinearLayoutManager(this)
-        adapter = PlayListAdapter(this, playlist)
+        adapter = PlayListAdapter(this, playlists, -1L, false)
 
         binding.recyclerViewPlaylist.adapter = adapter
 
         binding.btnBack.setOnClickListener {
             finish()
         }
-
         binding.btnAddPlaylist.setOnClickListener{
             val builder = AlertDialog.Builder(this)
             builder.setTitle("PlayList Name")
@@ -46,7 +46,9 @@ class PlayListActivity : AppCompatActivity() {
             builder.setPositiveButton("OK") { _, _ ->
                 val playListName = input.text.toString()
                 if(playListName.isNotEmpty()){
-                    databaseApi.insertPlaylist(PlayList(playListName), object: OnDatabaseCallBack{
+                    val playlist =  PlayList(playListName)
+                    playlists.add(playlist)
+                    databaseApi.insertPlaylist(playlist, object: OnDatabaseCallBack{
                         override fun onSuccess(id: Long) {
                             adapter.notifyDataSetChanged()
                             Toast.makeText(this@PlayListActivity, "Thêm thành công", Toast.LENGTH_SHORT).show()
@@ -54,6 +56,7 @@ class PlayListActivity : AppCompatActivity() {
 
                         override fun onFailure(e: Exception) {
                             Toast.makeText(this@PlayListActivity, "Thêm thất bại", Toast.LENGTH_SHORT).show()
+                            finish()
                         }
 
                     })
@@ -68,10 +71,9 @@ class PlayListActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        readPlaylists(playlist)
+        readPlaylists(playlists)
     }
 
-    //fun addPlayList()
 
     fun readPlaylists(playlists: ArrayList<PlayList>) {
         databaseApi.getAllPlaylists(playlists , object: OnDatabaseCallBack{

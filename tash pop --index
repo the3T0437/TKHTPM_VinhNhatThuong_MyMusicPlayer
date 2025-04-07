@@ -1,0 +1,101 @@
+[1mdiff --git a/app/src/main/java/com/musicapp/mymusicplayer/activities/PlayListActivity.kt b/app/src/main/java/com/musicapp/mymusicplayer/activities/PlayListActivity.kt[m
+[1mindex 3b840f1..1878a0d 100644[m
+[1m--- a/app/src/main/java/com/musicapp/mymusicplayer/activities/PlayListActivity.kt[m
+[1m+++ b/app/src/main/java/com/musicapp/mymusicplayer/activities/PlayListActivity.kt[m
+[36m@@ -1,28 +1,85 @@[m
+ package com.musicapp.mymusicplayer.activities[m
+[31m-[m
+ import android.os.Bundle[m
+[31m-import androidx.activity.enableEdgeToEdge[m
+[32m+[m[32mimport android.text.InputType[m
+[32m+[m[32mimport android.widget.EditText[m
+[32m+[m[32mimport android.widget.Toast[m
+[32m+[m[32mimport androidx.appcompat.app.AlertDialog[m
+ import androidx.appcompat.app.AppCompatActivity[m
+[31m-import androidx.core.view.ViewCompat[m
+[31m-import androidx.core.view.WindowInsetsCompat[m
+[31m-import com.musicapp.mymusicplayer.R[m
+[32m+[m[32mimport androidx.recyclerview.widget.LinearLayoutManager[m
+ import com.musicapp.mymusicplayer.adapters.PlayListAdapter[m
+ import com.musicapp.mymusicplayer.database.DatabaseAPI[m
+[32m+[m[32mimport com.musicapp.mymusicplayer.database.OnDatabaseCallBack[m
+ import com.musicapp.mymusicplayer.databinding.PlaylistLayoutBinding[m
+ import com.musicapp.mymusicplayer.model.PlayList[m
+ [m
+[31m-class PlayListActivity : AppCompatActivity() {[m
+[32m+[m[32mclass PlaylistActivity : AppCompatActivity() {[m
+     private lateinit var binding: PlaylistLayoutBinding[m
+[31m-    private lateinit var playListAdapter: PlayListAdapter[m
+[32m+[m[32m    private lateinit var adapter : PlayListAdapter[m
+[32m+[m[32m    private var playlist = arrayListOf<PlayList>()[m
+     private lateinit var databaseApi: DatabaseAPI[m
+[31m-    private lateinit var playList: ArrayList<PlayList>[m
+[32m+[m
+     override fun onCreate(savedInstanceState: Bundle?) {[m
+         super.onCreate(savedInstanceState)[m
+[32m+[m[32m        databaseApi = DatabaseAPI(this)[m
+[32m+[m
+         binding = PlaylistLayoutBinding.inflate(layoutInflater)[m
+         setContentView(binding.root)[m
+ [m
+[31m-        databaseApi = DatabaseAPI(this)[m
+[31m-        playListAdapter = PlayListAdapter(this, playList)[m
+[32m+[m[32m        binding.recyclerViewPlaylist.layoutManager = LinearLayoutManager(this)[m
+[32m+[m[32m        adapter = PlayListAdapter(this, playlist)[m
+[32m+[m
+[32m+[m[32m        binding.recyclerViewPlaylist.adapter = adapter[m
+[32m+[m
+[32m+[m[32m        binding.btnBack.setOnClickListener {[m
+[32m+[m[32m            finish()[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        binding.btnAddPlaylist.setOnClickListener{[m
+[32m+[m[32m            val builder = AlertDialog.Builder(this)[m
+[32m+[m[32m            builder.setTitle("PlayList Name")[m
+[32m+[m[32m            builder.setMessage("Enter playlist name")[m
+[32m+[m
+[32m+[m[32m            val input = EditText(this)[m
+[32m+[m[32m            input.inputType = InputType.TYPE_CLASS_TEXT[m
+[32m+[m[32m            builder.setView(input)[m
+[32m+[m
+[32m+[m[32m            builder.setPositiveButton("OK") { _, _ ->[m
+[32m+[m[32m                val playListName = input.text.toString()[m
+[32m+[m[32m                if(playListName.isNotEmpty()){[m
+[32m+[m[32m                    databaseApi.insertPlaylist(PlayList(playListName), object: OnDatabaseCallBack{[m
+[32m+[m[32m                        override fun onSuccess(id: Long) {[m
+[32m+[m[32m                            adapter.notifyDataSetChanged()[m
+[32m+[m[32m                            Toast.makeText(this@PlaylistActivity, "Thêm thành công", Toast.LENGTH_SHORT).show()[m
+[32m+[m[32m                        }[m
+[32m+[m
+[32m+[m[32m                        override fun onFailure(e: Exception) {[m
+[32m+[m[32m                            Toast.makeText(this@PlaylistActivity, "Thêm thất bại", Toast.LENGTH_SHORT).show()[m
+[32m+[m[32m                        }[m
+[32m+[m
+[32m+[m[32m                    })[m
+[32m+[m[32m                }[m
+[32m+[m[32m            }[m
+[32m+[m[32m            builder.setNegativeButton("Cancel"){dailog,_->[m
+[32m+[m[32m                dailog.dismiss()[m
+[32m+[m[32m            }[m
+[32m+[m[32m            builder.show()[m
+[32m+[m[32m        }[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m    override fun onResume() {[m
+[32m+[m[32m        super.onResume()[m
+[32m+[m[32m        readPlaylists(playlist)[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m    //fun addPlayList()[m
+ [m
+[32m+[m[32m    fun readPlaylists(playlists: ArrayList<PlayList>) {[m
+[32m+[m[32m        databaseApi.getAllPlaylists(playlists , object: OnDatabaseCallBack{[m
+[32m+[m[32m            override fun onSuccess(id: Long) {[m
+[32m+[m[32m                adapter.notifyDataSetChanged()[m
+[32m+[m[32m            }[m
+[32m+[m[32m            override fun onFailure(e: Exception) {[m
+[32m+[m[32m            }[m
+[32m+[m[32m        })[m
+     }[m
+ }[m
+\ No newline at end of file[m
