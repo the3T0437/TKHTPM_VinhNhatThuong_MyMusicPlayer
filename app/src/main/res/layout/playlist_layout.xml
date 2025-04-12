@@ -60,6 +60,7 @@
         android:src="@drawable/add"
         android:contentDescription="Add Playlist"/>
     <com.musicapp.mymusicplayer.widget.MusicPlaySmall
+        android:id="@+id/musicPlayer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 
