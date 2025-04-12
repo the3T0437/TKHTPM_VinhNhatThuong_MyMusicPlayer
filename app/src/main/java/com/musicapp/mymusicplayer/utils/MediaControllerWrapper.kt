@@ -70,6 +70,9 @@ class MediaControllerWrapper {
     fun seekToNextMediaItem(){
          mediaController?.seekToNextMediaItem()
     }
+    fun seekToPrevMediaItem(){
+        mediaController?.seekToPreviousMediaItem()
+    }
 
     fun seekTo(position: Long){
         mediaController?.seekTo(position)
@@ -133,5 +136,9 @@ class MediaControllerWrapper {
 
     fun removeListener(listener: Player.Listener){
         mediaController?.removeListener(listener)
+    }
+
+    fun setShuffleMode(isShuffle: Boolean){
+        mediaController?.shuffleModeEnabled = isShuffle
     }
 }

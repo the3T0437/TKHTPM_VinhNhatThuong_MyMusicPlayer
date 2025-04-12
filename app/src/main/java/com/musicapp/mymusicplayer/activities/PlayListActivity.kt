@@ -11,6 +11,7 @@ import com.musicapp.mymusicplayer.database.DatabaseAPI
 import com.musicapp.mymusicplayer.database.OnDatabaseCallBack
 import com.musicapp.mymusicplayer.databinding.PlaylistLayoutBinding
 import com.musicapp.mymusicplayer.model.PlayList
+import com.musicapp.mymusicplayer.utils.store
 
 class PlayListActivity : AppCompatActivity() {
     private lateinit var binding: PlaylistLayoutBinding
@@ -25,6 +26,8 @@ class PlayListActivity : AppCompatActivity() {
 
         binding = PlaylistLayoutBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        binding.musicPlayer.mediaController = store.mediaBrowser
 
         binding.recyclerViewPlaylist.layoutManager = LinearLayoutManager(this)
         adapter = PlayListAdapter(this, playlists, -1L, false)

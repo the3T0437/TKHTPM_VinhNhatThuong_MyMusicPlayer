@@ -40,6 +40,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.withContext
+import kotlin.random.Random
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: MainLayoutBinding
@@ -84,6 +85,7 @@ class MainActivity : AppCompatActivity() {
         setupButtonFillter()
         setupSearch()
         setupMusicPlayer()
+        setupButtonPlayBig()
     }
 
     fun createMediaController(){
@@ -153,6 +155,9 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun onStartClick() {
+                if (mediaController.getSize() == 0)
+                    playAllSong()
+
                 binding.musicPlayer.updateStateOfStartPauseButton()
             }
 
@@ -171,6 +176,13 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
+    private fun setupButtonPlayBig(){
+        binding.btnPlayBig.setOnClickListener{
+            playAllSong(isShuffle = true)
+        }
+    }
+
+
     fun setupRecyclerView(){
         val layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
         adapter = SongAdapter(this, songs)
@@ -183,13 +195,18 @@ class MainActivity : AppCompatActivity() {
 
             override fun onSongClick(song: Song, position: Int) {
                 Log.d("myLog", "playing songs count: ${mediaController.playingSongs.size}")
-                mediaController.clear()
-                mediaController.addSongs(songs)
-                mediaController.seekToMediaItem(position)
-                mediaController.prepare()
-                mediaController.play()
+                playAllSong(position)
             }
         })
+    }
+
+    private fun playAllSong(position: Int = 0, isShuffle : Boolean = false){
+        mediaController.clear()
+        mediaController.setShuffleMode(isShuffle)
+        mediaController.addSongs(songs)
+        mediaController.seekToMediaItem(position)
+        mediaController.prepare()
+        mediaController.play()
     }
 
     override fun onStart() {
