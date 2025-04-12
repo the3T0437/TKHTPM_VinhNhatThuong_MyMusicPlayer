@@ -45,7 +45,7 @@
         android:layout_height="wrap_content">
 
         <ImageView
-            android:id="@+id/imgPlayBig"
+            android:id="@+id/btnPlayBig"
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:src="@drawable/play_button_big"

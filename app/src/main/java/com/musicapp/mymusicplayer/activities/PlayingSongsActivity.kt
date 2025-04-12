@@ -49,13 +49,36 @@ class PlayingSongsActivity : AppCompatActivity() {
     }
 
     fun setup(){
-        adapter = PlayingSongAdapter(this, playingSongs)
-        binding.recyclerView.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
-        binding.recyclerView.adapter = adapter
-        adapter.mediaController = mediaController
+        setupRecyclerView()
 
         databaseApi = DatabaseAPI(this)
         makeDragable()
+    }
+
+    private fun setupRecyclerView() {
+        bindingData()
+        scrollRecyclerView()
+    }
+
+    private fun bindingData() {
+        adapter = PlayingSongAdapter(this, playingSongs)
+        binding.recyclerView.layoutManager =
+            LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
+        binding.recyclerView.adapter = adapter
+        adapter.mediaController = mediaController
+    }
+
+    private fun scrollRecyclerView() {
+        val positionScrollTo = getPositionToScrollTo()
+        binding.recyclerView.scrollToPosition(positionScrollTo)
+    }
+
+    private fun getPositionToScrollTo(): Int {
+        var positionScrollTo = store.mediaBrowser?.currentMediaItemIndex ?: 0
+        positionScrollTo -= 2;
+        if (positionScrollTo < 0)
+            positionScrollTo = 0;
+        return positionScrollTo
     }
 
     fun makeDragable(){
