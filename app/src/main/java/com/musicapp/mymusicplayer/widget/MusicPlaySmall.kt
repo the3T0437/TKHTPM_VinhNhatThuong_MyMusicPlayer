@@ -135,18 +135,16 @@ class MusicPlaySmall : ConstraintLayout {
 
                 when (v.id) {
                     binding.btnPauseStart.id -> {
-                        if (mediaController?.currentMediaItem != null) {
-                            if (binding.btnPauseStart.isSelected){
-                                mediaController?.pause()
-                                musicPlayerClickListener?.onPauseClick()
-                            }
-                            else{
-                                mediaController?.play()
-                                musicPlayerClickListener?.onStartClick()
-                            }
-
-                            updateStateOfStartPauseButton()
+                        if (binding.btnPauseStart.isSelected){
+                            mediaController?.pause()
+                            musicPlayerClickListener?.onPauseClick()
                         }
+                        else{
+                            mediaController?.play()
+                            musicPlayerClickListener?.onStartClick()
+                        }
+
+                        updateStateOfStartPauseButton()
                     }
 
                     binding.btnNext.id -> {

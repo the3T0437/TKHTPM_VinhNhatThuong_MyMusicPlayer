@@ -57,6 +57,8 @@ class SearchSongActivity : AppCompatActivity() {
             override fun onSongClick(song: Song, index: Int) {
                 mediaController.clear()
                 mediaController.addSongs(songList)
+                mediaController.prepare()
+                mediaController.play()
             }
         })
     }
