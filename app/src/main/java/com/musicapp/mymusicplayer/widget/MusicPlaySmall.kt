@@ -2,6 +2,8 @@ package com.musicapp.mymusicplayer.widget
 
 import android.content.Context
 import android.content.Intent
+import android.icu.text.CaseMap.Title
+import android.provider.MediaStore.Audio.Artists
 import android.util.AttributeSet
 import android.util.Size
 import android.view.LayoutInflater
@@ -116,6 +118,12 @@ class MusicPlaySmall : ConstraintLayout {
         this.context = context
         setUp(context)
     }
+     fun setSongInfo(title: String ,artist :String)
+    {
+        binding.tvTitle.text = title
+        binding.tvArtist.text = artist
+    }
+
 
     private fun setUp(context: Context) {
         binding = MusicPlayerSmallLayoutBinding.inflate(LayoutInflater.from(context), this, true)
