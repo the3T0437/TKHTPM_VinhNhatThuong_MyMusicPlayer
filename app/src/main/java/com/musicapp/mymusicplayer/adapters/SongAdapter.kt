@@ -18,7 +18,6 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
 import com.mikhaellopez.circularimageview.CircularImageView
 import com.musicapp.mymusicplayer.R
-import com.musicapp.mymusicplayer.activities.PlayListActivity
 import com.musicapp.mymusicplayer.activities.AddPlayListActivity
 import com.musicapp.mymusicplayer.database.DatabaseAPI
 import com.musicapp.mymusicplayer.database.OnDatabaseCallBack
@@ -36,7 +35,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 
 interface SongClickListener{
-    fun onArtistClick(artist: String)
+    fun OnArtistClick(artistId: Long)
     fun onSongClick(song: Song, index: Int)
 }
 
@@ -117,7 +116,7 @@ open class SongAdapter(protected val context: Context, protected val songs: Arra
     protected open fun onInitViewHolder(viewHolder: ViewHolderWrapper){
         val callBack = getCallback(viewHolder)
         val binding = getSongLayoutBindingWrapper(viewHolder.getBinding())
-        binding.getTvTitle().setOnClickListener(callBack)
+        binding.getTvArtirst().setOnClickListener(callBack)
         binding.getRoot().setOnClickListener(callBack)
     }
 
@@ -130,9 +129,9 @@ open class SongAdapter(protected val context: Context, protected val songs: Arra
                 val binding = viewHolder.getBinding()
                 val bindingWrapper = getSongLayoutBindingWrapper(binding)
                 val position = viewHolder.getItemPosition()
-                when (v.id) {
-                    bindingWrapper.getTvArtirst().id -> {
-                        _songClickListener?.onArtistClick(songs[position].artist ?: "")
+                when (v) {
+                    bindingWrapper.getTvArtirst() -> {
+                        _songClickListener?.OnArtistClick(songs[position].artistId)
                     }
 
                     else -> {

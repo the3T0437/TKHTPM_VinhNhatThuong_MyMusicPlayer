@@ -50,7 +50,7 @@ class SearchSongActivity : AppCompatActivity() {
 
     private fun setEventRecyclerView(){
         songAdapter.setSongClickListener( object: SongClickListener{
-            override fun onArtistClick(artist: String) {
+            override fun OnArtistClick(artist: Long) {
 
             }
 

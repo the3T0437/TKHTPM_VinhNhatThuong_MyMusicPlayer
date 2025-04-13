@@ -5,6 +5,7 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import com.musicapp.mymusicplayer.model.Artist
 import com.musicapp.mymusicplayer.model.FavoriteSong
 
 import com.musicapp.mymusicplayer.model.PlayList
@@ -12,7 +13,7 @@ import com.musicapp.mymusicplayer.model.Song
 import com.musicapp.mymusicplayer.model.SongPlayList
 
 @Database(
-    entities = [Song::class, PlayList::class, SongPlayList::class, FavoriteSong::class],
+    entities = [Song::class, PlayList::class, SongPlayList::class, FavoriteSong::class, Artist::class],
     version = MyRoomDatabase.DB_VERSION
 )
 abstract class MyRoomDatabase : RoomDatabase() {
@@ -41,4 +42,5 @@ abstract class MyRoomDatabase : RoomDatabase() {
     abstract fun songDao(): SongDAO
     abstract fun playListDao(): PlayListDAO
     abstract fun favroiteSongDAO(): FavoriteSongDAO
+    abstract fun artistDAO(): ArtistDAO
 }

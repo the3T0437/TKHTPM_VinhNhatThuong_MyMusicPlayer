@@ -104,7 +104,6 @@ class PlayingSongsActivity : AppCompatActivity() {
             finish()
         }
 
-
         setEventAdapter()
         setEventMusicPlayerSmall()
     }
@@ -119,7 +118,7 @@ class PlayingSongsActivity : AppCompatActivity() {
         })
 
         adapter.setSongClickListener(object: SongClickListener{
-            override fun onArtistClick(artist: String) {
+            override fun OnArtistClick(artist: Long) {
             }
 
             override fun onSongClick(song: Song, index: Int) {

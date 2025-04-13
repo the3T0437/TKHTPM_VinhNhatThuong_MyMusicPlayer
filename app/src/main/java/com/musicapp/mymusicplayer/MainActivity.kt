@@ -17,6 +17,7 @@ import androidx.media3.session.SessionToken
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.MoreExecutors
+import com.musicapp.mymusicplayer.activities.ArtistsActivity
 import com.musicapp.mymusicplayer.activities.FavoriteActitivy
 import com.musicapp.mymusicplayer.activities.MusicDetailActivity
 import com.musicapp.mymusicplayer.activities.SearchSongActivity
@@ -26,7 +27,9 @@ import com.musicapp.mymusicplayer.adapters.SongAdapter
 import com.musicapp.mymusicplayer.adapters.SongClickListener
 import com.musicapp.mymusicplayer.database.DatabaseAPI
 import com.musicapp.mymusicplayer.database.OnDatabaseCallBack
+import com.musicapp.mymusicplayer.database.OnGetItemCallback
 import com.musicapp.mymusicplayer.databinding.MainLayoutBinding
+import com.musicapp.mymusicplayer.model.Artist
 import com.musicapp.mymusicplayer.model.Song
 import com.musicapp.mymusicplayer.service.PlayBackService
 import com.musicapp.mymusicplayer.utils.MediaControllerWrapper
@@ -40,7 +43,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.withContext
-import kotlin.random.Random
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: MainLayoutBinding
@@ -51,6 +53,8 @@ class MainActivity : AppCompatActivity() {
     private val mediaControllerThread = newSingleThreadContext("mediaControllerThread")
     private val getDataFromDatabasethread = newSingleThreadContext("getDataFromDatabase")
     private lateinit var databaseApi: DatabaseAPI
+    private lateinit var jobUpdateArtist: Job
+    private var isArrSongUpdated = false
 
     private val mediaControllerListener: Player.Listener = object : Player.Listener {
         override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
@@ -128,6 +132,12 @@ class MainActivity : AppCompatActivity() {
                         startActivity(intent)
                         return true
                     }
+
+                    R.id.artists -> {
+                        val intent = Intent(this@MainActivity, ArtistsActivity::class.java)
+                        startActivity(intent)
+                        return true
+                    }
                 }
 
                 return false
@@ -190,7 +200,20 @@ class MainActivity : AppCompatActivity() {
         binding.recyclerView.layoutManager = layoutManager
 
         adapter.setSongClickListener(object: SongClickListener {
-            override fun onArtistClick(artist: String) {
+            override fun OnArtistClick(artistId: Long) {
+                CoroutineScope(getDataFromDatabasethread).launch {
+                    jobUpdateArtist.join()
+
+                    databaseApi.getArtist(artistId, object: OnGetItemCallback{
+                        override fun onSuccess(value: Any) {
+                            Log.d("myLog", "artist: ${(value as Artist).artistName}")
+                        }
+
+                        override fun onFailure(e: Exception) {
+                            Log.d("myLog", "artist: error")
+                        }
+                    })
+                }
             }
 
             override fun onSongClick(song: Song, position: Int) {
@@ -216,9 +239,19 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
 
-        var job = updateSongsDatabase()
-        job = updateArrSongs(job)
-        hightlightPlayingSong(job)
+        var jobUpdateDatabase = updateSongsDatabase()
+        var jobUpdateSongsMemory = updateArrSongs(jobUpdateDatabase)
+        jobUpdateArtist = updateArist(jobUpdateSongsMemory)
+        store.mediaBrowser?.let{ hightlightPlayingSong(jobUpdateDatabase) }
+
+        CoroutineScope(getDataFromDatabasethread).launch {
+            jobUpdateArtist.join()
+
+            for (song in songs){
+                if (song.artistId == -1L)
+                    Log.d("artist", song.toString())
+            }
+        }
 
         store.mediaBrowser?.let{
             mediaController = MediaControllerWrapper.getInstance(store.mediaBrowser)
@@ -258,23 +291,11 @@ class MainActivity : AppCompatActivity() {
 
             launch {
                 for(song in addSongs){
-                    databaseApi.insertSong(song, object: OnDatabaseCallBack{
-                        override fun onSuccess(id: Long) {
-                        }
-
-                        override fun onFailure(e: Exception) {
-                        }
-                    })
+                    databaseApi.insertSong(song, DatabaseAPI.onDatabaseCallBackDoNothing)
                 }
 
                 for (song in removeSongs){
-                    databaseApi.deleteSong(song.id, object : OnDatabaseCallBack{
-                        override fun onSuccess(id: Long) {
-                        }
-
-                        override fun onFailure(e: Exception) {
-                        }
-                    })
+                    databaseApi.deleteSong(song.id, DatabaseAPI.onDatabaseCallBackDoNothing)
                 }
             }
 
@@ -282,11 +303,23 @@ class MainActivity : AppCompatActivity() {
                 Log.d("myLog","add ${addSongs.size}, remove: ${removeSongs.size}")
                 if (addSongs.size == 0 && removeSongs.size == 0)
                     return@withContext
+                isArrSongUpdated = true
                 songs.clear()
                 newArr.sortBy { it.title}
                 songs.addAll(newArr)
                 adapter.notifyDataSetChanged()
             }
+        }
+    }
+
+    private fun updateArist(jobForWainting: Job): Job{
+        return CoroutineScope(getDataFromDatabasethread).launch {
+            jobForWainting.join()
+
+            if (isArrSongUpdated)
+                for(song in songs){
+                    databaseApi.insertArtistBySong(song, DatabaseAPI.onDatabaseCallBackDoNothing)
+                }
         }
     }
 
