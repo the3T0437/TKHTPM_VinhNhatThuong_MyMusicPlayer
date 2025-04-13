@@ -2,83 +2,86 @@ package com.musicapp.mymusicplayer.activities
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.media3.common.MediaItem
-import androidx.media3.session.MediaController
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.musicapp.mymusicplayer.R
-import com.musicapp.mymusicplayer.adapters.SongAdapter
-import com.musicapp.mymusicplayer.adapters.SongClickListener
+import com.musicapp.mymusicplayer.adapters.ArtistClickListener
+import com.musicapp.mymusicplayer.adapters.ArtistsAdapter
 import com.musicapp.mymusicplayer.database.DatabaseAPI
 import com.musicapp.mymusicplayer.database.OnDatabaseCallBack
-import com.musicapp.mymusicplayer.databinding.FavoriteScreenLayoutBinding
-import com.musicapp.mymusicplayer.model.FavoriteSong
-import com.musicapp.mymusicplayer.model.Song
+import com.musicapp.mymusicplayer.databinding.ArtistsLayoutBinding
+import com.musicapp.mymusicplayer.model.Artist
 import com.musicapp.mymusicplayer.utils.MediaControllerWrapper
 import com.musicapp.mymusicplayer.utils.store
 import com.musicapp.mymusicplayer.widget.MusicPlayerSmallClickListener
 
-class FavoriteActitivy : AppCompatActivity() {
-    private lateinit var binding: FavoriteScreenLayoutBinding
-    private lateinit var adapter: SongAdapter
-    private lateinit var favoriteSongs: ArrayList<Song>
+class ArtistsActivity : AppCompatActivity() {
+    private lateinit var binding: ArtistsLayoutBinding
+    private lateinit var adapter: ArtistsAdapter
+    private var artists = arrayListOf<Artist>()
     private lateinit var databaseAPI: DatabaseAPI
     private lateinit var mediaController: MediaControllerWrapper
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+        setupUI()
+        setupRecyclerView()
+        setupDatabase()
+        setupMusicPlayerSmall()
 
-        binding = FavoriteScreenLayoutBinding.inflate(layoutInflater)
+        setEvents()
+    }
+
+    private fun setupUI() {
+        enableEdgeToEdge()
+        binding = ArtistsLayoutBinding.inflate(layoutInflater)
         setContentView(binding.root)
         ViewCompat.setOnApplyWindowInsetsListener(binding.main) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-
-        setup()
     }
 
-    fun setup(){
-        favoriteSongs = arrayListOf()
-        databaseAPI = DatabaseAPI(this)
-        mediaController = MediaControllerWrapper.getInstance(store.mediaBrowser)
-        binding.musicPlayer.mediaController = store.mediaBrowser
-
-        binding.btnDown.setOnClickListener{
-            this@FavoriteActitivy.finish()
-        }
-
-
-        adapter = SongAdapter(this, favoriteSongs)
+    private fun setupRecyclerView() {
+        adapter = ArtistsAdapter(this, artists)
         val layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
         binding.recyclerView.adapter = adapter
         binding.recyclerView.layoutManager = layoutManager
 
-        setupPlayMusic()
-        setupOnSmallMusicPlayerClick()
-    }
-
-
-    fun setupPlayMusic(){
-        adapter.setSongClickListener(object: SongClickListener {
-            override fun OnArtistClick(artist: Long) {
-            }
-
-            override fun onSongClick(song: Song, position: Int) {
-                mediaController.clear()
-                mediaController.addSongs(favoriteSongs)
-                mediaController.seekToMediaItem(position)
-                mediaController.prepare()
-                mediaController.play()
+        adapter.setArtistClickListener(object: ArtistClickListener{
+            override fun onArtistClick(artistID: Long) {
+                val intent = Intent(this@ArtistsActivity, SongsOfArtistActivity::class.java)
+                intent.putExtra(Artist.ID, artistID)
+                startActivity(intent)
             }
         })
     }
 
-    fun setupOnSmallMusicPlayerClick(){
+    private fun setupDatabase() {
+        databaseAPI = DatabaseAPI(this)
+    }
+
+    private fun setupMusicPlayerSmall() {
+        mediaController = MediaControllerWrapper.getInstance(store.mediaBrowser)
+        binding.musicPlayer.mediaController = store.mediaBrowser
+    }
+
+    private fun setEvents() {
+        setOnBtnDownClick()
+        setOnMusicPlayerClick()
+    }
+
+    private fun setOnBtnDownClick() {
+        binding.btnDown.setOnClickListener {
+            this@ArtistsActivity.finish()
+        }
+    }
+
+    private fun setOnMusicPlayerClick(){
         binding.musicPlayer.setOnMusicPlayerClickListener(object: MusicPlayerSmallClickListener {
             override fun onPauseClick() {
             }
@@ -90,12 +93,12 @@ class FavoriteActitivy : AppCompatActivity() {
             }
 
             override fun onMenuClick() {
-                val intent= Intent(this@FavoriteActitivy, PlayingSongsActivity::class.java)
+                val intent= Intent(this@ArtistsActivity, PlayingSongsActivity::class.java)
                 startActivity(intent)
             }
 
             override fun onMusicPlayerClick() {
-                val intent= Intent(this@FavoriteActitivy, MusicDetailActivity::class.java)
+                val intent= Intent(this@ArtistsActivity, MusicDetailActivity::class.java)
                 startActivity(intent)
             }
         })
@@ -103,14 +106,15 @@ class FavoriteActitivy : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        databaseAPI.getAllFavoriteSong(favoriteSongs, object: OnDatabaseCallBack{
+
+        databaseAPI.getAllArtists(artists, object: OnDatabaseCallBack{
             override fun onSuccess(id: Long) {
                 adapter.notifyDataSetChanged()
             }
 
             override fun onFailure(e: Exception) {
+                Toast.makeText(this@ArtistsActivity, "get all artists fail", Toast.LENGTH_LONG)
             }
         })
     }
-
 }

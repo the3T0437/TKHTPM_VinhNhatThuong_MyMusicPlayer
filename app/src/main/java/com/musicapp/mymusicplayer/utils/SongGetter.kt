@@ -4,19 +4,14 @@ import android.content.Context
 import android.database.Cursor
 import android.net.Uri
 import android.provider.MediaStore
-import android.util.Log
 import androidx.core.database.getIntOrNull
 import androidx.core.database.getStringOrNull
-import com.musicapp.mymusicplayer.database.DatabaseAPI
-import com.musicapp.mymusicplayer.database.OnGetItemCallback
 import com.musicapp.mymusicplayer.model.Song
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import kotlin.coroutines.coroutineContext
 
 interface GetDataListener{
     suspend fun onGetData(arr: ArrayList<Song>)
