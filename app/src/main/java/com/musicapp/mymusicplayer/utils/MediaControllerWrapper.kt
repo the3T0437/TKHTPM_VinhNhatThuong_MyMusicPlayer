@@ -6,6 +6,7 @@ import androidx.media3.common.Player
 import androidx.media3.common.Player.Listener
 import androidx.media3.session.MediaController
 import com.musicapp.mymusicplayer.model.Song
+import com.musicapp.mymusicplayer.utils.store.mediaBrowser
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -55,6 +56,9 @@ class MediaControllerWrapper {
         return mediaController?.currentMediaItem
     }
 
+    fun getCurrentMediaItemIndex(): Int {
+        return mediaBrowser?.currentMediaItemIndex ?: -1
+    }
     fun isPlaying(): Boolean{
         return mediaController?.isPlaying ?: false
     }
@@ -119,6 +123,9 @@ class MediaControllerWrapper {
 
     fun getSize(): Int{
         return mediaController?.mediaItemCount ?: 0
+    }
+    fun getCurrentMediaItem(): MediaItem? {
+        return mediaBrowser?.currentMediaItem
     }
 
     fun getCurrentSongId(context: Context): Long{
