@@ -6,4 +6,5 @@ import com.musicapp.mymusicplayer.model.Song
 
 object store {
     var mediaBrowser: MediaBrowser? = null
+    val songs: ArrayList<Song> = arrayListOf()
 }
