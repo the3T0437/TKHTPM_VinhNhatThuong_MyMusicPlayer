@@ -247,15 +247,6 @@ class MainActivity : AppCompatActivity() {
         jobUpdateArtist = updateArist(jobUpdateSongsMemory)
         store.mediaBrowser?.let{ hightlightPlayingSong(jobUpdateDatabase) }
 
-        CoroutineScope(getDataFromDatabasethread).launch {
-            jobUpdateArtist.join()
-
-            for (song in songs){
-                if (song.artistId == -1L)
-                    Log.d("artist", song.toString())
-            }
-        }
-
         store.mediaBrowser?.let{
             mediaController = MediaControllerWrapper.getInstance(store.mediaBrowser)
         }
@@ -270,7 +261,7 @@ class MainActivity : AppCompatActivity() {
 
                 songs.clear()
                 songs.addAll(arrSongs)
-                songs.sortBy { it.title }
+                songs.sortBy { it.title.lowercase() }
                 adapter.notifyDataSetChanged()
                 Log.d("concurrent", "1")
             }
@@ -308,7 +299,7 @@ class MainActivity : AppCompatActivity() {
                     return@withContext
                 isArrSongUpdated = true
                 songs.clear()
-                newArr.sortBy { it.title}
+                newArr.sortBy { it.title.lowercase()}
                 songs.addAll(newArr)
                 adapter.notifyDataSetChanged()
             }
