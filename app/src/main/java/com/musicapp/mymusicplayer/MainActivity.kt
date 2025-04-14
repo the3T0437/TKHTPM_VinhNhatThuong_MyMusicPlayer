@@ -74,7 +74,7 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
-        songs = arrayListOf()
+        songs = store.songs
         setSupportActionBar(binding.toolbar)
         Toast.makeText(this, "open app", Toast.LENGTH_SHORT).show()
         setup()
@@ -239,7 +239,10 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
 
-        var jobUpdateDatabase = updateSongsDatabase()
+        var jobUpdateDatabase : Job? = null
+        if (songs.size == 0)
+            jobUpdateDatabase = updateSongsDatabase()
+
         var jobUpdateSongsMemory = updateArrSongs(jobUpdateDatabase)
         jobUpdateArtist = updateArist(jobUpdateSongsMemory)
         store.mediaBrowser?.let{ hightlightPlayingSong(jobUpdateDatabase) }
@@ -277,9 +280,9 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
-    private fun updateArrSongs(jobForWainting: Job): Job{
+    private fun updateArrSongs(jobForWainting: Job?): Job{
         return CoroutineScope(getDataFromDatabasethread).launch {
-            jobForWainting.join()
+            jobForWainting?.join()
             Log.d("concurrent", "2")
 
             val localSongs = songGetter.getAllSongs(this@MainActivity)
