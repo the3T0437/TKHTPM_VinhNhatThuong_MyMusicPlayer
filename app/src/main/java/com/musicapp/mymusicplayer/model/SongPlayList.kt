@@ -17,6 +17,7 @@ class SongPlayList {
         const val TABLE_NAME = "song_play_list"
         const val PLAY_LIST_ID = "play_list_id"
         const val SONG_ID = "song_id"
+        const val SONG_ORDER = "song_order"
     }
 
     @ColumnInfo(name = PLAY_LIST_ID)
@@ -24,6 +25,9 @@ class SongPlayList {
 
     @ColumnInfo(name = SONG_ID)
     var songId: Long = 0
+
+    @ColumnInfo(name = SONG_ORDER)
+    var songOrder: Long = 0
 
     // Constructor
     constructor(playListId: Int, songId: Long) {

@@ -38,7 +38,6 @@ class SearchSongActivity : AppCompatActivity() {
 
         songAdapter = SongAdapter(this, songList)
         songAdapter.mediaController = MediaControllerWrapper.getInstance(store.mediaBrowser)
-
         binding.recyclerView.adapter = songAdapter
     }
 

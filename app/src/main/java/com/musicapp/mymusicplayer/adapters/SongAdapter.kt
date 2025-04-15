@@ -75,6 +75,27 @@ open class SongAdapter(protected val context: Context, protected val songs: Arra
                 hightlightPlayingSong(oldPlayingSongId, newPlayingSongId)
             }
         }
+    // b1. viết hàm để xử lý lại danh sach
+    fun moveItem(fromPosition: Int, toPosition: Int) {
+        if (fromPosition < toPosition) {
+            for (i in fromPosition until toPosition) {
+                songs.swap(i, i + 1)
+            }
+        } else {
+            for (i in fromPosition downTo toPosition + 1) {
+                songs.swap(i, i - 1)
+            }
+        }
+        notifyItemMoved(fromPosition, toPosition)
+        // update  lại danh sách phát nhạc trong mediaController
+        mediaController?.clear()
+        mediaController?.addSongs(songs)
+    }
+    private fun <T> MutableList<T>.swap(index1: Int, index2: Int) {
+        val temp = this[index1]
+        this[index1] = this[index2]
+        this[index2] = temp
+    }
 
     private suspend fun hightlightPlayingSong(oldPlayingSongId: Long, newPlayingSongId: Long) {
         if (oldPlayingSongId == newPlayingSongId)
@@ -100,6 +121,7 @@ open class SongAdapter(protected val context: Context, protected val songs: Arra
     inner class ViewHolder(private val binding: ViewBinding) : RecyclerView.ViewHolder(binding.root), ViewHolderWrapper{
         var loadJob: Job? = null
         var songPosition: Int = -1
+
 
         override fun getItemPosition(): Int {
             return songPosition
