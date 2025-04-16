@@ -59,6 +59,8 @@ class DatabaseAPI(context: Context) {
             if (count == 0) { // Nếu chưa tồn tại thì thêm mới
                 val songPlayList = SongPlayList(playListID, songID)
                 val id = songPlayListDAO.insertSongPlayList(songPlayList)
+                songPlayList.songOrder = id;
+                songPlayListDAO.updateSongPlayList(songPlayList)
                 withContext(Dispatchers.Main) {
                     callback.onSuccess(id)
                 }
@@ -100,6 +102,48 @@ class DatabaseAPI(context: Context) {
             }
         }
     }
+
+    fun getAllSongsInPlaylist(playlistId: Int, songs: ArrayList<Song>, callback: OnDatabaseCallBack){
+        coroutineScope.launch {
+            try{
+                val songsId = songPlayListDAO.getSongsIDPlaylist(playlistId)
+                songs.addAll(getSongs(songsId))
+
+                withContext(Dispatchers.Main){
+                    callback.onSuccess(songs.size.toLong())
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    callback.onFailure(e)
+                }
+            }
+        }
+    }
+
+    fun swapOrder(playlistID: Long, songId1: Long, songId2: Long, callback: OnDatabaseCallBack){
+        coroutineScope.launch {
+            try{
+                val songPlayList1 = songPlayListDAO.getSongPlayList(playlistID, songId1)
+                val songPlayList2 = songPlayListDAO.getSongPlayList(playlistID, songId2)
+                val temp = songPlayList1.songOrder
+                songPlayList1.songOrder = songPlayList2.songOrder
+                songPlayList2.songOrder = temp
+
+                songPlayListDAO.updateSongPlayList(songPlayList1)
+                songPlayListDAO.updateSongPlayList(songPlayList2)
+
+                withContext(Dispatchers.Main){
+                    callback.onSuccess(2)
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    callback.onFailure(e)
+                }
+            }
+        }
+
+    }
+
 
     fun insertSong(song: Song, callback: OnDatabaseCallBack) {
         coroutineScope.launch {
@@ -392,6 +436,17 @@ class DatabaseAPI(context: Context) {
         }
     }
 
+    fun getSongs(songIds: List<Long>): ArrayList<Song>{
+        val songs = arrayListOf<Song>()
+        for (songId in songIds){
+            val song = songDAO.getSong(songId)
+            if (song == null)
+                continue;
+            songs.add(song)
+        }
+        return songs;
+    }
+
     fun deleteSong(id: Long, callback: OnDatabaseCallBack){
         coroutineScope.launch {
             try{
@@ -408,9 +463,7 @@ class DatabaseAPI(context: Context) {
             }
         }
     }
-    fun getSongPlayListDAO(): SongPlayListDAO {
-        return songPlayListDAO
-    }
+
     fun deleteSongFromPlaylist(playlistId: Int, songId: Long, callback: OnDatabaseCallBack) {
         coroutineScope.launch {
             try {

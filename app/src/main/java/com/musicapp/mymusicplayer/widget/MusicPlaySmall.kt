@@ -114,6 +114,12 @@ class MusicPlaySmall : ConstraintLayout {
         this.context = context
         setUp(context)
     }
+     fun setSongInfo(title: String ,artist :String)
+    {
+        binding.tvTitle.text = title
+        binding.tvArtist.text = artist
+    }
+
 
     private fun setUp(context: Context) {
         binding = MusicPlayerSmallLayoutBinding.inflate(LayoutInflater.from(context), this, true)
