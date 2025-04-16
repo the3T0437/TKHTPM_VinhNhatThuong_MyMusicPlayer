@@ -14,7 +14,9 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.session.MediaBrowser
 import androidx.media3.session.SessionToken
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.MoreExecutors
 import com.musicapp.mymusicplayer.activities.ArtistsActivity
@@ -80,6 +82,12 @@ class MainActivity : AppCompatActivity() {
         setup()
         //val testRunner = test(this)
         //testRunner.runTests()
+
+
+    }
+    private fun loadSongs(): ArrayList<Song> {
+        // Load your songs here from database or other sources
+        return arrayListOf()
     }
 
     fun setup(){
@@ -221,7 +229,51 @@ class MainActivity : AppCompatActivity() {
                 playAllSong(position)
             }
         })
+        // Gắn ItemTouchHelper vô RecyclerView
+        val itemTouchHelper = ItemTouchHelper(object : ItemTouchHelper.Callback() {
+            override fun getMovementFlags(
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder
+            ): Int {
+                val dragFlags = ItemTouchHelper.UP or ItemTouchHelper.DOWN
+                return makeMovementFlags(dragFlags, 0) // bật chỉ kéo
+            }
+
+            override fun onMove(
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder,
+                target: RecyclerView.ViewHolder
+            ): Boolean {
+                val fromPosition = viewHolder.adapterPosition
+                val toPosition = target.adapterPosition
+                adapter.moveItem(fromPosition, toPosition) // cập nhật thứ tự bài hát trong Adapter
+
+                updateMediaControllerAfterReorder()
+                return true
+            }
+             private  fun updateMediaControllerAfterReorder() {
+                val currentPlayingIndex = songs.indexOfFirst { it.id == adapter.currentPlayingSongId }
+                if (currentPlayingIndex != -1) {
+                    mediaController.clear()
+                    mediaController.addSongs(songs) // cập nhật danh sách phát
+                    mediaController.seekToMediaItem(currentPlayingIndex) // Đặt lại bài hát hiện tại
+                    mediaController.prepare()
+                }
+            }
+
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                // ko cần xl vuốt
+            }
+
+            override fun isLongPressDragEnabled(): Boolean {
+                return true // xl để cho phép nhấn giữ để kéo
+            }
+        })
+
+
+        itemTouchHelper.attachToRecyclerView(binding.recyclerView)
     }
+
 
     private fun playAllSong(position: Int = 0, isShuffle : Boolean = false){
         mediaController.clear()
