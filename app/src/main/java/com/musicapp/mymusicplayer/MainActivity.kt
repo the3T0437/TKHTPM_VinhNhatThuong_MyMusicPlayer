@@ -346,10 +346,9 @@ class MainActivity : AppCompatActivity() {
 
             val finalSongs = Collections.unmodifiableList(songs)
 
-            if (isArrSongUpdated)
-                for(song in finalSongs){
-                    databaseApi.insertArtistBySong(song, DatabaseAPI.onDatabaseCallBackDoNothing)
-                }
+            finalSongs.stream().forEach {
+                databaseApi.insertArtistBySong(it, DatabaseAPI.onDatabaseCallBackDoNothing)
+            }
         }
     }
 
