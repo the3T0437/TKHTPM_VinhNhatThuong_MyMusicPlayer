@@ -61,7 +61,7 @@ class PlayingSongsActivity : AppCompatActivity() {
     }
 
     private fun bindingData() {
-        adapter = PlayingSongAdapter(this, playingSongs)
+        adapter = PlayingSongAdapter(this, playingSongs, mediaController)
         binding.recyclerView.layoutManager =
             LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
         binding.recyclerView.adapter = adapter
@@ -117,6 +117,7 @@ class PlayingSongsActivity : AppCompatActivity() {
             }
         })
 
+        /*
         adapter.setSongClickListener(object: SongClickListener{
             override fun OnArtistClick(artist: Long) {
             }
@@ -125,6 +126,7 @@ class PlayingSongsActivity : AppCompatActivity() {
                 mediaController.seekToMediaItem(index)
             }
         })
+         */
     }
 
     private fun setEventMusicPlayerSmall(){
@@ -155,7 +157,7 @@ class PlayingSongsActivity : AppCompatActivity() {
         hightlightPlayingSong()
 
         loadPlayingSongs()
-        binding.musicPlayer.mediaController = store.mediaBrowser
+        binding.musicPlayer.mediaController = MediaControllerWrapper.getInstance(store.mediaBrowser)
     }
 
     private fun hightlightPlayingSong(){

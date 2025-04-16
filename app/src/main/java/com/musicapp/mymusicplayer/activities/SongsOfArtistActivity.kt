@@ -49,7 +49,8 @@ class SongsOfArtistActivity : AppCompatActivity() {
         songs = arrayListOf()
         databaseAPI = DatabaseAPI(this)
         mediaController = MediaControllerWrapper.getInstance(store.mediaBrowser)
-        binding.musicPlayer.mediaController = store.mediaBrowser
+        binding.musicPlayer.mediaController = MediaControllerWrapper.getInstance(store.mediaBrowser)
+        binding.musicPlayer.songs = songs
 
         binding.btnDown.setOnClickListener{
             this@SongsOfArtistActivity.finish()
@@ -66,17 +67,17 @@ class SongsOfArtistActivity : AppCompatActivity() {
         })
 
 
-        adapter = SongAdapter(this, songs)
+        adapter = SongAdapter(this, songs, mediaController)
         val layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
         binding.recyclerView.adapter = adapter
         binding.recyclerView.layoutManager = layoutManager
 
         setupPlayMusic()
-        setupOnSmallMusicPlayerClick()
     }
 
 
     fun setupPlayMusic(){
+        /*
         adapter.setSongClickListener(object: SongClickListener {
             override fun OnArtistClick(artist: Long) {
             }
@@ -89,29 +90,7 @@ class SongsOfArtistActivity : AppCompatActivity() {
                 mediaController.play()
             }
         })
-    }
-
-    fun setupOnSmallMusicPlayerClick(){
-        binding.musicPlayer.setOnMusicPlayerClickListener(object: MusicPlayerSmallClickListener {
-            override fun onPauseClick() {
-            }
-
-            override fun onStartClick() {
-            }
-
-            override fun onNextClick() {
-            }
-
-            override fun onMenuClick() {
-                val intent= Intent(this@SongsOfArtistActivity, PlayingSongsActivity::class.java)
-                startActivity(intent)
-            }
-
-            override fun onMusicPlayerClick() {
-                val intent= Intent(this@SongsOfArtistActivity, MusicDetailActivity::class.java)
-                startActivity(intent)
-            }
-        })
+        */
     }
 
     override fun onResume() {

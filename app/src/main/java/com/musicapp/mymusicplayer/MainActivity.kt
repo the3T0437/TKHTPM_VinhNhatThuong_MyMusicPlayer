@@ -115,9 +115,9 @@ class MainActivity : AppCompatActivity() {
                     else
                         null
                 }
-                binding.musicPlayer.mediaController = store.mediaBrowser
                 store.mediaBrowser?.addListener(mediaControllerListener)
                 mediaController = MediaControllerWrapper.getInstance(store.mediaBrowser)
+                binding.musicPlayer.mediaController = mediaController
                 adapter.mediaController = mediaController
             },
             MoreExecutors.directExecutor()
@@ -169,30 +169,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupMusicPlayer() {
-        binding.musicPlayer.setOnMusicPlayerClickListener(object : MusicPlayerSmallClickListener {
-            override fun onPauseClick() {
-            }
-
-            override fun onStartClick() {
-                if (mediaController.getSize() == 0)
-                    playAllSong()
-
-                binding.musicPlayer.updateStateOfStartPauseButton()
-            }
-
-            override fun onNextClick() {
-            }
-
-            override fun onMenuClick() {
-                val intent = Intent(this@MainActivity, PlayingSongsActivity::class.java)
-                startActivity(intent)
-            }
-
-            override fun onMusicPlayerClick() {
-                val intent = Intent(this@MainActivity, MusicDetailActivity::class.java)
-                startActivity(intent)
-            }
-        })
+        binding.musicPlayer.songs = songs
     }
 
     private fun setupButtonPlayBig(){
@@ -208,11 +185,10 @@ class MainActivity : AppCompatActivity() {
         binding.recyclerView.adapter = adapter
         binding.recyclerView.layoutManager = layoutManager
 
+        /*
         adapter.setSongClickListener(object: SongClickListener {
             override fun OnArtistClick(artistId: Long) {
                 CoroutineScope(getDataFromDatabasethread).launch {
-                    jobUpdateArtist.join()
-
                     databaseApi.getArtist(artistId, object: OnGetItemCallback{
                         override fun onSuccess(value: Any) {
                             Log.d("myLog", "artist: ${(value as Artist).artistName}")
@@ -227,9 +203,14 @@ class MainActivity : AppCompatActivity() {
 
             override fun onSongClick(song: Song, position: Int) {
                 Log.d("myLog", "playing songs count: ${mediaController.playingSongs.size}")
-                playAllSong(position)
             }
         })
+         */
+
+        //makeDragable()
+    }
+
+    private fun makeDragable() {
         // Gắn ItemTouchHelper vô RecyclerView
         val itemTouchHelper = ItemTouchHelper(object : ItemTouchHelper.Callback() {
             override fun getMovementFlags(
@@ -252,8 +233,10 @@ class MainActivity : AppCompatActivity() {
                 updateMediaControllerAfterReorder()
                 return true
             }
-             private  fun updateMediaControllerAfterReorder() {
-                val currentPlayingIndex = songs.indexOfFirst { it.id == adapter.currentPlayingSongId }
+
+            private fun updateMediaControllerAfterReorder() {
+                val currentPlayingIndex =
+                    songs.indexOfFirst { it.id == adapter.currentPlayingSongId }
                 if (currentPlayingIndex != -1) {
                     mediaController.clear()
                     mediaController.addSongs(songs) // cập nhật danh sách phát
@@ -271,10 +254,8 @@ class MainActivity : AppCompatActivity() {
             }
         })
 
-
         itemTouchHelper.attachToRecyclerView(binding.recyclerView)
     }
-
 
     private fun playAllSong(position: Int = 0, isShuffle : Boolean = false){
         mediaController.clear()
