@@ -17,7 +17,7 @@ interface SongDAO {
     @Query("SELECT * FROM ${Song.TABLE_NAME} WHERE ${Song.ID} = :id")
     suspend fun getSong(id: Long):Song?
     @Update
-    suspend fun updateSong(song: Song):Int
+    fun updateSong(song: Song):Int
     @Query("DELETE FROM ${Song.TABLE_NAME} WHERE ${Song.ID} = :songId")
     suspend fun deleteSong(songId: Long): Int
 

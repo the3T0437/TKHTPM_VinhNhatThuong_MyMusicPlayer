@@ -498,6 +498,7 @@ class DatabaseAPI(context: Context) {
                 val artist = Artist(song.artist)
                 val value = artistDAO.insertArtist(artist)
                 song.artistId = artistDAO.getArtist(song.artist)!!.id
+                songDAO.updateSong(song)
 
                 withContext(Dispatchers.Main) {
                     callback.onSuccess(value)

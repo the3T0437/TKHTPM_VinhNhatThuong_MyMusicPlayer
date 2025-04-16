@@ -35,7 +35,7 @@ class Song {
     var title: String = ""
     lateinit var artist: String
     @ColumnInfo(name = ARTIST)
-    var artistId: Long = 0
+    var artistId: Long? = null
     @ColumnInfo(name = ALBUM)
     var album: String? = null
     @ColumnInfo(name = LYRICS)

@@ -131,7 +131,7 @@ open class SongAdapter(protected val context: Context, protected val songs: Arra
                 val position = viewHolder.getItemPosition()
                 when (v) {
                     bindingWrapper.getTvArtirst() -> {
-                        _songClickListener?.OnArtistClick(songs[position].artistId)
+                        _songClickListener?.OnArtistClick(songs[position].artistId ?: 0)
                     }
 
                     else -> {
