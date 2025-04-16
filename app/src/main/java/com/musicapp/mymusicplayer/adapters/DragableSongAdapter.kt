@@ -13,9 +13,10 @@ import androidx.viewbinding.ViewBinding
 import com.mikhaellopez.circularimageview.CircularImageView
 import com.musicapp.mymusicplayer.databinding.DragableSongLayoutBinding
 import com.musicapp.mymusicplayer.model.Song
+import com.musicapp.mymusicplayer.utils.MediaControllerWrapper
 import com.musicapp.mymusicplayer.widget.ThreeDotMenuView
 
-open class DragableSongAdapter(context: Context, arr: ArrayList<Song>) : SongAdapter(context, arr){
+open class DragableSongAdapter(context: Context, arr: ArrayList<Song>, mediaController: MediaControllerWrapper?) : SongAdapter(context, arr, mediaController){
     private var itemTouchHelper: ItemTouchHelper? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {

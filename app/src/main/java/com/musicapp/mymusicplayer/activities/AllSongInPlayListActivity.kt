@@ -34,15 +34,17 @@ class AllSongInPlayListActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         databaseAPI = DatabaseAPI(this)
+        binding = MusicSongInPlaylistLayoutBinding.inflate(layoutInflater)
         mediaController = MediaControllerWrapper.getInstance(store.mediaBrowser)
 
-        binding = MusicSongInPlaylistLayoutBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        binding.musicPlayer.mediaController = mediaController
+        binding.musicPlayer.songs = songs
 
         binding.recyclerView.layoutManager = LinearLayoutManager(this)
         playlistId = intent.getIntExtra("PLAYLIST_ID", -1).toLong()
         Log.d("id", "id của list ${playlistId}")
-        adapter = SongInPlaylistAdapter(this, songs)
+        adapter = SongInPlaylistAdapter(this, songs, mediaController)
         binding.recyclerView.adapter = adapter
 
         binding.btnBack.setOnClickListener{

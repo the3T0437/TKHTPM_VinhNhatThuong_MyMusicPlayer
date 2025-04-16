@@ -54,12 +54,13 @@ interface SongLayoutBindingWrapper{
 }
 
 /*
+ * need to set mediaController to make threeDotWidget work, playable song
+ *
  * override onInitViewHolder, getCallBack, onCreateViewHolder to create new adapter
  * to reuse onBindViewHolder, override getSongLayoutBindingWrapper
  *
  * override getMenuResource, getThreeDotMenuListener to change behavior of three dot widget
  *
- * need to set mediaController to make threeDotWidget work
  * set currentPlayingSongId to hightlight playing song
  */
 open class SongAdapter(protected val context: Context, protected val songs: ArrayList<Song>, var mediaController: MediaControllerWrapper? = null) :
@@ -159,12 +160,24 @@ open class SongAdapter(protected val context: Context, protected val songs: Arra
 
                     else -> {
                         _songClickListener?.onSongClick(songs[position], position)
+                        playAllSong(position)
                     }
                 }
             }
         }
 
         return callback
+    }
+
+    private fun playAllSong(position: Int = 0, isShuffle : Boolean = false){
+        mediaController?.apply {
+            clear()
+            setShuffleMode(isShuffle)
+            addSongs(songs)
+            seekToMediaItem(position)
+            prepare()
+            play()
+        }
     }
 
     open override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {

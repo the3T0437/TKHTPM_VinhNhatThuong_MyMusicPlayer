@@ -46,20 +46,20 @@ class FavoriteActitivy : AppCompatActivity() {
         favoriteSongs = arrayListOf()
         databaseAPI = DatabaseAPI(this)
         mediaController = MediaControllerWrapper.getInstance(store.mediaBrowser)
-        binding.musicPlayer.mediaController = store.mediaBrowser
+        binding.musicPlayer.mediaController = mediaController
+        binding.musicPlayer.songs = favoriteSongs
 
         binding.btnDown.setOnClickListener{
             this@FavoriteActitivy.finish()
         }
 
 
-        adapter = SongAdapter(this, favoriteSongs)
+        adapter = SongAdapter(this, favoriteSongs, mediaController)
         val layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
         binding.recyclerView.adapter = adapter
         binding.recyclerView.layoutManager = layoutManager
 
-        setupPlayMusic()
-        setupOnSmallMusicPlayerClick()
+        //setupPlayMusic()
     }
 
 
@@ -74,29 +74,6 @@ class FavoriteActitivy : AppCompatActivity() {
                 mediaController.seekToMediaItem(position)
                 mediaController.prepare()
                 mediaController.play()
-            }
-        })
-    }
-
-    fun setupOnSmallMusicPlayerClick(){
-        binding.musicPlayer.setOnMusicPlayerClickListener(object: MusicPlayerSmallClickListener {
-            override fun onPauseClick() {
-            }
-
-            override fun onStartClick() {
-            }
-
-            override fun onNextClick() {
-            }
-
-            override fun onMenuClick() {
-                val intent= Intent(this@FavoriteActitivy, PlayingSongsActivity::class.java)
-                startActivity(intent)
-            }
-
-            override fun onMusicPlayerClick() {
-                val intent= Intent(this@FavoriteActitivy, MusicDetailActivity::class.java)
-                startActivity(intent)
             }
         })
     }
