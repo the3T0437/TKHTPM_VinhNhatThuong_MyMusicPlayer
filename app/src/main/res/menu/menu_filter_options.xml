@@ -2,8 +2,11 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/playlist"
-        android:title="playlist"/>
+        android:title="playlists"/>
     <item
         android:id="@+id/favorite"
         android:title="favorite"/>
+    <item
+        android:id="@+id/artists"
+        android:title="artists"/>
 </menu>
