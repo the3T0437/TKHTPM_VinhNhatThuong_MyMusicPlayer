@@ -45,6 +45,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.withContext
+import java.util.Collections
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: MainLayoutBinding
@@ -358,12 +359,14 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun updateArist(jobForWainting: Job): Job{
+    private fun updateArist(jobForWainting: Job?): Job{
         return CoroutineScope(getDataFromDatabasethread).launch {
-            jobForWainting.join()
+            jobForWainting?.join()
+
+            val finalSongs = Collections.unmodifiableList(songs)
 
             if (isArrSongUpdated)
-                for(song in songs){
+                for(song in finalSongs){
                     databaseApi.insertArtistBySong(song, DatabaseAPI.onDatabaseCallBackDoNothing)
                 }
         }

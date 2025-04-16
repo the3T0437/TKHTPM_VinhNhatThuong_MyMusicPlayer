@@ -33,6 +33,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
+import java.util.Collections
 
 interface SongClickListener{
     fun OnArtistClick(artistId: Long)
@@ -172,7 +173,8 @@ open class SongAdapter(protected val context: Context, protected val songs: Arra
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val song = songs[position]
+        val finalSongs = Collections.unmodifiableList(songs)
+        val song = finalSongs[position]
         Log.d("SongAdapter", "Binding song: ${song.title}, Artist: ${song.artist}")
 
         val binding = getSongLayoutBindingWrapper(holder.getBinding())
