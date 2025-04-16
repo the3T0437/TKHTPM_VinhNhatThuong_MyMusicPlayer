@@ -2,35 +2,40 @@ package com.musicapp.mymusicplayer.activities
 
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.media3.common.MediaItem
-import androidx.media3.session.MediaController
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.musicapp.mymusicplayer.R
 import com.musicapp.mymusicplayer.adapters.SongAdapter
 import com.musicapp.mymusicplayer.adapters.SongClickListener
 import com.musicapp.mymusicplayer.database.DatabaseAPI
 import com.musicapp.mymusicplayer.database.OnDatabaseCallBack
+import com.musicapp.mymusicplayer.database.OnGetItemCallback
 import com.musicapp.mymusicplayer.databinding.FavoriteScreenLayoutBinding
-import com.musicapp.mymusicplayer.model.FavoriteSong
+import com.musicapp.mymusicplayer.model.Artist
 import com.musicapp.mymusicplayer.model.Song
 import com.musicapp.mymusicplayer.utils.MediaControllerWrapper
 import com.musicapp.mymusicplayer.utils.store
 import com.musicapp.mymusicplayer.widget.MusicPlayerSmallClickListener
 
-class FavoriteActitivy : AppCompatActivity() {
+class SongsOfArtistActivity : AppCompatActivity() {
     private lateinit var binding: FavoriteScreenLayoutBinding
     private lateinit var adapter: SongAdapter
-    private lateinit var favoriteSongs: ArrayList<Song>
+    private lateinit var songs: ArrayList<Song>
     private lateinit var databaseAPI: DatabaseAPI
     private lateinit var mediaController: MediaControllerWrapper
+    private var artistId: Long = 0
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        artistId = intent.getLongExtra(Artist.ID, 0)
+        setupUI()
+        setup()
+    }
 
+    private fun setupUI() {
         binding = FavoriteScreenLayoutBinding.inflate(layoutInflater)
         setContentView(binding.root)
         ViewCompat.setOnApplyWindowInsetsListener(binding.main) { v, insets ->
@@ -38,22 +43,30 @@ class FavoriteActitivy : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-
-        setup()
     }
 
     fun setup(){
-        favoriteSongs = arrayListOf()
+        songs = arrayListOf()
         databaseAPI = DatabaseAPI(this)
         mediaController = MediaControllerWrapper.getInstance(store.mediaBrowser)
         binding.musicPlayer.mediaController = store.mediaBrowser
 
         binding.btnDown.setOnClickListener{
-            this@FavoriteActitivy.finish()
+            this@SongsOfArtistActivity.finish()
         }
+        databaseAPI.getArtist(artistId, object: OnGetItemCallback{
+            override fun onSuccess(value: Any) {
+                val artist = value as Artist
+                binding.title.setText(artist.artistName)
+            }
+
+            override fun onFailure(e: Exception) {
+                Toast.makeText(this@SongsOfArtistActivity, "can't get artist", Toast.LENGTH_LONG)
+            }
+        })
 
 
-        adapter = SongAdapter(this, favoriteSongs)
+        adapter = SongAdapter(this, songs)
         val layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
         binding.recyclerView.adapter = adapter
         binding.recyclerView.layoutManager = layoutManager
@@ -70,7 +83,7 @@ class FavoriteActitivy : AppCompatActivity() {
 
             override fun onSongClick(song: Song, position: Int) {
                 mediaController.clear()
-                mediaController.addSongs(favoriteSongs)
+                mediaController.addSongs(songs)
                 mediaController.seekToMediaItem(position)
                 mediaController.prepare()
                 mediaController.play()
@@ -90,12 +103,12 @@ class FavoriteActitivy : AppCompatActivity() {
             }
 
             override fun onMenuClick() {
-                val intent= Intent(this@FavoriteActitivy, PlayingSongsActivity::class.java)
+                val intent= Intent(this@SongsOfArtistActivity, PlayingSongsActivity::class.java)
                 startActivity(intent)
             }
 
             override fun onMusicPlayerClick() {
-                val intent= Intent(this@FavoriteActitivy, MusicDetailActivity::class.java)
+                val intent= Intent(this@SongsOfArtistActivity, MusicDetailActivity::class.java)
                 startActivity(intent)
             }
         })
@@ -103,7 +116,7 @@ class FavoriteActitivy : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        databaseAPI.getAllFavoriteSong(favoriteSongs, object: OnDatabaseCallBack{
+        databaseAPI.getSongsByArtistId(artistId, songs, object: OnDatabaseCallBack{
             override fun onSuccess(id: Long) {
                 adapter.notifyDataSetChanged()
             }
@@ -111,6 +124,4 @@ class FavoriteActitivy : AppCompatActivity() {
             override fun onFailure(e: Exception) {
             }
         })
-    }
-
-}
+    }}

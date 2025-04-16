@@ -83,8 +83,9 @@ class MusicDetailActivity : AppCompatActivity() {
         mediaController = store.mediaBrowser
         mediaController?.addListener(playerListener)
         databaseApi = DatabaseAPI(this)
-
         coroutineScope = CoroutineScope(Dispatchers.IO + Job())
+
+        updateSeekbar()
         setupUpdateSeekbar()
         setEvents()
     }
@@ -356,18 +357,12 @@ class MusicDetailActivity : AppCompatActivity() {
     }
 
     fun updateSeekbar(){
-        var isFineMediaControl = false;
         var process: Int = 0 ;
         var duration: Int = 0;
-        isFineMediaControl = mediaController?.currentMediaItem != null
-        if (isFineMediaControl){
-            process = (mediaController!!.currentPosition / 1000).toInt()
-            duration = (mediaController!!.contentDuration / 1000).toInt()
-            Log.d("myLog", "seekbar: $process $duration")
-        }
-        if (isFineMediaControl){
-            binding.seekbar.progress = process
-            binding.seekbar.max = duration
-        }
+        process = ((mediaController?.currentPosition ?: 0) / 1000).toInt()
+        duration = ((mediaController?.contentDuration ?: 100000)/ 1000).toInt()
+        Log.d("myLog", "seekbar: $process $duration")
+        binding.seekbar.setProgress(process, true)
+        binding.seekbar.max = duration
     }
 }

@@ -2,6 +2,7 @@ package com.musicapp.mymusicplayer.database
 
 import android.content.Context
 import android.util.Log
+import com.musicapp.mymusicplayer.model.Artist
 import com.musicapp.mymusicplayer.model.FavoriteSong
 import com.musicapp.mymusicplayer.model.PlayList
 import com.musicapp.mymusicplayer.model.Song
@@ -25,10 +26,21 @@ interface OnGetItemCallback {
 }
 
 class DatabaseAPI(context: Context) {
+    companion object{
+        val onDatabaseCallBackDoNothing = object: OnDatabaseCallBack{
+            override fun onSuccess(id: Long) {
+            }
+
+            override fun onFailure(e: Exception) {
+            }
+        }
+    }
+
     private val songPlayListDAO: SongPlayListDAO
     private var songDAO: SongDAO
     private var playListDAO: PlayListDAO
     private var favoriteSongDAO: FavoriteSongDAO
+    private var artistDAO: ArtistDAO
     private val job = Job()
     val coroutineScope = CoroutineScope(Dispatchers.IO + job)
     init {
@@ -37,6 +49,7 @@ class DatabaseAPI(context: Context) {
         songDAO = myRoomDatabase.songDao()
         playListDAO = myRoomDatabase.playListDao()
         favoriteSongDAO = myRoomDatabase.favroiteSongDAO()
+        artistDAO = myRoomDatabase.artistDAO()
     }
 
     fun themSongPlayList(songID: Long,playListID: Int, callback: OnDatabaseCallBack) {
@@ -406,6 +419,23 @@ class DatabaseAPI(context: Context) {
         }
     }
 
+    fun getSongsByArtistId(artistId: Long, songs: ArrayList<Song>, callback: OnDatabaseCallBack){
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                songs.clear()
+                songs.addAll(songDAO.getSongByArtistId(artistId))
+
+                withContext(Dispatchers.Main) {
+                    callback.onSuccess(songs.size.toLong())
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    callback.onFailure(e)
+                }
+            }
+        }
+    }
+
     fun getSongs(songIds: List<Long>): ArrayList<Song>{
         val songs = arrayListOf<Song>()
         for (songId in songIds){
@@ -449,4 +479,92 @@ class DatabaseAPI(context: Context) {
             }
         }
     }
+
+    fun insertArtist(artist: Artist, callback: OnDatabaseCallBack) {
+        coroutineScope.launch {
+            try {
+                val id = artistDAO.insertArtist(artist)
+
+                withContext(Dispatchers.Main) {
+                    callback.onSuccess(id)
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    callback.onFailure(e)
+                }
+            }
+        }
+    }
+
+    fun getAllArtists(artists:ArrayList<Artist>, callback: OnDatabaseCallBack) : Job{
+        return coroutineScope.launch {
+            try {
+                artists.clear()
+                artists.addAll(artistDAO.getAllArtists())
+
+                withContext(Dispatchers.Main) {
+                    callback.onSuccess(artists.size.toLong())
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    callback.onFailure(e)
+                }
+            }
+        }
+    }
+
+    fun getArtist(artistId: Long, callback: OnGetItemCallback){
+        coroutineScope.launch {
+            try {
+                val value = artistDAO.getArtist(artistId)
+
+                withContext(Dispatchers.Main) {
+                    callback.onSuccess(value as Any)
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    callback.onFailure(e)
+                }
+            }
+        }
+    }
+
+    fun getArtistByName(artistId: String, callback: OnGetItemCallback){
+        coroutineScope.launch {
+            try {
+                val value = artistDAO.getArtist(artistId)
+
+                withContext(Dispatchers.Main) {
+                    callback.onSuccess(value as Any)
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    callback.onFailure(e)
+                }
+            }
+        }
+    }
+
+    fun insertArtistBySong(song: Song, callback: OnDatabaseCallBack) {
+        coroutineScope.launch {
+            try {
+                val artist = Artist(song.artist)
+                val value = artistDAO.insertArtist(artist)
+                song.artistId = artistDAO.getArtist(song.artist)!!.id
+                songDAO.updateSong(song)
+
+                withContext(Dispatchers.Main) {
+                    callback.onSuccess(value)
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    song.artistId = artistDAO.getArtist("<unknown>")!!.id
+
+                    callback.onFailure(e)
+                }
+            }
+        }
+    }
+
+
 }

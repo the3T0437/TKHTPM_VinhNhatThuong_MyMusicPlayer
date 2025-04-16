@@ -1,9 +1,6 @@
 package com.musicapp.mymusicplayer.widget
 
 import android.content.Context
-import android.content.Intent
-import android.icu.text.CaseMap.Title
-import android.provider.MediaStore.Audio.Artists
 import android.util.AttributeSet
 import android.util.Size
 import android.view.LayoutInflater
@@ -13,7 +10,6 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.session.MediaController
 import com.musicapp.mymusicplayer.R
-import com.musicapp.mymusicplayer.activities.MusicDetailActivity
 import com.musicapp.mymusicplayer.databinding.MusicPlayerSmallLayoutBinding
 import com.musicapp.mymusicplayer.utils.songGetter
 

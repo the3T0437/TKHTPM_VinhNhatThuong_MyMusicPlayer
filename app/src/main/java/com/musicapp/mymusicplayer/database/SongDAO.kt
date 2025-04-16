@@ -26,4 +26,7 @@ interface SongDAO {
 
     @Query("SELECT * FROM song WHERE album = (SELECT album FROM song WHERE id = :songId) AND id != :songId ORDER BY RANDOM() LIMIT 10")
     fun getRelatedSongs(songId: Long): List<Song>
+
+    @Query("SELECT * FROM ${Song.TABLE_NAME} WHERE ${Song.ARTIST} = :artistId ORDER BY ${Song.ALBUM} ASC, ${Song.TITLE} ASC")
+    fun getSongByArtistId(artistId: Long): List<Song>
 }
