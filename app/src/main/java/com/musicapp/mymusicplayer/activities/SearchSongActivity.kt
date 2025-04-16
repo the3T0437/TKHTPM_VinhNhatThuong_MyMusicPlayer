@@ -17,7 +17,7 @@ import com.musicapp.mymusicplayer.utils.store
 
 class SearchSongActivity : AppCompatActivity() {
     private lateinit var binding: MusicSearchBarLayoutBinding
-    private lateinit var songAdapter: SongAdapter
+    private lateinit var adapter: SongAdapter
     private lateinit var mediaController :MediaControllerWrapper
     private var songList = ArrayList<Song>()
 
@@ -36,9 +36,9 @@ class SearchSongActivity : AppCompatActivity() {
     private fun setupRecyclerView(){
         binding.recyclerView.layoutManager = LinearLayoutManager(this)
 
-        songAdapter = SongAdapter(this, songList)
-        songAdapter.mediaController = MediaControllerWrapper.getInstance(store.mediaBrowser)
-        binding.recyclerView.adapter = songAdapter
+        adapter = SongAdapter(this, songList, mediaController)
+        adapter.mediaController = MediaControllerWrapper.getInstance(store.mediaBrowser)
+        binding.recyclerView.adapter = adapter
     }
 
     private fun setEvents(){
@@ -48,7 +48,7 @@ class SearchSongActivity : AppCompatActivity() {
     }
 
     private fun setEventRecyclerView(){
-        songAdapter.setSongClickListener( object: SongClickListener{
+        adapter.setSongClickListener( object: SongClickListener{
             override fun OnArtistClick(artist: Long) {
 
             }
@@ -94,7 +94,7 @@ class SearchSongActivity : AppCompatActivity() {
                 if (value is List<*>) {
                     songList.clear()
                     songList.addAll(value.filterIsInstance<Song>())
-                    songAdapter.notifyDataSetChanged()
+                    adapter.notifyDataSetChanged()
                 }
             }
 

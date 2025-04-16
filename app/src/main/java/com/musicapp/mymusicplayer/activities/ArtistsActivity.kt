@@ -67,7 +67,7 @@ class ArtistsActivity : AppCompatActivity() {
 
     private fun setupMusicPlayerSmall() {
         mediaController = MediaControllerWrapper.getInstance(store.mediaBrowser)
-        binding.musicPlayer.mediaController = store.mediaBrowser
+        binding.musicPlayer.mediaController = mediaController
     }
 
     private fun setEvents() {

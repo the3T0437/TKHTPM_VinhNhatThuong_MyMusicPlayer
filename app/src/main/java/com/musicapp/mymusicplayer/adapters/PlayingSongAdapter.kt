@@ -4,6 +4,7 @@ import android.content.Context
 import android.view.MenuItem
 import com.musicapp.mymusicplayer.R
 import com.musicapp.mymusicplayer.model.Song
+import com.musicapp.mymusicplayer.utils.MediaControllerWrapper
 import com.musicapp.mymusicplayer.widget.ThreeDotMenuListener
 
 
@@ -11,7 +12,7 @@ interface RemoveSongListener{
     fun onRemoveSong(song: Song, index: Int)
 }
 
-class PlayingSongAdapter(context: Context, arr: ArrayList<Song>) : DragableSongAdapter(context, arr) {
+class PlayingSongAdapter(context: Context, arr: ArrayList<Song>, mediaController: MediaControllerWrapper) : DragableSongAdapter(context, arr, mediaController) {
     private var removeSongListener : RemoveSongListener? = null
 
     override fun getMenuResource(): Int {
