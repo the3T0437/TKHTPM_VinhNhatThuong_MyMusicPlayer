@@ -11,7 +11,7 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.musicapp.mymusicplayer.R
-import com.musicapp.mymusicplayer.adapters.DragableSongAdapter
+import com.musicapp.mymusicplayer.adapters.SongInPlayListAdapter
 import com.musicapp.mymusicplayer.adapters.SongClickListener
 import com.musicapp.mymusicplayer.database.DatabaseAPI
 import com.musicapp.mymusicplayer.database.OnDatabaseCallBack
@@ -21,12 +21,19 @@ import com.musicapp.mymusicplayer.utils.MediaControllerWrapper
 import com.musicapp.mymusicplayer.utils.store
 import com.musicapp.mymusicplayer.widget.ThreeDotMenuListener
 
-
+/**
+ * Activity hiển thị danh sách bài hát trong một playlist
+ * Cho phép:
+ * - Xem danh sách bài hát
+ * - Phát nhạc
+ * - Xóa bài hát khỏi playlist
+ * - Kéo thả để sắp xếp bài hát
+ */
 class AllSongInPlayListActivity : AppCompatActivity() {
     private lateinit var binding: MusicSongInPlaylistLayoutBinding
     private lateinit var databaseAPI: DatabaseAPI
     private var songs = arrayListOf<Song>()
-    private lateinit var adapter: DragableSongAdapter
+    private lateinit var adapter: SongInPlayListAdapter
     private lateinit var mediaController: MediaControllerWrapper
     private var playlistId: Long = -1;
 
@@ -40,45 +47,32 @@ class AllSongInPlayListActivity : AppCompatActivity() {
         binding.musicPlayer.mediaController = mediaController
         binding.musicPlayer.songs = songs
 
+        // Thiết lập RecyclerView
         binding.recyclerView.layoutManager = LinearLayoutManager(this)
         playlistId = intent.getIntExtra("PLAYLIST_ID", -1).toLong()
         
-        class PlaylistSongAdapter(context: Context, songs: ArrayList<Song>, mediaController: MediaControllerWrapper) : 
-            DragableSongAdapter(context, songs, mediaController) {
-            override fun getMenuResource(): Int {
-                return R.menu.playing_song_menu
-            }
-            
-            override fun getThreeDotMenuListener(holder: ViewHolder, song: Song, position: Int): ThreeDotMenuListener {
-                return object : ThreeDotMenuListener {
-                    override fun onMenuItemClick(item: MenuItem): Boolean {
-                        if (item.itemId == R.id.menuRemove) {
-                            databaseAPI.deleteSongFromPlaylist(playlistId.toInt(), song.id, object: OnDatabaseCallBack {
-                                override fun onSuccess(id: Long) {
-                                    songs.removeAt(position)
-                                    notifyItemRemoved(position)
-                                }
-
-                                override fun onFailure(e: Exception) {
-                                    Toast.makeText(context, "Không thể xóa bài hát", Toast.LENGTH_SHORT).show()
-                                }
-                            })
-                            return true
-                        }
-                        return false
-                    }
-                }
-            }
-        }
-        
-        adapter = PlaylistSongAdapter(this, songs, mediaController)
+        adapter = SongInPlayListAdapter(this, songs, playlistId.toInt())
         binding.recyclerView.adapter = adapter
 
+        // Xử lý sự kiện nút back
         binding.btnBack.setOnClickListener{
             finish()
         }
-        val name  = intent.getStringExtra("PLAYLIST_NAME")
+
+        // Hiển thị tên playlist
+        val name = intent.getStringExtra("PLAYLIST_NAME")
         binding.tvNameList.text = name.toString()
+
+        // Lấy danh sách bài hát trong playlist
+        databaseAPI.getAllSongsInPlaylist(playlistId.toInt(), songs, object: OnDatabaseCallBack {
+            override fun onSuccess(id: Long) {
+                adapter.notifyDataSetChanged()
+            }
+
+            override fun onFailure(e: Exception) {
+                Toast.makeText(this@AllSongInPlayListActivity, "Không thể tải danh sách bài hát", Toast.LENGTH_SHORT).show()
+            }
+        })
 
         // Thêm xử lý phát nhạc
         adapter.setSongClickListener(object : SongClickListener {
@@ -100,15 +94,8 @@ class AllSongInPlayListActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        readSongs(songs)
-    }
-
-    private fun readSongs(songs: ArrayList<Song>) {
-        val playlistId = intent.getIntExtra("PLAYLIST_ID", -1)
-        if (playlistId == -1)
-            return
-        songs.clear()
-        databaseAPI.getAllSongsInPlaylist(playlistId, songs, object: OnDatabaseCallBack{
+        // Cập nhật danh sách bài hát khi quay lại activity
+        databaseAPI.getAllSongsInPlaylist(playlistId.toInt(), songs, object: OnDatabaseCallBack {
             override fun onSuccess(id: Long) {
                 adapter.notifyDataSetChanged()
             }

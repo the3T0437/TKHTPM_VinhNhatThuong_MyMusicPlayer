@@ -3,7 +3,6 @@ package com.musicapp.mymusicplayer.activities
 import android.content.Intent
 import android.os.Bundle
 import android.text.InputType
-import android.util.Log
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -26,6 +25,14 @@ import com.musicapp.mymusicplayer.utils.SimpleItemTouchHelperCallBack
 import com.musicapp.mymusicplayer.utils.store
 import com.musicapp.mymusicplayer.widget.MusicPlayerSmallClickListener
 
+/**
+ * Activity hiển thị danh sách các playlist
+ * Cho phép:
+ * - Xem danh sách playlist
+ * - Tạo playlist mới
+ * - Xóa playlist
+ * - Mở playlist để xem danh sách bài hát
+ */
 class PlayListActivity : AppCompatActivity() {
     private lateinit var binding: PlaylistLayoutBinding
     private lateinit var adapter: PlayListAdapter
@@ -139,6 +146,10 @@ class PlayListActivity : AppCompatActivity() {
         readPlaylists(playlists)
     }
 
+    /**
+     * Đọc danh sách playlist từ database
+     * @param playlists Danh sách để lưu kết quả
+     */
     fun readPlaylists(playlists: ArrayList<PlayList>) {
         databaseAPI.getAllPlaylists(playlists, object: OnDatabaseCallBack{
             override fun onSuccess(id: Long) {

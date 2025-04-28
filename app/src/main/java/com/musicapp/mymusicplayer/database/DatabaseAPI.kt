@@ -15,16 +15,26 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 
+/**
+ * Interface để xử lý callback khi thao tác với database thành công hoặc thất bại
+ */
 interface OnDatabaseCallBack {
     fun onSuccess(id: Long)
     fun onFailure(e: Exception)
 }
 
+/**
+ * Interface để xử lý callback khi lấy dữ liệu từ database
+ */
 interface OnGetItemCallback {
     fun onSuccess(value: Any)
     fun onFailure(e: Exception)
 }
 
+/**
+ * Class chính để tương tác với database
+ * Cung cấp các phương thức để thao tác với dữ liệu
+ */
 class DatabaseAPI(context: Context) {
     companion object{
         val onDatabaseCallBackDoNothing = object: OnDatabaseCallBack{
@@ -36,6 +46,7 @@ class DatabaseAPI(context: Context) {
         }
     }
 
+    // Khai báo các DAO để tương tác với các bảng trong database
     private val songPlayListDAO: SongPlayListDAO
     private var songDAO: SongDAO
     private var playListDAO: PlayListDAO
@@ -43,6 +54,7 @@ class DatabaseAPI(context: Context) {
     private var artistDAO: ArtistDAO
     private val job = Job()
     val coroutineScope = CoroutineScope(Dispatchers.IO + job)
+
     init {
         val myRoomDatabase = MyRoomDatabase.getDatabase(context)
         songPlayListDAO = myRoomDatabase.songPlayListDao()
@@ -52,6 +64,12 @@ class DatabaseAPI(context: Context) {
         artistDAO = myRoomDatabase.artistDAO()
     }
 
+    /**
+     * Thêm bài hát vào playlist
+     * @param songID ID của bài hát
+     * @param playListID ID của playlist
+     * @param callback Callback để xử lý kết quả
+     */
     fun themSongPlayList(songID: Long,playListID: Int, callback: OnDatabaseCallBack) {
         coroutineScope.launch {
             val count = songPlayListDAO.checkSongExists(playListID, songID)
@@ -72,6 +90,11 @@ class DatabaseAPI(context: Context) {
         }
     }
 
+    /**
+     * Lấy danh sách liên kết giữa bài hát và playlist
+     * @param danhSachLienKet Danh sách để lưu kết quả
+     * @param callback Callback để xử lý kết quả
+     */
     fun docSongPlayList(danhSachLienKet: ArrayList<SongPlayList>, callback: OnDatabaseCallBack) {
         coroutineScope.launch {
             try {
@@ -88,6 +111,11 @@ class DatabaseAPI(context: Context) {
         }
     }
 
+    /**
+     * Xóa liên kết giữa bài hát và playlist
+     * @param songPlayList Đối tượng liên kết cần xóa
+     * @param callback Callback để xử lý kết quả
+     */
     fun xoaSongPlayList(songPlayList: SongPlayList, callback: OnDatabaseCallBack) {
         coroutineScope.launch {
             try {
@@ -103,12 +131,18 @@ class DatabaseAPI(context: Context) {
         }
     }
 
+    /**
+     * Lấy tất cả bài hát trong một playlist
+     * @param playlistId ID của playlist
+     * @param songs Danh sách để lưu kết quả
+     * @param callback Callback để xử lý kết quả
+     */
     fun getAllSongsInPlaylist(playlistId: Int, songs: ArrayList<Song>, callback: OnDatabaseCallBack){
         coroutineScope.launch {
             try{
                 val songsId = songPlayListDAO.getSongsIDPlaylist(playlistId)
+                songs.clear()
                 songs.addAll(getSongs(songsId))
-
                 withContext(Dispatchers.Main){
                     callback.onSuccess(songs.size.toLong())
                 }
@@ -120,6 +154,13 @@ class DatabaseAPI(context: Context) {
         }
     }
 
+    /**
+     * Đổi vị trí hai bài hát trong playlist
+     * @param playlistID ID của playlist
+     * @param songId1 ID của bài hát thứ nhất
+     * @param songId2 ID của bài hát thứ hai
+     * @param callback Callback để xử lý kết quả
+     */
     fun swapOrder(playlistID: Long, songId1: Long, songId2: Long, callback: OnDatabaseCallBack){
         coroutineScope.launch {
             try{
@@ -141,19 +182,17 @@ class DatabaseAPI(context: Context) {
                 }
             }
         }
-
     }
 
-
+    /**
+     * Thêm bài hát mới vào database
+     * @param song Đối tượng bài hát cần thêm
+     * @param callback Callback để xử lý kết quả
+     */
     fun insertSong(song: Song, callback: OnDatabaseCallBack) {
         coroutineScope.launch {
             try {
                 val id = songDAO.themSong(song)
-                /*
-                if (id != -1L) {
-                    song.id = id
-                }
-                 */
                 withContext(Dispatchers.Main) {
                     callback.onSuccess(id)
                 }
@@ -165,6 +204,11 @@ class DatabaseAPI(context: Context) {
         }
     }
 
+    /**
+     * Lấy tất cả bài hát từ database
+     * @param songs Danh sách để lưu kết quả
+     * @param callback Callback để xử lý kết quả
+     */
     fun getAllSongs(songs:ArrayList<Song>, callback: OnDatabaseCallBack) : Job{
         return coroutineScope.launch {
             try {
@@ -182,6 +226,11 @@ class DatabaseAPI(context: Context) {
         }
     }
 
+    /**
+     * Lấy thông tin một bài hát theo ID
+     * @param songId ID của bài hát
+     * @param callback Callback để xử lý kết quả
+     */
     fun getSong(songId: Long, callback: OnGetItemCallback){
         coroutineScope.launch {
             try {
@@ -198,6 +247,11 @@ class DatabaseAPI(context: Context) {
         }
     }
 
+    /**
+     * Cập nhật thông tin bài hát
+     * @param song Đối tượng bài hát cần cập nhật
+     * @param callback Callback để xử lý kết quả
+     */
     fun capNhatSong(song: Song, callback: OnDatabaseCallBack) {
         coroutineScope.launch {
             try {
@@ -213,7 +267,11 @@ class DatabaseAPI(context: Context) {
         }
     }
 
-
+    /**
+     * Thêm playlist mới vào database
+     * @param playList Đối tượng playlist cần thêm
+     * @param callback Callback để xử lý kết quả
+     */
     fun insertPlaylist(playList: PlayList, callback: OnDatabaseCallBack) {
         coroutineScope.launch {
             try {
@@ -231,9 +289,22 @@ class DatabaseAPI(context: Context) {
             }
         }
     }
+
+    /**
+     * Xóa playlist và tất cả bài hát trong playlist đó
+     * @param playlistID ID của playlist cần xóa
+     * @param callback Callback để xử lý kết quả
+     */
     fun deletePlayList(playlistID: Long, callback: OnDatabaseCallBack){
         coroutineScope.launch(Dispatchers.IO) {
             try {
+                // Xóa tất cả bài hát trong playlist trước
+                val songsInPlaylist = songPlayListDAO.getSongsIDPlaylist(playlistID.toInt())
+                for (songId in songsInPlaylist) {
+                    songPlayListDAO.deleteSongFromPlaylist(playlistID.toInt(), songId)
+                }
+
+                // Sau đó xóa playlist
                 val rowDel = playListDAO.deletePlaylist(playlistID)
                 if(rowDel > 0){
                     withContext(Dispatchers.Main) {
@@ -251,6 +322,12 @@ class DatabaseAPI(context: Context) {
             }
         }
     }
+
+    /**
+     * Lấy tất cả playlist từ database
+     * @param playlists Danh sách để lưu kết quả
+     * @param callback Callback để xử lý kết quả
+     */
     fun getAllPlaylists(playlists:ArrayList<PlayList>, callback: OnDatabaseCallBack) {
         coroutineScope.launch {
             try {
@@ -268,7 +345,12 @@ class DatabaseAPI(context: Context) {
             }
         }
     }
-    // 3. Dinh nghia ham cap nhat lai du lieu
+
+    /**
+     * Cập nhật thông tin playlist
+     * @param playList Đối tượng playlist cần cập nhật
+     * @param callback Callback để xử lý kết quả
+     */
     fun capNhatPlayList(playList: PlayList, callback: OnDatabaseCallBack) {
         coroutineScope.launch {
             try {
@@ -284,6 +366,11 @@ class DatabaseAPI(context: Context) {
         }
     }
 
+    /**
+     * Thêm bài hát vào danh sách yêu thích
+     * @param favoriteSong Đối tượng bài hát yêu thích cần thêm
+     * @param callback Callback để xử lý kết quả
+     */
     fun insertFavoriteSong(favoriteSong: FavoriteSong, callback: OnDatabaseCallBack){
         coroutineScope.launch {
             try{
@@ -305,6 +392,11 @@ class DatabaseAPI(context: Context) {
         }
     }
 
+    /**
+     * Xóa bài hát khỏi danh sách yêu thích
+     * @param id ID của bài hát cần xóa
+     * @param callback Callback để xử lý kết quả
+     */
     fun deleteFavroiteSong(id: Int, callback: OnDatabaseCallBack){
         coroutineScope.launch {
             try{
@@ -322,6 +414,11 @@ class DatabaseAPI(context: Context) {
         }
     }
 
+    /**
+     * Lấy tất cả bài hát trong danh sách yêu thích
+     * @param arr Danh sách để lưu kết quả
+     * @param callback Callback để xử lý kết quả
+     */
     fun getAllFavoriteSong(arr: ArrayList<Song>, callback: OnDatabaseCallBack){
         coroutineScope.launch {
             try{
@@ -343,41 +440,22 @@ class DatabaseAPI(context: Context) {
         }
     }
 
-    fun getFavorite(songId: Long, callback: OnGetItemCallback): Job{
-        return coroutineScope.launch {
-            try{
-                val favoriteSong = favoriteSongDAO.readFavoriteSongFromId(songId)
-
-                withContext(Dispatchers.Main){
-                    callback.onSuccess(favoriteSong as Any)
-                }
-            }
-            catch(e: Exception){
-                withContext(Dispatchers.Main){
-                    callback.onFailure(e)
-                }
-            }
+    /**
+     * Kiểm tra bài hát có trong danh sách yêu thích không
+     * @param songId ID của bài hát cần kiểm tra
+     * @return FavoriteSong nếu có, null nếu không
+     */
+    suspend fun getFavorite(songId: Long): FavoriteSong? {
+        return withContext(Dispatchers.IO) {
+            favoriteSongDAO.readFavoriteSongFromId(songId)
         }
     }
 
-    suspend fun getFavorite(songId: Long): FavoriteSong? = runBlocking(coroutineScope.coroutineContext){
-        var favoriteSong : FavoriteSong? = null
-        favoriteSong = favoriteSongDAO.readFavoriteSongFromId(songId)
-        favoriteSong
-    }
-
-    suspend fun join(){
-        val job = Job()
-        val coroutineScope = CoroutineScope(Dispatchers.IO + job)
-
-        coroutineScope.launch{
-            print("1")
-            delay(1000)
-            withContext(Dispatchers.Main){
-                print("2")
-            }
-        }
-    }
+    /**
+     * Tìm kiếm bài hát theo tên
+     * @param title Từ khóa tìm kiếm
+     * @param callback Callback để xử lý kết quả
+     */
     fun searchSongs(title: String, callback: OnGetItemCallback) {
         coroutineScope.launch {
             try {
@@ -395,47 +473,11 @@ class DatabaseAPI(context: Context) {
         }
     }
 
-
-
-    fun getSongs(songIds: ArrayList<Long>, callback: OnGetItemCallback){
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                val songs = arrayListOf<Song>()
-                for (songId in songIds){
-                    val song = songDAO.getSong(songId)
-                    if (song == null)
-                        continue;
-                    songs.add(song)
-                }
-
-                withContext(Dispatchers.Main) {
-                    callback.onSuccess(songs as Any)
-                }
-            } catch (e: Exception) {
-                withContext(Dispatchers.Main) {
-                    callback.onFailure(e)
-                }
-            }
-        }
-    }
-
-    fun getSongsByArtistId(artistId: Long, songs: ArrayList<Song>, callback: OnDatabaseCallBack){
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                songs.clear()
-                songs.addAll(songDAO.getSongByArtistId(artistId))
-
-                withContext(Dispatchers.Main) {
-                    callback.onSuccess(songs.size.toLong())
-                }
-            } catch (e: Exception) {
-                withContext(Dispatchers.Main) {
-                    callback.onFailure(e)
-                }
-            }
-        }
-    }
-
+    /**
+     * Lấy danh sách bài hát theo danh sách ID
+     * @param songIds Danh sách ID của các bài hát
+     * @return Danh sách bài hát
+     */
     fun getSongs(songIds: List<Long>): ArrayList<Song>{
         val songs = arrayListOf<Song>()
         for (songId in songIds){
@@ -447,6 +489,11 @@ class DatabaseAPI(context: Context) {
         return songs;
     }
 
+    /**
+     * Xóa bài hát khỏi database
+     * @param id ID của bài hát cần xóa
+     * @param callback Callback để xử lý kết quả
+     */
     fun deleteSong(id: Long, callback: OnDatabaseCallBack){
         coroutineScope.launch {
             try{
@@ -464,6 +511,12 @@ class DatabaseAPI(context: Context) {
         }
     }
 
+    /**
+     * Xóa bài hát khỏi playlist
+     * @param playlistId ID của playlist
+     * @param songId ID của bài hát
+     * @param callback Callback để xử lý kết quả
+     */
     fun deleteSongFromPlaylist(playlistId: Int, songId: Long, callback: OnDatabaseCallBack) {
         coroutineScope.launch {
             try {
@@ -480,6 +533,11 @@ class DatabaseAPI(context: Context) {
         }
     }
 
+    /**
+     * Thêm nghệ sĩ mới vào database
+     * @param artist Đối tượng nghệ sĩ cần thêm
+     * @param callback Callback để xử lý kết quả
+     */
     fun insertArtist(artist: Artist, callback: OnDatabaseCallBack) {
         coroutineScope.launch {
             try {
@@ -496,6 +554,11 @@ class DatabaseAPI(context: Context) {
         }
     }
 
+    /**
+     * Lấy tất cả nghệ sĩ từ database
+     * @param artists Danh sách để lưu kết quả
+     * @param callback Callback để xử lý kết quả
+     */
     fun getAllArtists(artists:ArrayList<Artist>, callback: OnDatabaseCallBack) : Job{
         return coroutineScope.launch {
             try {
@@ -513,6 +576,11 @@ class DatabaseAPI(context: Context) {
         }
     }
 
+    /**
+     * Lấy thông tin nghệ sĩ theo ID
+     * @param artistId ID của nghệ sĩ
+     * @param callback Callback để xử lý kết quả
+     */
     fun getArtist(artistId: Long, callback: OnGetItemCallback){
         coroutineScope.launch {
             try {
@@ -529,6 +597,11 @@ class DatabaseAPI(context: Context) {
         }
     }
 
+    /**
+     * Lấy thông tin nghệ sĩ theo tên
+     * @param artistId Tên của nghệ sĩ
+     * @param callback Callback để xử lý kết quả
+     */
     fun getArtistByName(artistId: String, callback: OnGetItemCallback){
         coroutineScope.launch {
             try {
@@ -545,6 +618,11 @@ class DatabaseAPI(context: Context) {
         }
     }
 
+    /**
+     * Thêm nghệ sĩ từ thông tin bài hát
+     * @param song Đối tượng bài hát chứa thông tin nghệ sĩ
+     * @param callback Callback để xử lý kết quả
+     */
     fun insertArtistBySong(song: Song, callback: OnDatabaseCallBack) {
         coroutineScope.launch {
             try {
@@ -565,7 +643,11 @@ class DatabaseAPI(context: Context) {
             }
         }
     }
-
+    /**
+     * Lấy danh sách bài hát trong playlist
+     * @param playlistId ID của playlist
+     * @return Danh sách bài hát
+     */
     fun getSongsInPlaylist(playlistId: Int): List<Song> {
         return songPlayListDAO.getSongsInPlayList(playlistId)
     }

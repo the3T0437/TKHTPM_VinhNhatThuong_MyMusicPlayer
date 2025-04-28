@@ -6,6 +6,7 @@ import android.util.Log
 import android.util.Size
 import android.widget.SeekBar
 import android.widget.SeekBar.OnSeekBarChangeListener
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.OptIn
 import androidx.appcompat.app.AppCompatActivity
@@ -164,7 +165,6 @@ class MusicDetailActivity : AppCompatActivity() {
     }
 
     private fun setEventButtonDown(){
-
         binding.btnDown.setOnClickListener{
             this@MusicDetailActivity.finish()
         }
@@ -185,55 +185,53 @@ class MusicDetailActivity : AppCompatActivity() {
                 isUpdateSeekbar = true
             }
         })
-
     }
 
-    private fun setEventButtonFavorite(){
-        binding.btnFavorite.setOnClickListener{
-            var favoriteId: Int = -1
-
+    private fun setEventButtonFavorite() {
+        binding.btnFavorite.setOnClickListener {
             val mediaItem = mediaController?.currentMediaItem
-            if (mediaItem == null){
+            if (mediaItem == null) {
                 binding.btnFavorite.isSelected = false
                 return@setOnClickListener
             }
 
-            val uri = mediaItem.localConfiguration?.uri!!
-            val songId : Long? = songGetter.getSong(this, uri)?.id
-            if (songId == null){
+            val uri = mediaItem.localConfiguration?.uri
+            if (uri == null) {
                 binding.btnFavorite.isSelected = false
                 return@setOnClickListener
             }
 
-            runBlocking {
+            val song = songGetter.getSong(this, uri)
+            if (song == null) {
+                binding.btnFavorite.isSelected = false
+                return@setOnClickListener
+            }
 
-                favoriteId = databaseApi?.getFavorite(songId)?.id ?: -1
+            kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.Main).launch {
+                val favorite = databaseApi?.getFavorite(song.id)
+                val favoriteId = favorite?.id ?: -1
 
-                if (favoriteId == -1){
-                    databaseApi?.insertFavoriteSong(FavoriteSong(songId), object: OnDatabaseCallBack{
+                if (favoriteId == -1) {
+                    databaseApi?.insertFavoriteSong(FavoriteSong(song.id), object : OnDatabaseCallBack {
                         override fun onSuccess(id: Long) {
+                            binding.btnFavorite.isSelected = true
                         }
-
                         override fun onFailure(e: Exception) {
+                            Toast.makeText(this@MusicDetailActivity, "Không thể thêm vào yêu thích", Toast.LENGTH_SHORT).show()
                         }
                     })
-
-                    binding.btnFavorite.isSelected = true
-                }
-                else{
-                    databaseApi?.deleteFavroiteSong(favoriteId, object: OnDatabaseCallBack{
+                } else {
+                    databaseApi?.deleteFavroiteSong(favoriteId, object : OnDatabaseCallBack {
                         override fun onSuccess(id: Long) {
+                            binding.btnFavorite.isSelected = false
                         }
-
                         override fun onFailure(e: Exception) {
+                            Toast.makeText(this@MusicDetailActivity, "Không thể xóa khỏi yêu thích", Toast.LENGTH_SHORT).show()
                         }
                     })
-
-                    binding.btnFavorite.isSelected = false
                 }
             }
         }
-
     }
 
     private fun setEventBtnMenu(){
@@ -242,7 +240,6 @@ class MusicDetailActivity : AppCompatActivity() {
             startActivity(intent)
         }
     }
-
 
     override fun onStop() {
         this.coroutineScope.cancel()
@@ -256,47 +253,47 @@ class MusicDetailActivity : AppCompatActivity() {
         val mediaItem = mediaController?.currentMediaItem
 
         if (mediaItem == null){
-            binding.tvTitle.setText("Not playing music")
-            binding.tvArtist.setText("Unknown")
-            binding.seekbar.progress = 0
-            return;
-        }
-
-        val uri = mediaItem.localConfiguration?.uri!!
-        val songId : Long? = songGetter.getSong(this, uri)?.id
-        if (songId == null)
             setDefaultMusicDetail()
-        else{
-            databaseApi?.getSong(songId, object: OnGetItemCallback{
-                override fun onSuccess(value: Any) {
-                    val song: Song = value as Song
-
-                    try{
-                        val bitmap = this@MusicDetailActivity.contentResolver.loadThumbnail(uri, Size(640, 480), null)
-                        binding.imgThumbnail.setImageBitmap(bitmap)
-                    }catch (e: Exception){
-                        binding.imgThumbnail.setImageResource(this@MusicDetailActivity.DEFAULT_THUMBNAIL)
-                    }
-
-                    binding.tvTitle.setText(song.title)
-                    binding.tvArtist.setText(song.artist)
-                }
-
-                override fun onFailure(e: Exception) {
-                    setDefaultMusicDetail()
-                }
-            })
-
-            databaseApi?.getFavorite(songId, object: OnGetItemCallback{
-                override fun onSuccess(value: Any) {
-                    binding.btnFavorite.isSelected = value != null
-                }
-
-                override fun onFailure(e: Exception) {
-                    binding.btnFavorite.isSelected = false
-                }
-            })
+            return
         }
+
+        val uri = mediaItem.localConfiguration?.uri
+        if (uri == null) {
+            setDefaultMusicDetail()
+            return
+        }
+
+        val song = songGetter.getSong(this, uri)
+        if (song == null) {
+            setDefaultMusicDetail()
+            return
+        }
+
+        databaseApi?.getSong(song.id, object: OnGetItemCallback{
+            override fun onSuccess(value: Any) {
+                val song: Song = value as Song
+
+                try{
+                    val bitmap = this@MusicDetailActivity.contentResolver.loadThumbnail(uri, Size(640, 480), null)
+                    binding.imgThumbnail.setImageBitmap(bitmap)
+                }catch (e: Exception){
+                    binding.imgThumbnail.setImageResource(this@MusicDetailActivity.DEFAULT_THUMBNAIL)
+                }
+
+                binding.tvTitle.setText(song.title)
+                binding.tvArtist.setText(song.artist)
+            }
+
+            override fun onFailure(e: Exception) {
+                setDefaultMusicDetail()
+            }
+        })
+
+        kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.Main).launch {
+            val favorite = databaseApi?.getFavorite(song.id)
+            binding.btnFavorite.isSelected = favorite != null
+        }
+
         updateSeekbar()
         mode = getStateMode()
         updateModePlayer()
@@ -307,7 +304,7 @@ class MusicDetailActivity : AppCompatActivity() {
         binding.tvTitle.setText("unknown")
         binding.tvArtist.setText("unknown")
         binding.imgThumbnail.setImageResource(this.DEFAULT_THUMBNAIL)
-
+        binding.btnFavorite.isSelected = false
     }
 
     private fun updateStateStartPauseButton(){
@@ -353,7 +350,6 @@ class MusicDetailActivity : AppCompatActivity() {
             mediaController?.shuffleModeEnabled = true
             binding.btnMode.setImageResource(R.drawable.shuffle)
         }
-
     }
 
     fun updateSeekbar(){

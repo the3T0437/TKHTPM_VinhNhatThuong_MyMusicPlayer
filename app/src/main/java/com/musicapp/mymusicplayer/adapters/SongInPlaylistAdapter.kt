@@ -1,15 +1,10 @@
 package com.musicapp.mymusicplayer.adapters
 
 import android.content.Context
-import android.view.LayoutInflater
 import android.view.MenuItem
-import android.view.ViewGroup
 import android.widget.Toast
-import androidx.recyclerview.widget.ItemTouchHelper
-import androidx.recyclerview.widget.RecyclerView
 import com.musicapp.mymusicplayer.R
 import com.musicapp.mymusicplayer.database.OnDatabaseCallBack
-import com.musicapp.mymusicplayer.databinding.DragableSongLayoutBinding
 import com.musicapp.mymusicplayer.model.Song
 import com.musicapp.mymusicplayer.widget.ThreeDotMenuListener
 import kotlinx.coroutines.CoroutineScope
@@ -17,66 +12,66 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+/**
+ * Adapter để hiển thị danh sách bài hát trong một playlist
+ * Kế thừa từ DragableSongAdapter để có thể kéo thả sắp xếp bài hát
+ * @param context Context của ứng dụng
+ * @param songs Danh sách bài hát trong playlist (ArrayList<Song> để cập nhật trực tiếp)
+ * @param playlistId ID của playlist
+ */
+class SongInPlayListAdapter(
+    context: Context,
+    songs: ArrayList<Song>,
+    private val playlistId: Int
+) : DragableSongAdapter(context, songs, null) {
 
-class SongInPlayListAdapter(private val context: Context, songs : List<Song>, private val playlistId: Int) :
-    RecyclerView.Adapter<SongInPlayListAdapter.ViewHolder>(){
-    private var itemTouchHelper: ItemTouchHelper? = null
-    private val mutableSongs = songs.toMutableList()
-
+    /**
+     * Interface để xử lý callback khi xóa bài hát khỏi playlist
+     */
     interface OnSongDeletedListener {
         fun onSongDeleted(songId: Long)
     }
     private var onSongDeletedListener: OnSongDeletedListener? = null
 
+    /**
+     * Set listener để xử lý khi xóa bài hát khỏi playlist
+     */
     fun setOnSongDeletedListener(listener: OnSongDeletedListener) {
         this.onSongDeletedListener = listener
     }
 
-    fun getSongs(): List<Song> {
-        return mutableSongs.toList()
+    /**
+     * Lấy resource ID của menu 3 chấm
+     * @return Resource ID của menu
+     */
+    override fun getMenuResource(): Int {
+        return R.menu.playing_song_menu
     }
 
-    fun updateSongs(newSongs: List<Song>) {
-        mutableSongs.clear()
-        mutableSongs.addAll(newSongs)
-        notifyDataSetChanged()
-    }
-
-    class ViewHolder(val binding: DragableSongLayoutBinding, private val adapter: SongInPlayListAdapter) :
-        RecyclerView.ViewHolder(binding.root) {
-
-        fun bind(song: Song) {
-            binding.tvTitle.text = song.title
-            binding.tvArtist.text = song.artist
-            binding.threeDotMenu.setMenuResource(R.menu.playing_song_menu)
-
-            binding.threeDotMenu.setThreeDotMenuListener(object : ThreeDotMenuListener {
-                override fun onMenuItemClick(item: MenuItem): Boolean {
-                    if (item.itemId == R.id.menuRemove) {
-                        adapter.removeSong(bindingAdapterPosition, song.id)
-                        return true
-                    }
-                    return false
+    /**
+     * Tạo listener cho menu 3 chấm
+     * @param holder ViewHolder của item
+     * @param song Bài hát được chọn
+     * @param position Vị trí của bài hát trong danh sách
+     * @return ThreeDotMenuListener để xử lý các sự kiện của menu
+     */
+    override fun getThreeDotMenuListener(holder: ViewHolder, song: Song, position: Int): ThreeDotMenuListener {
+        return object : ThreeDotMenuListener {
+            override fun onMenuItemClick(item: MenuItem): Boolean {
+                if (item.itemId == R.id.menuRemove) {
+                    removeSong(position, song.id)
+                    return true
                 }
-            })
-            binding.btnDrag.setOnTouchListener { v, event ->
-                adapter.itemTouchHelper?.startDrag(this)
-                true
+                return false
             }
         }
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val inflater = LayoutInflater.from(parent.context)
-        val binding = DragableSongLayoutBinding.inflate(inflater, parent, false)
-        return ViewHolder(binding, this)
-    }
-
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(mutableSongs.get(position))
-
-    }
-    override fun getItemCount(): Int = mutableSongs.size
+    /**
+     * Xóa bài hát khỏi playlist
+     * @param position Vị trí của bài hát trong danh sách
+     * @param songID ID của bài hát cần xóa
+     */
     private fun removeSong(position: Int, songID: Long) {
         CoroutineScope(Dispatchers.Main).launch {
             withContext(Dispatchers.IO) {
@@ -95,8 +90,5 @@ class SongInPlayListAdapter(private val context: Context, songs : List<Song>, pr
                 })
             }
         }
-    }
-    fun setItemTouchHelper(itemTouchHelper: ItemTouchHelper){
-        this.itemTouchHelper = itemTouchHelper
     }
 }

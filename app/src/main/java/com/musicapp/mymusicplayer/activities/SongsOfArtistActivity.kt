@@ -95,12 +95,12 @@ class SongsOfArtistActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        databaseAPI.getSongsByArtistId(artistId, songs, object: OnDatabaseCallBack{
+        /*databaseAPI.getSongsByArtistId(artistId, songs, object: OnDatabaseCallBack{
             override fun onSuccess(id: Long) {
                 adapter.notifyDataSetChanged()
             }
 
             override fun onFailure(e: Exception) {
             }
-        })
+        })*/
     }}
