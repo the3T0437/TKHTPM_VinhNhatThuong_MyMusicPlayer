@@ -168,10 +168,7 @@ class MusicPlaySmall : ConstraintLayout {
 
             private fun onStartClicked() {
                 mediaController?.play()
-                if (mediaController?.getSize() == 0)
-                    playAllSong()
                 updateStateOfStartPauseButton()
-
                 musicPlayerClickListener?.onStartClick()
             }
 
@@ -199,19 +196,5 @@ class MusicPlaySmall : ConstraintLayout {
 
     fun setOnMusicPlayerClickListener(musicPlayerSmallClickListener: MusicPlayerSmallClickListener) {
         musicPlayerClickListener = musicPlayerSmallClickListener
-    }
-
-    private fun playAllSong(position: Int = 0, isShuffle : Boolean = false){
-        if (songs == null)
-            return
-
-        mediaController?.apply {
-            clear()
-            setShuffleMode(isShuffle)
-            addSongs(songs!!)
-            seekToMediaItem(position)
-            prepare()
-            play()
-        }
     }
 }

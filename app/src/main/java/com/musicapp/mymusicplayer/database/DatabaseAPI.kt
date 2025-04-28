@@ -566,5 +566,7 @@ class DatabaseAPI(context: Context) {
         }
     }
 
-
+    fun getSongsInPlaylist(playlistId: Int): List<Song> {
+        return songPlayListDAO.getSongsInPlayList(playlistId)
+    }
 }

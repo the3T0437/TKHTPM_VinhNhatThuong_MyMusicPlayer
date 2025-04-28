@@ -29,10 +29,17 @@ class AddPlayListActivity : AppCompatActivity() {
         binding.recyclerViewAddToPlaylist.layoutManager = LinearLayoutManager(this)
         val songID = intent.getLongExtra("song_id", -1L)
         adapter = PlayListAdapter(this, playlists, songID, true)
-
         binding.recyclerViewAddToPlaylist.adapter = adapter
 
-        binding.tvAddPlaylist.setOnClickListener{
+        // Thêm listener để cập nhật danh sách khi thêm bài hát
+        adapter.setOnSongAddedListener(object : PlayListAdapter.OnSongAddedListener {
+            override fun onSongAdded(playlistId: Int) {
+                // Cập nhật lại danh sách playlist
+                readPlaylists(playlists)
+            }
+        })
+
+        binding.tvAddPlaylist.setOnClickListener {
             val builder = AlertDialog.Builder(this)
             builder.setTitle("PlayList Name")
             builder.setMessage("Enter playlist name")
@@ -43,36 +50,36 @@ class AddPlayListActivity : AppCompatActivity() {
 
             builder.setPositiveButton("OK") { _, _ ->
                 val playListName = input.text.toString()
-                if(playListName.isNotEmpty()){
-                    databaseApi.insertPlaylist(PlayList(playListName), object: OnDatabaseCallBack{
+                if (playListName.isNotEmpty()) {
+                    val newPlaylist = PlayList(playListName)
+                    databaseApi.insertPlaylist(newPlaylist, object : OnDatabaseCallBack {
                         override fun onSuccess(id: Long) {
-                            val playlist =  PlayList(playListName)
-                            playlists.add(playlist)
+                            // Cập nhật ID cho playlist mới
+                            newPlaylist.id = id.toInt()
+                            playlists.add(newPlaylist)
                             adapter.notifyDataSetChanged()
-                            Toast.makeText(this@AddPlayListActivity, "Thêm thành công", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(this@AddPlayListActivity, "Thêm playlist thành công", Toast.LENGTH_SHORT).show()
                         }
 
                         override fun onFailure(e: Exception) {
-                            Toast.makeText(this@AddPlayListActivity, "Thêm thất bại", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(this@AddPlayListActivity, "Thêm playlist thất bại", Toast.LENGTH_SHORT).show()
                         }
-
                     })
+                } else {
+                    Toast.makeText(this, "Tên playlist không được để trống", Toast.LENGTH_SHORT).show()
                 }
             }
-            builder.setNegativeButton("Cancel"){dailog,_->
-                dailog.dismiss()
+
+            builder.setNegativeButton("Cancel") { dialog, _ ->
+                dialog.dismiss()
             }
             builder.show()
         }
-
-
     }
     override fun onResume() {
         super.onResume()
         readPlaylists(playlists)
     }
-
-    //fun addPlayList()
 
     fun readPlaylists(playlists: ArrayList<PlayList>) {
         databaseApi.getAllPlaylists(playlists , object: OnDatabaseCallBack {

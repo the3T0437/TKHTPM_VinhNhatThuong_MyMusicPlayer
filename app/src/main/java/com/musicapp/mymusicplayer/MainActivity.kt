@@ -93,12 +93,11 @@ class MainActivity : AppCompatActivity() {
 
     fun setup(){
         databaseApi = DatabaseAPI(this)
-        setupRecyclerView()
         createMediaController()
+        setupRecyclerView()
         setupButtonFillter()
         setupSearch()
         setupMusicPlayer()
-        setupButtonPlayBig()
     }
 
     fun createMediaController(){
@@ -118,7 +117,7 @@ class MainActivity : AppCompatActivity() {
                 store.mediaBrowser?.addListener(mediaControllerListener)
                 mediaController = MediaControllerWrapper.getInstance(store.mediaBrowser)
                 binding.musicPlayer.mediaController = mediaController
-                adapter.mediaController = mediaController
+                adapter?.mediaController = mediaController
             },
             MoreExecutors.directExecutor()
         )
@@ -172,20 +171,12 @@ class MainActivity : AppCompatActivity() {
         binding.musicPlayer.songs = songs
     }
 
-    private fun setupButtonPlayBig(){
-        binding.btnPlayBig.setOnClickListener{
-            playAllSong(isShuffle = true)
-        }
-    }
-
-
     fun setupRecyclerView(){
         val layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
         adapter = SongAdapter(this, songs)
         binding.recyclerView.adapter = adapter
         binding.recyclerView.layoutManager = layoutManager
 
-        /*
         adapter.setSongClickListener(object: SongClickListener {
             override fun OnArtistClick(artistId: Long) {
                 CoroutineScope(getDataFromDatabasethread).launch {
@@ -205,9 +196,8 @@ class MainActivity : AppCompatActivity() {
                 Log.d("myLog", "playing songs count: ${mediaController.playingSongs.size}")
             }
         })
-         */
 
-        //makeDragable()
+        makeDragable()
     }
 
     private fun makeDragable() {
@@ -255,15 +245,6 @@ class MainActivity : AppCompatActivity() {
         })
 
         itemTouchHelper.attachToRecyclerView(binding.recyclerView)
-    }
-
-    private fun playAllSong(position: Int = 0, isShuffle : Boolean = false){
-        mediaController.clear()
-        mediaController.setShuffleMode(isShuffle)
-        mediaController.addSongs(songs)
-        mediaController.seekToMediaItem(position)
-        mediaController.prepare()
-        mediaController.play()
     }
 
     override fun onStart() {

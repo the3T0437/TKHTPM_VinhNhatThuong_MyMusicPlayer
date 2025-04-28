@@ -160,24 +160,12 @@ open class SongAdapter(protected val context: Context, protected val songs: Arra
 
                     else -> {
                         _songClickListener?.onSongClick(songs[position], position)
-                        playAllSong(position)
                     }
                 }
             }
         }
 
         return callback
-    }
-
-    private fun playAllSong(position: Int = 0, isShuffle : Boolean = false){
-        mediaController?.apply {
-            clear()
-            setShuffleMode(isShuffle)
-            addSongs(songs)
-            seekToMediaItem(position)
-            prepare()
-            play()
-        }
     }
 
     open override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -279,7 +267,6 @@ open class SongAdapter(protected val context: Context, protected val songs: Arra
                        return true
                    }
                }
-
                return false;
            }
        }
