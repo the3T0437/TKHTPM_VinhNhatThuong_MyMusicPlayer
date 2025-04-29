@@ -19,7 +19,7 @@ import com.musicapp.mymusicplayer.model.SongPlayList
 abstract class MyRoomDatabase : RoomDatabase() {
 
     companion object {
-        const val DB_VERSION = 1
+        const val DB_VERSION = 2
         const val DB_NAME = "my_database_song_playlist"
 
         @Volatile
@@ -31,7 +31,9 @@ abstract class MyRoomDatabase : RoomDatabase() {
                     context.applicationContext,
                     MyRoomDatabase::class.java,
                     DB_NAME
-                ).build()
+                )
+                .fallbackToDestructiveMigration()
+                .build()
                 DB_INSTANCE = instance
                 instance
             }
