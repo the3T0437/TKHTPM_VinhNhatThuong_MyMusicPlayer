@@ -7,8 +7,18 @@ import androidx.room.ForeignKey
 @Entity(
     tableName = SongPlayList.TABLE_NAME,
     foreignKeys = [
-        ForeignKey(entity = PlayList::class, parentColumns = [PlayList.ID], childColumns = [SongPlayList.PLAY_LIST_ID]),
-        ForeignKey(entity = Song::class, parentColumns = [Song.ID], childColumns = [SongPlayList.SONG_ID])
+        ForeignKey(
+            entity = PlayList::class, 
+            parentColumns = [PlayList.ID], 
+            childColumns = [SongPlayList.PLAY_LIST_ID],
+            onDelete = ForeignKey.CASCADE
+        ),
+        ForeignKey(
+            entity = Song::class, 
+            parentColumns = [Song.ID], 
+            childColumns = [SongPlayList.SONG_ID],
+            onDelete = ForeignKey.CASCADE
+        )
     ],
     primaryKeys = ["play_list_id", "song_id"]
 )

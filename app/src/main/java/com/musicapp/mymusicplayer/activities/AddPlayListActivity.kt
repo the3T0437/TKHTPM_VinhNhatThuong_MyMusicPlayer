@@ -50,8 +50,6 @@ class AddPlayListActivity : AppCompatActivity() {
                             playlist.id = id.toInt()
                             playlists.add(playlist)
                             adapter.notifyDataSetChanged()
-                            
-                            // Sau khi tạo playlist thành công, thêm bài hát vào playlist đó
                             if (songID != -1L) {
                                 databaseApi.themSongPlayList(songID, playlist.id, object: OnDatabaseCallBack {
                                     override fun onSuccess(id: Long) {
