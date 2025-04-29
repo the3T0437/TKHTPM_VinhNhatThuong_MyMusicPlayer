@@ -234,6 +234,10 @@ class DatabaseAPI(context: Context) {
     fun deletePlayList(playlistID: Long, callback: OnDatabaseCallBack){
         coroutineScope.launch(Dispatchers.IO) {
             try {
+                val songPlayLists = songPlayListDAO.getSongPlayListsByPlayListId(playlistID.toInt())
+                for (songPlayList in songPlayLists) {
+                    songPlayListDAO.deleteSongPlayList(songPlayList)
+                }
                 val rowDel = playListDAO.deletePlaylist(playlistID)
                 if(rowDel > 0){
                     withContext(Dispatchers.Main) {

@@ -137,6 +137,7 @@ RecyclerView.Adapter<PlayListAdapter.ViewHolder>(){
                              "Đã thêm bài hát vào playlist",
                              Toast.LENGTH_SHORT
                          ).show()
+                         (context as android.app.Activity).finish()
                      }
 
                      override fun onFailure(e: Exception) {

@@ -8,6 +8,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.musicapp.mymusicplayer.adapters.RemoveSongListener
 import com.musicapp.mymusicplayer.adapters.SongInPlaylistAdapter
 import com.musicapp.mymusicplayer.database.DatabaseAPI
 import com.musicapp.mymusicplayer.database.OnDatabaseCallBack
@@ -54,6 +55,25 @@ class AllSongInPlayListActivity : AppCompatActivity() {
         binding.tvNameList.text = name.toString()
 
         makeDragable()
+        setupRemoveListener()
+    }
+
+    private fun setupRemoveListener() {
+        adapter.setRemoveSongListener(object : RemoveSongListener {
+            override fun onRemoveSong(song: Song, index: Int) {
+                databaseAPI.deleteSongFromPlaylist(playlistId.toInt(), song.id, object : OnDatabaseCallBack {
+                    override fun onSuccess(id: Long) {
+                        songs.removeAt(index)
+                        adapter.notifyItemRemoved(index)
+                        Toast.makeText(this@AllSongInPlayListActivity, "Removed from playlist", Toast.LENGTH_SHORT).show()
+                    }
+
+                    override fun onFailure(e: Exception) {
+                        Toast.makeText(this@AllSongInPlayListActivity, "Failed to remove song", Toast.LENGTH_SHORT).show()
+                    }
+                })
+            }
+        })
     }
 
     override fun onResume() {
