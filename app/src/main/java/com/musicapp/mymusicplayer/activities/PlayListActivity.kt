@@ -1,6 +1,7 @@
 package com.musicapp.mymusicplayer.activities
 import android.os.Bundle
 import android.text.InputType
+import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -41,10 +42,16 @@ class PlayListActivity : AppCompatActivity() {
         binding.btnAddPlaylist.setOnClickListener{
             val builder = AlertDialog.Builder(this)
             builder.setTitle("PlayList Name")
-            builder.setMessage("Enter playlist name")
+
 
             val input = EditText(this)
             input.inputType = InputType.TYPE_CLASS_TEXT
+            input.hint = "Enter playlist name"
+            input.setPadding(70,40,40,50)
+            val params =  ViewGroup.MarginLayoutParams(  ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT)
+            params.setMargins(16, 16, 16, 16) // Left, Top, Right, Bottom in pixels
+            input.layoutParams = params
             builder.setView(input)
 
             builder.setPositiveButton("OK") { _, _ ->
