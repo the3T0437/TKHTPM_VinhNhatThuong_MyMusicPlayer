@@ -33,6 +33,7 @@ import com.musicapp.mymusicplayer.database.OnGetItemCallback
 import com.musicapp.mymusicplayer.databinding.MainLayoutBinding
 import com.musicapp.mymusicplayer.model.Artist
 import com.musicapp.mymusicplayer.model.Song
+import com.musicapp.mymusicplayer.permission.PermissionHelper
 import com.musicapp.mymusicplayer.service.PlayBackService
 import com.musicapp.mymusicplayer.utils.MediaControllerWrapper
 import com.musicapp.mymusicplayer.utils.songGetter
@@ -58,6 +59,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var databaseApi: DatabaseAPI
     private lateinit var jobUpdateArtist: Job
     private var isArrSongUpdated = false
+    private lateinit var permissionHelper: PermissionHelper
 
     private val mediaControllerListener: Player.Listener = object : Player.Listener {
         override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
@@ -69,29 +71,48 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
         binding = MainLayoutBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
         ViewCompat.setOnApplyWindowInsetsListener(binding.main) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
 
-        songs = store.songs
-        setSupportActionBar(binding.toolbar)
-        Toast.makeText(this, "open app", Toast.LENGTH_SHORT).show()
-        setup()
-        //val testRunner = test(this)
-        //testRunner.runTests()
+        permissionHelper = PermissionHelper(this)
 
-
+        if (!permissionHelper.hasPermissions()) {
+            permissionHelper.requestPermissions()
+        } else {
+            songs = store.songs
+            setup()
+        }
     }
     private fun loadSongs(): ArrayList<Song> {
         // Load your songs here from database or other sources
         return arrayListOf()
     }
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+        permissionHelper.handlePermissionsResult(
+            requestCode,
+            grantResults,
+            onGranted = {
+                Toast.makeText(this, "Đã cấp quyền cho ứng dụng!", Toast.LENGTH_SHORT).show()
+                setup()
+            },
+            onDenied = {
+                Toast.makeText(this, "Quyền bị từ chối! Ứng dụng có thể không hoạt động !.", Toast.LENGTH_SHORT).show()
+            }
+        )
+    }
 
     fun setup(){
+        Toast.makeText(this, "Ứng dụng đã mở!", Toast.LENGTH_SHORT).show()
+
         databaseApi = DatabaseAPI(this)
         setupRecyclerView()
         createMediaController()
