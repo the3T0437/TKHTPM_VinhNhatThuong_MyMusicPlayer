@@ -17,6 +17,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MyMusicPlayer"
         tools:targetApi="31">
+
         <activity
             android:name=".activities.SongsOfArtistActivity"
             android:exported="false" />
@@ -51,7 +52,7 @@
             android:name=".activities.MusicDetailActivity"
             android:exported="false" />
         <activity
-            android:name=".MainActivity"
+            android:name="com.musicapp.mymusicplayer.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

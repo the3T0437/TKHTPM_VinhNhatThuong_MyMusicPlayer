@@ -5,8 +5,7 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white"
-    >
+    android:background="@color/white">
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
@@ -17,11 +16,13 @@
         app:titleTextColor="@color/white"
         app:titleTextAppearance="@style/TextAppearance.AppCompat.Widget.ActionBar.Title"
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center_vertical">
+
             <ImageButton
                 android:id="@+id/btnBack"
                 android:layout_width="48dp"
@@ -30,7 +31,7 @@
                 android:src="@drawable/back"
                 app:tint="@color/white"
                 android:contentDescription="Back"
-                android:padding="8dp"/>
+                android:padding="8dp" />
 
             <TextView
                 android:layout_width="0dp"
@@ -43,25 +44,28 @@
                 android:textStyle="bold" />
         </LinearLayout>
     </androidx.appcompat.widget.Toolbar>
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewPlaylist"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:padding="10dp"/>
-    <ImageButton
+        android:padding="10dp" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/btnAddPlaylist"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_gravity="end"
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="80dp"
-        android:background="@null"
+        android:contentDescription="Add Playlist"
         android:src="@drawable/add"
-        android:contentDescription="Add Playlist"/>
+        app:tint="@color/white"
+        app:elevation="6dp" />
+
     <com.musicapp.mymusicplayer.widget.MusicPlaySmall
         android:id="@+id/musicPlayer"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
-
+        android:layout_height="wrap_content" />
 </LinearLayout>
