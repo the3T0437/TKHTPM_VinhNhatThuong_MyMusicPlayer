@@ -26,14 +26,14 @@
 
             <SearchView
                 android:id="@+id/svSearch"
-                android:outlineSpotShadowColor="@color/black"
-                android:outlineAmbientShadowColor="@color/black"
-                android:queryHint="Search"
-                android:layout_weight="1"
-                android:iconifiedByDefault="false"
-                android:background="@drawable/search_background"
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent"/>
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@drawable/search_background"
+                android:iconifiedByDefault="false"
+                android:outlineAmbientShadowColor="@color/black"
+                android:outlineSpotShadowColor="@color/black"
+                android:queryHint="Search" />
 
 
         </LinearLayout>

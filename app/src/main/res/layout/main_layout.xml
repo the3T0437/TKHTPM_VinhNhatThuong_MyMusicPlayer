@@ -24,7 +24,7 @@
                 android:id="@+id/svSearch"
                 android:outlineSpotShadowColor="@color/black"
                 android:outlineAmbientShadowColor="@color/black"
-                android:queryHint="search"
+                android:queryHint="Search"
                 android:layout_weight="1"
                 android:iconifiedByDefault="false"
                 android:background="@drawable/search_background"
