@@ -239,6 +239,8 @@ class MusicDetailActivity : AppCompatActivity() {
     private fun setEventBtnMenu(){
         binding.btnMenu.setOnClickListener{
             val intent = Intent(this@MusicDetailActivity, PlayingSongsActivity::class.java)
+            intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
+            intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
             startActivity(intent)
         }
     }
