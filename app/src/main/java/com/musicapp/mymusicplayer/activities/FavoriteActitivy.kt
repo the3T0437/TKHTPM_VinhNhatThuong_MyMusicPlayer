@@ -64,8 +64,8 @@ class FavoriteActitivy : AppCompatActivity() {
 
 
     fun setupPlayMusic(){
-        adapter.setSongClickListener(object: SongClickListener {
-            override fun OnArtistClick(artist: Long) {
+        adapter.setSongClickListener(object: SongClickListener (){
+            override fun onArtistClick(artist: Long) {
             }
 
             override fun onSongClick(song: Song, position: Int) {

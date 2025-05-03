@@ -35,10 +35,6 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import java.util.Collections
 
-interface SongClickListener{
-    fun OnArtistClick(artistId: Long)
-    fun onSongClick(song: Song, index: Int)
-}
 
 interface ViewHolderWrapper{
     fun getItemPosition(): Int
@@ -53,6 +49,17 @@ interface SongLayoutBindingWrapper{
     fun getRoot(): View
 }
 
+abstract class SongClickListener{
+    open fun onArtistClick(artistId: Long){
+    }
+
+    open fun onSongClick(song: Song, index: Int){
+    }
+
+    open fun isPlayingSongWhenClicked(): Boolean{
+        return true
+    }
+}
 /*
  * need to set mediaController to make threeDotWidget work, playable song
  *
@@ -64,6 +71,7 @@ interface SongLayoutBindingWrapper{
  * set currentPlayingSongId to hightlight playing song
  */
 open class SongAdapter(protected val context: Context, protected val songs: ArrayList<Song>, var mediaController: MediaControllerWrapper? = null) :
+
     RecyclerView.Adapter<SongAdapter.ViewHolder>() {
     protected var _songClickListener: SongClickListener? = null
     var currentPlayingSongId : Long = -1
@@ -155,12 +163,14 @@ open class SongAdapter(protected val context: Context, protected val songs: Arra
                 val position = viewHolder.getItemPosition()
                 when (v) {
                     bindingWrapper.getTvArtirst() -> {
-                        _songClickListener?.OnArtistClick(songs[position].artistId ?: 0)
+                        _songClickListener?.onArtistClick(songs[position].artistId ?: 0)
                     }
 
                     else -> {
                         _songClickListener?.onSongClick(songs[position], position)
-                        playAllSong(position)
+
+                        if (_songClickListener == null || _songClickListener!!.isPlayingSongWhenClicked())
+                            playAllSong(position)
                     }
                 }
             }
