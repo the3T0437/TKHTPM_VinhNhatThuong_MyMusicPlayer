@@ -85,10 +85,10 @@ class MainActivity : AppCompatActivity() {
 
         if (!permissionHelper.hasPermissions()) {
             permissionHelper.requestPermissions()
-        } else {
-            songs = store.songs
-            setup()
         }
+
+        songs = store.songs
+        setup()
     }
     private fun loadSongs(): ArrayList<Song> {
         // Load your songs here from database or other sources
