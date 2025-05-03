@@ -2,6 +2,8 @@ package com.musicapp.mymusicplayer.widget
 
 import android.content.Context
 import android.content.Intent
+import android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP
+import android.content.Intent.FLAG_ACTIVITY_SINGLE_TOP
 import android.util.AttributeSet
 import android.util.Size
 import android.view.LayoutInflater
@@ -185,6 +187,8 @@ class MusicPlaySmall : ConstraintLayout {
                 musicPlayerClickListener?.onMenuClick()
 
                 val intent = Intent(context, PlayingSongsActivity::class.java)
+                intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
+                intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
                 context.startActivity(intent)
             }
 
@@ -192,6 +196,8 @@ class MusicPlaySmall : ConstraintLayout {
                 musicPlayerClickListener?.onMusicPlayerClick()
 
                 val intent = Intent(context, MusicDetailActivity::class.java)
+                intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
+                intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
                 context.startActivity(intent)
             }
         }
