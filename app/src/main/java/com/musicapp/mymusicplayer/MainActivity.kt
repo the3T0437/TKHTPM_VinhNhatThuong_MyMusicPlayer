@@ -206,28 +206,6 @@ class MainActivity : AppCompatActivity() {
         binding.recyclerView.adapter = adapter
         binding.recyclerView.layoutManager = layoutManager
 
-        /*
-        adapter.setSongClickListener(object: SongClickListener {
-            override fun OnArtistClick(artistId: Long) {
-                CoroutineScope(getDataFromDatabasethread).launch {
-                    databaseApi.getArtist(artistId, object: OnGetItemCallback{
-                        override fun onSuccess(value: Any) {
-                            Log.d("myLog", "artist: ${(value as Artist).artistName}")
-                        }
-
-                        override fun onFailure(e: Exception) {
-                            Log.d("myLog", "artist: error")
-                        }
-                    })
-                }
-            }
-
-            override fun onSongClick(song: Song, position: Int) {
-                Log.d("myLog", "playing songs count: ${mediaController.playingSongs.size}")
-            }
-        })
-         */
-
         //makeDragable()
     }
 

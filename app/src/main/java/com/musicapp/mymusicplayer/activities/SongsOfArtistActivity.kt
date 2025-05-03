@@ -71,26 +71,6 @@ class SongsOfArtistActivity : AppCompatActivity() {
         val layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
         binding.recyclerView.adapter = adapter
         binding.recyclerView.layoutManager = layoutManager
-
-        setupPlayMusic()
-    }
-
-
-    fun setupPlayMusic(){
-        /*
-        adapter.setSongClickListener(object: SongClickListener {
-            override fun OnArtistClick(artist: Long) {
-            }
-
-            override fun onSongClick(song: Song, position: Int) {
-                mediaController.clear()
-                mediaController.addSongs(songs)
-                mediaController.seekToMediaItem(position)
-                mediaController.prepare()
-                mediaController.play()
-            }
-        })
-        */
     }
 
     override fun onResume() {
