@@ -30,15 +30,6 @@ open class DragableSongAdapter(context: Context, arr: ArrayList<Song>, mediaCont
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         super.onBindViewHolder(holder, position)
-        val binding = holder.getBinding() as DragableSongLayoutBinding
-        binding.btnDrag.setOnClickListener{
-
-        }
-
-        binding.btnDrag.setOnTouchListener { v, event ->
-            itemTouchHelper?.startDrag(holder)
-            true
-        }
     }
 
     fun setItemTouchHelper(itemTouchHelper: ItemTouchHelper){
