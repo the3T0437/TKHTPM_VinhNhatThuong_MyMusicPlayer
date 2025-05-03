@@ -93,13 +93,9 @@ class ArtistsActivity : AppCompatActivity() {
             }
 
             override fun onMenuClick() {
-                val intent= Intent(this@ArtistsActivity, PlayingSongsActivity::class.java)
-                startActivity(intent)
             }
 
             override fun onMusicPlayerClick() {
-                val intent= Intent(this@ArtistsActivity, MusicDetailActivity::class.java)
-                startActivity(intent)
             }
         })
     }

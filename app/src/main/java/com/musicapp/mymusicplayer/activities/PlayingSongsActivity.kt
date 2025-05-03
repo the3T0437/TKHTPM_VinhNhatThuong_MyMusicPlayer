@@ -105,7 +105,6 @@ class PlayingSongsActivity : AppCompatActivity() {
         }
 
         setEventAdapter()
-        setEventMusicPlayerSmall()
     }
 
     private fun setEventAdapter(){
@@ -114,40 +113,6 @@ class PlayingSongsActivity : AppCompatActivity() {
                 mediaController.removeSong(index)
                 adapter.notifyItemRemoved(index)
                 Log.d("myLog", "remove at: $index")
-            }
-        })
-
-        /*
-        adapter.setSongClickListener(object: SongClickListener{
-            override fun OnArtistClick(artist: Long) {
-            }
-
-            override fun onSongClick(song: Song, index: Int) {
-                mediaController.seekToMediaItem(index)
-            }
-        })
-         */
-    }
-
-    private fun setEventMusicPlayerSmall(){
-        binding.musicPlayer.setOnMusicPlayerClickListener(object: MusicPlayerSmallClickListener {
-            override fun onPauseClick() {
-            }
-
-            override fun onStartClick() {
-            }
-
-            override fun onNextClick() {
-            }
-
-            override fun onMenuClick() {
-                val intent = Intent(this@PlayingSongsActivity, PlayingSongsActivity::class.java)
-                startActivity(intent)
-            }
-
-            override fun onMusicPlayerClick() {
-                val intent= Intent(this@PlayingSongsActivity, MusicDetailActivity::class.java)
-                startActivity(intent)
             }
         })
     }
