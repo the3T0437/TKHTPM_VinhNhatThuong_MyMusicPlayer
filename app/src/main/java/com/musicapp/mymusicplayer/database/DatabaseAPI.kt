@@ -2,6 +2,7 @@ package com.musicapp.mymusicplayer.database
 
 import android.content.Context
 import android.util.Log
+import com.musicapp.mymusicplayer.model.Album
 import com.musicapp.mymusicplayer.model.Artist
 import com.musicapp.mymusicplayer.model.FavoriteSong
 import com.musicapp.mymusicplayer.model.PlayList
@@ -41,6 +42,7 @@ class DatabaseAPI(context: Context) {
     private var playListDAO: PlayListDAO
     private var favoriteSongDAO: FavoriteSongDAO
     private var artistDAO: ArtistDAO
+    private var albumDAO: AlbumDao
     private val job = Job()
     val coroutineScope = CoroutineScope(Dispatchers.IO + job)
     init {
@@ -50,6 +52,7 @@ class DatabaseAPI(context: Context) {
         playListDAO = myRoomDatabase.playListDao()
         favoriteSongDAO = myRoomDatabase.favroiteSongDAO()
         artistDAO = myRoomDatabase.artistDAO()
+        albumDAO = myRoomDatabase.albumDao()
     }
 
     fun themSongPlayList(songID: Long,playListID: Int, callback: OnDatabaseCallBack) {
@@ -149,12 +152,21 @@ class DatabaseAPI(context: Context) {
     fun insertSong(song: Song, callback: OnDatabaseCallBack) {
         coroutineScope.launch {
             try {
-                val id = songDAO.themSong(song)
-                /*
-                if (id != -1L) {
-                    song.id = id
+                // Xử lý album
+                val albumName = song.album?.trim() ?: "<unknown>"
+                if (albumName.isNotBlank() && albumName != "<unknown>") {
+                    val albums = albumDAO.getAllAlbums()
+                    val existingAlbum = albums.find { it.albumName == albumName }
+                    
+                    if (existingAlbum == null) {
+                        // Tạo album mới nếu chưa tồn tại
+                        val newAlbum = Album(albumName = albumName)
+                        albumDAO.insertAlbum(newAlbum)
+                    }
                 }
-                 */
+                
+                // Thêm bài hát
+                val id = songDAO.themSong(song)
                 withContext(Dispatchers.Main) {
                     callback.onSuccess(id)
                 }
@@ -567,5 +579,41 @@ class DatabaseAPI(context: Context) {
         }
     }
 
+    fun getAllAlbums(albums: ArrayList<Album>, callback: OnDatabaseCallBack) {
+        coroutineScope.launch {
+            try {
+                val databaseAlbums = withContext(Dispatchers.IO) {
+                    albumDAO.getAllAlbums()
+                }
+                albums.clear()
+                albums.addAll(databaseAlbums)
+                withContext(Dispatchers.Main) {
+                    callback.onSuccess(albums.size.toLong())
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    callback.onFailure(e)
+                }
+            }
+        }
+    }
 
+    fun getSongsByAlbum(albumName: String, songs: ArrayList<Song>, callback: OnDatabaseCallBack) {
+        coroutineScope.launch {
+            try {
+                val songsList = withContext(Dispatchers.IO) {
+                    songDAO.getSongsByAlbum(albumName)
+                }
+                songs.clear()
+                songs.addAll(songsList)
+                withContext(Dispatchers.Main) {
+                    callback.onSuccess(songs.size.toLong())
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    callback.onFailure(e)
+                }
+            }
+        }
+    }
 }

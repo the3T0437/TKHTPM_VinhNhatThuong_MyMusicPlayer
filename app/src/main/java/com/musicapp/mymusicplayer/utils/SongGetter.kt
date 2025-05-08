@@ -6,12 +6,14 @@ import android.net.Uri
 import android.provider.MediaStore
 import androidx.core.database.getIntOrNull
 import androidx.core.database.getStringOrNull
+import com.musicapp.mymusicplayer.database.MyRoomDatabase
 import com.musicapp.mymusicplayer.model.Song
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 
 interface GetDataListener{
     suspend fun onGetData(arr: ArrayList<Song>)
@@ -136,5 +138,4 @@ object songGetter {
         cursor.close()
         return song;
     }
-
 }

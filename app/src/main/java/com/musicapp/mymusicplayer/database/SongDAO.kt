@@ -29,4 +29,7 @@ interface SongDAO {
 
     @Query("SELECT * FROM ${Song.TABLE_NAME} WHERE ${Song.ARTIST} = :artistId ORDER BY ${Song.ALBUM} ASC, ${Song.TITLE} ASC")
     fun getSongByArtistId(artistId: Long): List<Song>
+
+    @Query("SELECT * FROM song WHERE album = :albumName")
+    fun getSongsByAlbum(albumName: String): List<Song>
 }
