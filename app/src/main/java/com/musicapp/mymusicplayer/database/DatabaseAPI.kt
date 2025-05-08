@@ -106,6 +106,7 @@ class DatabaseAPI(context: Context) {
     fun getAllSongsInPlaylist(playlistId: Int, songs: ArrayList<Song>, callback: OnDatabaseCallBack){
         coroutineScope.launch {
             try{
+                songs.clear()
                 val songsId = songPlayListDAO.getSongsIDPlaylist(playlistId)
                 songs.addAll(getSongs(songsId))
 
