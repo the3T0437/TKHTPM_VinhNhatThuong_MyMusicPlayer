@@ -60,6 +60,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var jobUpdateArtist: Job
     private var isArrSongUpdated = false
     private lateinit var permissionHelper: PermissionHelper
+    private var sortByTitle = true
 
     private val mediaControllerListener: Player.Listener = object : Player.Listener {
         override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
@@ -120,6 +121,7 @@ class MainActivity : AppCompatActivity() {
         setupSearch()
         setupMusicPlayer()
         setupButtonPlayBig()
+        setupSortButton()
     }
 
     fun createMediaController(){
@@ -199,6 +201,17 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun setupSortButton() {
+        binding.btnSort.setOnClickListener {
+            sortByTitle = !sortByTitle
+            if (sortByTitle) {
+                songs.sortBy { it.title.lowercase() }
+            } else {
+                songs.sortBy { it.artist.lowercase() }
+            }
+            adapter.notifyDataSetChanged()
+        }
+    }
 
     fun setupRecyclerView(){
         val layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
