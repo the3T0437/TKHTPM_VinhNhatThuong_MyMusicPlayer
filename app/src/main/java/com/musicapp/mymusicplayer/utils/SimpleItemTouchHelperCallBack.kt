@@ -36,6 +36,6 @@ class SimpleItemTouchHelperCallBack : ItemTouchHelper.Callback(){
     }
 
     override fun isLongPressDragEnabled(): Boolean {
-        return false
+        return true
     }
 }

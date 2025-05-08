@@ -57,6 +57,7 @@ class PlayingSongsActivity : AppCompatActivity() {
 
     private fun setupRecyclerView() {
         bindingData()
+        setEventRecyclerView()
         scrollRecyclerView()
     }
 
@@ -65,7 +66,18 @@ class PlayingSongsActivity : AppCompatActivity() {
         binding.recyclerView.layoutManager =
             LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
         binding.recyclerView.adapter = adapter
-        adapter.mediaController = mediaController
+    }
+
+    private fun setEventRecyclerView(){
+        adapter.setSongClickListener(object: SongClickListener(){
+            override fun isPlayingSongWhenClicked(): Boolean {
+                return false
+            }
+
+            override fun onSongClick(song: Song, index: Int) {
+                mediaController.seekToMediaItem(index)
+            }
+        })
     }
 
     private fun scrollRecyclerView() {

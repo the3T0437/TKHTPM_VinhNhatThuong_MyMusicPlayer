@@ -48,13 +48,7 @@ class SongsOfArtistActivity : AppCompatActivity() {
     fun setup(){
         songs = arrayListOf()
         databaseAPI = DatabaseAPI(this)
-        mediaController = MediaControllerWrapper.getInstance(store.mediaBrowser)
-        binding.musicPlayer.mediaController = MediaControllerWrapper.getInstance(store.mediaBrowser)
-        binding.musicPlayer.songs = songs
 
-        binding.btnDown.setOnClickListener{
-            this@SongsOfArtistActivity.finish()
-        }
         databaseAPI.getArtist(artistId, object: OnGetItemCallback{
             override fun onSuccess(value: Any) {
                 val artist = value as Artist
@@ -66,31 +60,17 @@ class SongsOfArtistActivity : AppCompatActivity() {
             }
         })
 
+        mediaController = MediaControllerWrapper.getInstance(store.mediaBrowser)
+        binding.musicPlayer.mediaController = MediaControllerWrapper.getInstance(store.mediaBrowser)
+        binding.musicPlayer.songs = songs
 
+        binding.btnDown.setOnClickListener{
+            this@SongsOfArtistActivity.finish()
+        }
         adapter = SongAdapter(this, songs, mediaController)
         val layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
         binding.recyclerView.adapter = adapter
         binding.recyclerView.layoutManager = layoutManager
-
-        setupPlayMusic()
-    }
-
-
-    fun setupPlayMusic(){
-        /*
-        adapter.setSongClickListener(object: SongClickListener {
-            override fun OnArtistClick(artist: Long) {
-            }
-
-            override fun onSongClick(song: Song, position: Int) {
-                mediaController.clear()
-                mediaController.addSongs(songs)
-                mediaController.seekToMediaItem(position)
-                mediaController.prepare()
-                mediaController.play()
-            }
-        })
-        */
     }
 
     override fun onResume() {

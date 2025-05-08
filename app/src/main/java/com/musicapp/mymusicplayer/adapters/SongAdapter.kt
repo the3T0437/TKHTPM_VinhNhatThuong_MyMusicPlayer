@@ -19,9 +19,11 @@ import androidx.viewbinding.ViewBinding
 import com.mikhaellopez.circularimageview.CircularImageView
 import com.musicapp.mymusicplayer.R
 import com.musicapp.mymusicplayer.activities.AddPlayListActivity
+import com.musicapp.mymusicplayer.activities.SongsOfArtistActivity
 import com.musicapp.mymusicplayer.database.DatabaseAPI
 import com.musicapp.mymusicplayer.database.OnDatabaseCallBack
 import com.musicapp.mymusicplayer.databinding.SongLayoutBinding
+import com.musicapp.mymusicplayer.model.Artist
 import com.musicapp.mymusicplayer.model.FavoriteSong
 import com.musicapp.mymusicplayer.model.Song
 import com.musicapp.mymusicplayer.utils.MediaControllerWrapper
@@ -35,10 +37,6 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import java.util.Collections
 
-interface SongClickListener{
-    fun OnArtistClick(artistId: Long)
-    fun onSongClick(song: Song, index: Int)
-}
 
 interface ViewHolderWrapper{
     fun getItemPosition(): Int
@@ -53,6 +51,17 @@ interface SongLayoutBindingWrapper{
     fun getRoot(): View
 }
 
+abstract class SongClickListener{
+    open fun onArtistClick(artistId: Long){
+    }
+
+    open fun onSongClick(song: Song, index: Int){
+    }
+
+    open fun isPlayingSongWhenClicked(): Boolean{
+        return true
+    }
+}
 /*
  * need to set mediaController to make threeDotWidget work, playable song
  *
@@ -64,6 +73,7 @@ interface SongLayoutBindingWrapper{
  * set currentPlayingSongId to hightlight playing song
  */
 open class SongAdapter(protected val context: Context, protected val songs: ArrayList<Song>, var mediaController: MediaControllerWrapper? = null) :
+
     RecyclerView.Adapter<SongAdapter.ViewHolder>() {
     protected var _songClickListener: SongClickListener? = null
     var currentPlayingSongId : Long = -1
@@ -155,12 +165,19 @@ open class SongAdapter(protected val context: Context, protected val songs: Arra
                 val position = viewHolder.getItemPosition()
                 when (v) {
                     bindingWrapper.getTvArtirst() -> {
-                        _songClickListener?.OnArtistClick(songs[position].artistId ?: 0)
+                        _songClickListener?.onArtistClick(songs[position].artistId ?: 0)
+
+                        val intent = Intent(context, SongsOfArtistActivity::class.java)
+                        intent.putExtra(Artist.ID, songs[position].artistId)
+                        intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                        context.startActivity(intent)
                     }
 
                     else -> {
                         _songClickListener?.onSongClick(songs[position], position)
-                        playAllSong(position)
+
+                        if (_songClickListener == null || _songClickListener!!.isPlayingSongWhenClicked())
+                            playAllSong(position)
                     }
                 }
             }
