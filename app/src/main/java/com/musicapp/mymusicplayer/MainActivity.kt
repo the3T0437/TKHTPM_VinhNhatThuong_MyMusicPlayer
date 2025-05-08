@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.MoreExecutors
+import com.musicapp.mymusicplayer.activities.Albums_Activity
 import com.musicapp.mymusicplayer.activities.ArtistsActivity
 import com.musicapp.mymusicplayer.activities.FavoriteActitivy
 import com.musicapp.mymusicplayer.activities.MusicDetailActivity
@@ -167,6 +168,11 @@ class MainActivity : AppCompatActivity() {
 
                     R.id.artists -> {
                         val intent = Intent(this@MainActivity, ArtistsActivity::class.java)
+                        startActivity(intent)
+                        return true
+                    }
+                    R.id.album->{
+                        val intent = Intent(this@MainActivity, Albums_Activity::class.java)
                         startActivity(intent)
                         return true
                     }

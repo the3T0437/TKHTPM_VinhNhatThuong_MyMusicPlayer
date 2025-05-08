@@ -5,6 +5,7 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import com.musicapp.mymusicplayer.model.Album
 import com.musicapp.mymusicplayer.model.Artist
 import com.musicapp.mymusicplayer.model.FavoriteSong
 
@@ -13,13 +14,13 @@ import com.musicapp.mymusicplayer.model.Song
 import com.musicapp.mymusicplayer.model.SongPlayList
 
 @Database(
-    entities = [Song::class, PlayList::class, SongPlayList::class, FavoriteSong::class, Artist::class],
+    entities = [Song::class, PlayList::class, SongPlayList::class, FavoriteSong::class, Artist::class, Album::class],
     version = MyRoomDatabase.DB_VERSION
 )
 abstract class MyRoomDatabase : RoomDatabase() {
 
     companion object {
-        const val DB_VERSION = 2
+        const val DB_VERSION = 1
         const val DB_NAME = "my_database_song_playlist"
 
         @Volatile
@@ -45,4 +46,5 @@ abstract class MyRoomDatabase : RoomDatabase() {
     abstract fun playListDao(): PlayListDAO
     abstract fun favroiteSongDAO(): FavoriteSongDAO
     abstract fun artistDAO(): ArtistDAO
+    abstract fun albumDao() : AlbumDao
 }
