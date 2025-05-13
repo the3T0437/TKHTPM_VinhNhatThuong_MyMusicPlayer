@@ -52,11 +52,11 @@ class SongsOfArtistActivity : AppCompatActivity() {
         databaseAPI.getArtist(artistId, object: OnGetItemCallback{
             override fun onSuccess(value: Any) {
                 val artist = value as Artist
-                binding.title.setText(artist.artistName)
+                binding.title.text = artist.artistName
             }
 
             override fun onFailure(e: Exception) {
-                Toast.makeText(this@SongsOfArtistActivity, "can't get artist", Toast.LENGTH_LONG)
+                Toast.makeText(this@SongsOfArtistActivity, "can't get artist", Toast.LENGTH_LONG).show()
             }
         })
 

@@ -48,7 +48,7 @@ class SongsOfAlbumActivity : AppCompatActivity() {
         songs = arrayListOf()
         databaseAPI = DatabaseAPI(this)
 
-        binding.title.setText(albumName)
+        binding.title.text = albumName
 
         mediaController = MediaControllerWrapper.getInstance(store.mediaBrowser)
         binding.musicPlayer.mediaController = MediaControllerWrapper.getInstance(store.mediaBrowser)
