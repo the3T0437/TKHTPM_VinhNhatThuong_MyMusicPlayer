@@ -33,11 +33,11 @@
 
             <ImageView
                 android:id="@+id/btnSetting"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_marginLeft="10dp"
-                android:contentDescription="Settings"
-                android:src="@drawable/settings" />
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginHorizontal="10dp"
+                android:contentDescription="Alarm"
+                android:src="@drawable/alarm" />
         </LinearLayout>
     </androidx.appcompat.widget.Toolbar>
 
