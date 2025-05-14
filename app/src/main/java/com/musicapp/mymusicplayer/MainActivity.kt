@@ -1,10 +1,14 @@
 package com.musicapp.mymusicplayer
 
+import android.app.AlertDialog
 import android.content.ComponentName
 import android.content.Intent
 import android.os.Bundle
+import android.os.CountDownTimer
+import android.text.InputType
 import android.util.Log
 import android.view.MenuItem
+import android.widget.EditText
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -123,6 +127,50 @@ class MainActivity : AppCompatActivity() {
         setupMusicPlayer()
         setupButtonPlayBig()
         setupSortButton()
+        binding.btnSetting.setOnClickListener {
+            showSleepTimerDialog()
+        }
+    }
+    private fun showSleepTimerDialog() {
+        val builder = AlertDialog.Builder(this)
+        val input = EditText(this)
+        input.hint = "Nhập thời gian (phút)"
+        input.inputType = InputType.TYPE_CLASS_NUMBER
+
+        builder.setTitle("Hẹn giờ đi ngủ")
+        builder.setView(input)
+        builder.setPositiveButton("Bắt đầu") { _, _ ->
+            val minutes = input.text.toString().toIntOrNull()
+            if (minutes != null && minutes > 0) {
+                startSleepTimer(minutes)
+            } else {
+                Toast.makeText(this, "Vui lòng nhập thời gian hợp lệ!", Toast.LENGTH_SHORT).show()
+            }
+        }
+        builder.setNegativeButton("Hủy") { dialog, _ -> dialog.dismiss() }
+        builder.show()
+    }
+
+    // Hàm bắt đầu hẹn giờ tắt nhạc
+    private fun startSleepTimer(minutes: Int) {
+        val milliseconds = minutes * 60 * 1000L
+        val timer = object : CountDownTimer(milliseconds, 1000) {
+            override fun onTick(millisUntilFinished: Long) {
+                // Hiển thị thời gian còn lại (nếu cần)
+            }
+
+            override fun onFinish() {
+                stopMusic()
+            }
+        }
+        timer.start()
+        Toast.makeText(this, "Hẹn giờ đi ngủ trong $minutes phút.", Toast.LENGTH_SHORT).show()
+    }
+
+    // Hàm dừng phát nhạc
+    private fun stopMusic() {
+        mediaController.pause() // Hoặc mediaController.stop() nếu cần
+        Toast.makeText(this, "Nhạc đã dừng!", Toast.LENGTH_SHORT).show()
     }
 
     fun createMediaController(){

@@ -31,6 +31,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
+import java.io.File
 
 class MusicDetailActivity : AppCompatActivity() {
     private var databaseApi: DatabaseAPI? = null
@@ -252,36 +253,70 @@ class MusicDetailActivity : AppCompatActivity() {
     }
 
     @OptIn(UnstableApi::class)
+    private fun loadLyricsFromFile(filePath: String) {
+        try {
+
+            val lyricsFile = File(filePath)
+            if (lyricsFile.exists()) {
+
+                val lyrics = lyricsFile.readText(Charsets.UTF_8)
+
+
+                runOnUiThread {
+                    binding.tvLyrics.text = lyrics
+                }
+            } else {
+
+                runOnUiThread {
+                    binding.tvLyrics.text = "Unknown"
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            runOnUiThread {
+                binding.tvLyrics.text = "Unknown"
+            }
+        }
+    }
+
     override fun onResume() {
         super.onResume()
         Log.d("myLog", "start resume")
         val mediaItem = mediaController?.currentMediaItem
 
-        if (mediaItem == null){
-            binding.tvTitle.setText("Not playing music")
-            binding.tvArtist.setText("Unknown")
-            binding.seekbar.progress = 0
-            return;
+        if (mediaItem == null) {
+            // Không có bài hát đang phát
+            setDefaultMusicDetail()
+            return
         }
 
         val uri = mediaItem.localConfiguration?.uri!!
-        val songId : Long? = songGetter.getSong(this, uri)?.id
-        if (songId == null)
+        val songId: Long? = songGetter.getSong(this, uri)?.id
+        if (songId == null) {
             setDefaultMusicDetail()
-        else{
-            databaseApi?.getSong(songId, object: OnGetItemCallback{
+        } else {
+            // Lấy thông tin bài hát từ csdl
+            databaseApi?.getSong(songId, object : OnGetItemCallback {
                 override fun onSuccess(value: Any) {
                     val song: Song = value as Song
 
-                    try{
+                    try {
+
                         val bitmap = this@MusicDetailActivity.contentResolver.loadThumbnail(uri, Size(640, 480), null)
                         binding.imgThumbnail.setImageBitmap(bitmap)
-                    }catch (e: Exception){
+                    } catch (e: Exception) {
                         binding.imgThumbnail.setImageResource(this@MusicDetailActivity.DEFAULT_THUMBNAIL)
                     }
 
-                    binding.tvTitle.setText(song.title)
-                    binding.tvArtist.setText(song.artist)
+
+                    binding.tvTitle.text = song.title
+                    binding.tvArtist.text = song.artist
+                    binding.tvLyrics.text = """
+                    Song name: ${song.title}
+                    Artist: ${song.artist}
+                    Album: ${song.album ?: "Unknown"}
+                 Duration: ${formatDuration(song.played_time)}
+                """.trimIndent()
                 }
 
                 override fun onFailure(e: Exception) {
@@ -289,7 +324,7 @@ class MusicDetailActivity : AppCompatActivity() {
                 }
             })
 
-            databaseApi?.getFavorite(songId, object: OnGetItemCallback{
+            databaseApi?.getFavorite(songId, object : OnGetItemCallback {
                 override fun onSuccess(value: Any) {
                     binding.btnFavorite.isSelected = value != null
                 }
@@ -304,12 +339,26 @@ class MusicDetailActivity : AppCompatActivity() {
         updateModePlayer()
         updateStateStartPauseButton()
     }
-
-    private fun setDefaultMusicDetail(){
-        binding.tvTitle.setText("unknown")
-        binding.tvArtist.setText("unknown")
+    private fun setDefaultMusicDetail() {
+        binding.tvTitle.text = "Not playing music"
+        binding.tvArtist.text = "Unknown"
+        binding.tvLyrics.text = """
+        Song name: Unknown
+        Artist: Unknown
+        Album: Unknown
+        Duration: Unknown
+    """.trimIndent()
         binding.imgThumbnail.setImageResource(this.DEFAULT_THUMBNAIL)
+    }
 
+    private fun formatDuration(durationInMillis: Int): String {
+        if (durationInMillis == null || durationInMillis <= 0) {
+            return "Unknown"
+        }
+        val totalSeconds = durationInMillis / 1000
+        val minutes = totalSeconds / 60
+        val seconds = totalSeconds % 60
+        return String.format("%02d:%02d", minutes, seconds)
     }
 
     private fun updateStateStartPauseButton(){

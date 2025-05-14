@@ -117,6 +117,8 @@
         app:layout_constraintTop_toBottomOf="@+id/imgThumbnail" />
 
     <TextView
+        android:ellipsize="end"
+        android:maxLines="1"
         android:id="@+id/tvTitle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -154,5 +156,34 @@
         android:src="@drawable/favorite_not_favorite"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/tvTitle" />
+    <FrameLayout
+        android:id="@+id/bottomSheet"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
+        android:background="@color/white"
+        tools:ignore="MissingConstraints">
 
+    </FrameLayout>
+
+    <ScrollView
+        android:layout_width="391dp"
+        android:layout_height="95dp"
+        android:layout_marginTop="12dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.625"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btnContinue">
+
+        <TextView
+            android:id="@+id/tvLyrics"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:padding="16dp"
+            android:scrollbars="vertical"
+            android:text="Lyrics"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+    </ScrollView>
 </androidx.constraintlayout.widget.ConstraintLayout>
