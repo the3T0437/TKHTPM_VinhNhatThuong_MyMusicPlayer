@@ -29,10 +29,11 @@ class PlayListActivity : AppCompatActivity() {
         binding = PlaylistLayoutBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.musicPlayer.mediaController = MediaControllerWrapper.getInstance(store.mediaBrowser)
+        val mediaController = MediaControllerWrapper.getInstance(store.mediaBrowser)
+        binding.musicPlayer.mediaController = mediaController
 
         binding.recyclerViewPlaylist.layoutManager = LinearLayoutManager(this)
-        adapter = PlayListAdapter(this, playlists, -1L, false)
+        adapter = PlayListAdapter(this, playlists, -1L, false, mediaController)
 
         binding.recyclerViewPlaylist.adapter = adapter
 

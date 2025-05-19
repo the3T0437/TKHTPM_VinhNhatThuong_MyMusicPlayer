@@ -3,4 +3,10 @@
     <item
         android:id="@+id/menuRemove"
         android:title="Remove"/>
+    <item
+        android:id="@+id/action_add_favorite"
+        android:title="Add/Remove favorite"/>
+    <item
+        android:id="@+id/action_add_to"
+        android:title="Add to Playlist"/>
 </menu>

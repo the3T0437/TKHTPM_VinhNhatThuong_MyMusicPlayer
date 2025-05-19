@@ -8,5 +8,5 @@
         android:title="Add/Remove favorite"/>
     <item
         android:id="@+id/action_add_to"
-        android:title="Add to"/>
+        android:title="Add to Playlist"/>
 </menu>
