@@ -13,10 +13,12 @@ import com.musicapp.mymusicplayer.database.DatabaseAPI
 import com.musicapp.mymusicplayer.database.OnDatabaseCallBack
 import com.musicapp.mymusicplayer.databinding.PlaylistMemberLayoutBinding
 import com.musicapp.mymusicplayer.model.PlayList
+import com.musicapp.mymusicplayer.model.Song
+import com.musicapp.mymusicplayer.utils.MediaControllerWrapper
 import com.musicapp.mymusicplayer.widget.ThreeDotMenuListener
 
 
-class PlayListAdapter(private val context: Context, private val arrs: List<PlayList>, private val songID : Long,private val isFromAddPlayList: Boolean):
+class PlayListAdapter(private val context: Context, private val arrs: List<PlayList>, private val songID : Long,private val isFromAddPlayList: Boolean, private val mediaController: MediaControllerWrapper):
 RecyclerView.Adapter<PlayListAdapter.ViewHolder>(){
     private  var databaseAPI: DatabaseAPI = DatabaseAPI(context)
 
@@ -27,6 +29,18 @@ RecyclerView.Adapter<PlayListAdapter.ViewHolder>(){
                 binding.optionPlayList.setThreeDotMenuListener(object : ThreeDotMenuListener {
                     override fun onMenuItemClick(item: MenuItem): Boolean {
                         when (item.itemId) {
+                            R.id.addToQueue ->{
+                                val playlistId = arrs[this@ViewHolder.absoluteAdapterPosition].id
+                                val songs = arrayListOf<Song>()
+                                DatabaseAPI(context).getAllSongsInPlaylist(playlistId, songs, object: OnDatabaseCallBack{
+                                    override fun onSuccess(id: Long) {
+                                        mediaController.addSongs(songs)
+                                    }
+
+                                    override fun onFailure(e: Exception) {
+                                    }
+                                })
+                            }
                             R.id.remove -> {
                                 val dialogBuilder = android.app.AlertDialog.Builder(context)
                                 dialogBuilder.setTitle("Xóa Playlist")

@@ -9,15 +9,19 @@ import android.view.View.OnClickListener
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.musicapp.mymusicplayer.R
+import com.musicapp.mymusicplayer.database.DatabaseAPI
+import com.musicapp.mymusicplayer.database.OnDatabaseCallBack
 import com.musicapp.mymusicplayer.databinding.ArtistLayoutBinding
 import com.musicapp.mymusicplayer.model.Artist
+import com.musicapp.mymusicplayer.model.Song
+import com.musicapp.mymusicplayer.utils.MediaControllerWrapper
 import com.musicapp.mymusicplayer.widget.ThreeDotMenuListener
 
 interface ArtistClickListener{
     fun onArtistClick(artistID: Long)
 }
 
-class ArtistsAdapter(val context: Context, val artists: ArrayList<Artist>) : RecyclerView.Adapter<ArtistsAdapter.ViewHolder>(){
+class ArtistsAdapter(val context: Context, val artists: ArrayList<Artist>, val mediaController: MediaControllerWrapper) : RecyclerView.Adapter<ArtistsAdapter.ViewHolder>(){
 
     private var artistClickListener: ArtistClickListener? = null
 
@@ -33,22 +37,29 @@ class ArtistsAdapter(val context: Context, val artists: ArrayList<Artist>) : Rec
         }
 
         init {
-            setupThreeDotWidget()
             binding.root.setOnClickListener(callback)
+            setupOptions()
+            setupEvents()
         }
     }
 
-    private fun ViewHolder.setupThreeDotWidget() {
-        setupOptions()
-        setupEvents()
-    }
 
     private fun ViewHolder.setupEvents() {
         binding.btnThreeDot.setThreeDotMenuListener(object : ThreeDotMenuListener {
             override fun onMenuItemClick(item: MenuItem): Boolean {
                 when (item.itemId) {
                     R.id.addToQueue -> {
-                        Log.d("myLog", "add to queue")
+                        val artistId = artists.get(this@setupEvents.absoluteAdapterPosition).id
+                        val databaseAPI = DatabaseAPI(context)
+                        val songs = arrayListOf<Song>()
+                        databaseAPI.getSongsByArtistId(artistId, songs, object: OnDatabaseCallBack{
+                            override fun onSuccess(id: Long) {
+                                mediaController.addSongs(songs)
+                            }
+
+                            override fun onFailure(e: Exception) {
+                            }
+                        })
                     }
 
                     else -> {

@@ -28,9 +28,9 @@ class ArtistsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setupUI()
+        setupMusicPlayerSmall()
         setupRecyclerView()
         setupDatabase()
-        setupMusicPlayerSmall()
 
         setEvents()
     }
@@ -47,7 +47,7 @@ class ArtistsActivity : AppCompatActivity() {
     }
 
     private fun setupRecyclerView() {
-        adapter = ArtistsAdapter(this, artists)
+        adapter = ArtistsAdapter(this, artists, mediaController)
         val layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
         binding.recyclerView.adapter = adapter
         binding.recyclerView.layoutManager = layoutManager

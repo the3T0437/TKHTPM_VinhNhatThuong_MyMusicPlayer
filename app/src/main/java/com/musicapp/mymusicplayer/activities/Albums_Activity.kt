@@ -8,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.musicapp.mymusicplayer.adapters.AlbumClickListener
 import com.musicapp.mymusicplayer.adapters.AlbumsAdapter
 import com.musicapp.mymusicplayer.database.DatabaseAPI
 import com.musicapp.mymusicplayer.database.OnDatabaseCallBack
@@ -27,9 +28,9 @@ class Albums_Activity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setupUI()
+        setupMusicPlayerSmall()
         setupRecyclerView()
         setupDatabase()
-        setupMusicPlayerSmall()
         setEvents()
     }
 
@@ -45,16 +46,19 @@ class Albums_Activity : AppCompatActivity() {
     }
 
     private fun setupRecyclerView() {
-        adapter = AlbumsAdapter(this, albums)
+        adapter = AlbumsAdapter(this, albums, mediaController)
         val layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
         binding.recyclerView.adapter = adapter
         binding.recyclerView.layoutManager = layoutManager
 
-        adapter.setAlbumClickListener { album ->
-            val intent = Intent(this@Albums_Activity, SongsOfAlbumActivity::class.java)
-            intent.putExtra("album_name", album.albumName)
-            startActivity(intent)
+        adapter.setAlbumClickListener ( object: AlbumClickListener{
+            override fun onAlbumClick(albumName: String) {
+                val intent = Intent(this@Albums_Activity, SongsOfAlbumActivity::class.java)
+                intent.putExtra("album_name", albumName)
+                startActivity(intent)
+            }
         }
+        )
     }
 
     private fun setupDatabase() {

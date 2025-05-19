@@ -302,7 +302,7 @@ open class SongAdapter(protected val context: Context, protected val songs: Arra
        }
     }
 
-    private fun toggleFavoriteSong(song: Song){
+    protected fun toggleFavoriteSong(song: Song){
         val databaseApi = DatabaseAPI(context)
         runBlocking {
             val favoriteId = databaseApi.getFavorite(song.id)?.id ?: -1
@@ -330,7 +330,7 @@ open class SongAdapter(protected val context: Context, protected val songs: Arra
         }
     }
 
-    private fun isFavoriteSong(song: Song): Boolean = runBlocking {
+    protected fun isFavoriteSong(song: Song): Boolean = runBlocking {
         val databaseApi = DatabaseAPI(context)
         return@runBlocking databaseApi.getFavorite(song.id) != null
     }
