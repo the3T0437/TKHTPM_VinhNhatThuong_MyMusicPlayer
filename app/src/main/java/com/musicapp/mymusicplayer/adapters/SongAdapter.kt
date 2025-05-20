@@ -73,7 +73,6 @@ abstract class SongClickListener{
  * set currentPlayingSongId to hightlight playing song
  */
 open class SongAdapter(protected val context: Context, protected val songs: ArrayList<Song>, var mediaController: MediaControllerWrapper? = null) :
-
     RecyclerView.Adapter<SongAdapter.ViewHolder>() {
     protected var _songClickListener: SongClickListener? = null
     var currentPlayingSongId : Long = -1

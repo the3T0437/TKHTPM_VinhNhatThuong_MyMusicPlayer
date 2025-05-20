@@ -1,34 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:padding="16dp"
-    android:gravity="center_vertical"
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:app="http://schemas.android.com/apk/res-auto"
+android:layout_width="match_parent"
+android:layout_height="wrap_content"
+android:layout_marginHorizontal="8dp"
+android:layout_marginVertical="4dp"
+android:clickable="true"
+android:focusable="true"
+android:foreground="?attr/selectableItemBackground"
+app:cardCornerRadius="12dp"
+app:cardElevation="2dp">
+
+<LinearLayout
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginHorizontal="8dp"
-    android:layout_marginVertical="4dp"
-    android:background="@color/white">
+    android:orientation="horizontal"
+    android:padding="12dp">
 
     <TextView
         android:id="@+id/tvArtist"
-        android:lines="1"
-        android:ellipsize="end"
-        android:textSize="18sp"
-        android:textColor="@color/black"
-        android:textStyle="bold"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_gravity="center_vertical"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="8dp"
         android:text="Tên nghệ sĩ"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_weight="1" />
-
-    <Space
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_weight="1" />
+        android:textSize="16sp"
+        android:textColor="@color/black"
+        android:maxLines="1"
+        android:ellipsize="end" />
 
     <com.musicapp.mymusicplayer.widget.ThreeDotMenuView
         android:id="@+id/btnThreeDot"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
         android:src="@drawable/baseline_more_vert_24"
-        android:backgroundTint="@color/transparent"
-        android:layout_width="40dp"
-        android:layout_height="40dp" />
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:padding="12dp"
+        app:tint="@color/black" />
+
 </LinearLayout>
+
+</androidx.cardview.widget.CardView>
