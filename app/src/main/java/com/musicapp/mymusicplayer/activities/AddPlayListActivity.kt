@@ -78,6 +78,10 @@ class AddPlayListActivity : AppCompatActivity() {
             }
             builder.show()
         }
+
+        binding.btnBack.setOnClickListener{
+            finish()
+        }
     }
 
     override fun onResume() {

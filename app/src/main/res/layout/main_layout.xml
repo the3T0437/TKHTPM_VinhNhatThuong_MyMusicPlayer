@@ -58,12 +58,18 @@
             android:layout_height="match_parent"
             android:layout_weight="1"/>
 
-        <ImageView
+        <ImageButton
             android:id="@+id/btnSort"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@drawable/sort"
-            />
+            android:contentDescription="Sort"
+            android:padding="12dp"/>
+
+        <Space
+            android:layout_width="8dp"
+            android:layout_height="48dp"/>
 
         <com.musicapp.mymusicplayer.widget.ThreeDotMenuView
             android:id="@+id/btnFilter"
